@@ -4,7 +4,7 @@ TagRec
 ##Towards A Standardized Tag Recommender Benchmarking Framework
 
 ## Description
-The aim of this work is to provide the community with a simple to use, generic tag-recommender framework to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as MAP, MRR, P@k, R@k, F1@k and folksonomy datasets such as BibSonomy, CiteULike, LastFM or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
+The aim of this work is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as MAP, MRR, P@k, R@k, F1@k and folksonomy datasets such as BibSonomy, CiteULike, LastFM or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
 
 Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out splitting and LDA topic creation).
 
