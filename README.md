@@ -84,8 +84,9 @@ for _k_ = 1 to 10 (each line is one _k_)
 
 ## References
 * D. Kowald, P. Seitinger, C. Trattner, and T. Ley.: [Forgetting the Words but Remembering the Meaning: Modeling Forgetting in a Verbal and Semantic Tag Recommender](http://arxiv.org/pdf/1402.0728v1.pdf), 2014a. (under review)
-* D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://arxiv.org/pdf/1312.5111.pdf). In Proceedings of the 23rd international conference on World Wide Web, WWW '14, Seoul, Korea, 2014b. ACM.
+* D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://www.sheridanprinting.com/14-www-comp2ch4rv3-19/companion/p463.pdf). In Proceedings of the 23rd international conference on World Wide Web, WWW '14, Seoul, Korea, 2014b. ACM.
 * P. Seitinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
+
 * A. Hotho, R. Jäschke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411–426. Springer, 2006.
 * L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354–365. Springer, 2012.
 * R. Jäschke, L. Marinho, A. Hotho, L. Schmidt-Thieme, and G. Stumme. Tag recommendations in folksonomies. In Knowledge Discovery in Databases: PKDD 2007, pages 506–514. Springer, 2007.
