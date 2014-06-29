@@ -36,7 +36,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 
 import common.DoubleMapComparator;
-import common.UserData;
+import common.Bookmark;
 import common.Utilities;
 
 import file.PredictionFileWriter;
@@ -54,7 +54,7 @@ public class BM25Calculator {
 	private boolean userBased;
 	private boolean resBased;
 	private double beta;
-	private List<UserData> trainList;
+	private List<Bookmark> trainList;
 	private List<Map<Integer, Integer>> userMaps;
 	private List<Map<Integer, Integer>> resMaps;
 	
@@ -64,7 +64,7 @@ public class BM25Calculator {
 		this.userBased = userBased;
 		this.resBased = resBased;
 		this.beta = (double)beta / 10.0;
-		this.trainList = this.reader.getUserLines().subList(0, predictTags ? trainSize : reader.getUserLines().size());
+		this.trainList = this.reader.getBookmarks().subList(0, predictTags ? trainSize : reader.getBookmarks().size());
 		if (this.userBased) {
 			this.userMaps = Utilities.getUserMaps(this.trainList);
 		}
@@ -82,7 +82,7 @@ public class BM25Calculator {
 			for (Map.Entry<Integer, Double> entry : neighbors.entrySet()) {
 				if (i++ < MAX_NEIGHBORS) {
 					//neighborMaps.add(this.userMaps.get(entry.getKey()));
-					List<Integer> tags = UserData.getUserData(this.trainList, entry.getKey(), resID).getTags();
+					List<Integer> tags = Bookmark.getUserData(this.trainList, entry.getKey(), resID).getTags();
 					double bm25 = this.beta * entry.getValue();
 					// add tags to resultMap
 					for (int tag : tags) {
@@ -101,7 +101,7 @@ public class BM25Calculator {
 			Map<Integer, Double> resources = getSimResources(userID, resID);
 			for (Map.Entry<Integer, Double> entry : resources.entrySet()) {
 				if (i++ < MAX_NEIGHBORS) {
-					List<Integer> tags = UserData.getResData(this.trainList, userID, entry.getKey()).getTags();
+					List<Integer> tags = Bookmark.getResData(this.trainList, userID, entry.getKey()).getTags();
 					double bm25 = (1.0 - this.beta) * entry.getValue();
 					// add tags to resultMap
 					for (int tag : tags) {
@@ -135,7 +135,7 @@ public class BM25Calculator {
 		Map<Integer, Double> neighbors = new LinkedHashMap<Integer, Double>();
 		//List<Map<Integer, Integer>> neighborMaps = new ArrayList<Map<Integer, Integer>>();
 		// get all users that have tagged the resource
-		for (UserData data : this.trainList) {
+		for (Bookmark data : this.trainList) {
 			if (data.getUserID() != userID) {
 				if (resID == -1) {
 					neighbors.put(data.getUserID(), 0.0);
@@ -148,7 +148,7 @@ public class BM25Calculator {
 		// if list is empty, use all users		
 		if (neighbors.size() == 0) {
 			//allUsers = true;
-			for (UserData data : this.trainList) {
+			for (Bookmark data : this.trainList) {
 				neighbors.put(data.getUserID(), 0.0);
 			}
 		}
@@ -176,7 +176,7 @@ public class BM25Calculator {
 	private Map<Integer, Double> getSimResources(int userID, int resID) {
 		Map<Integer, Double> resources = new LinkedHashMap<Integer, Double>();
 		// get all resources that have been tagged by the user
-		for (UserData data : this.trainList) {
+		for (Bookmark data : this.trainList) {
 			if (data.getWikiID() != resID) {
 				if (userID == -1) {
 					resources.put(data.getWikiID(), 0.0);
@@ -187,7 +187,7 @@ public class BM25Calculator {
 		}
 		// if list is empty, use all users		
 		if (resources.size() == 0) {
-			for (UserData data : this.trainList) {
+			for (Bookmark data : this.trainList) {
 				resources.put(data.getWikiID(), 0.0);
 			}
 		}
@@ -214,7 +214,7 @@ public class BM25Calculator {
 	 * @param userID
 	 */
 	private Map<Integer, Double> getRankedResourcesList(int userID) {
-		List<Integer> userResources = UserData.getResourcesFromUser(this.trainList.subList(0, trainSize), userID);
+		List<Integer> userResources = Bookmark.getResourcesFromUser(this.trainList.subList(0, trainSize), userID);
 		Map<Integer, Double> sortedNeighbors = getNeighbors(userID, -1);
 		Map<Integer, Double> rankedResources = new LinkedHashMap<Integer, Double>();
 		
@@ -223,7 +223,7 @@ public class BM25Calculator {
 			if (i++ > MAX_NEIGHBORS) {
 				break;
 			}	
-			List<Integer> resources = UserData.getResourcesFromUser(this.trainList, neighbor.getKey());			
+			List<Integer> resources = Bookmark.getResourcesFromUser(this.trainList, neighbor.getKey());			
 			double bm25 = neighbor.getValue();		
 			for (Integer resID : resources) {
 				if (!userResources.contains(resID)) {
@@ -327,7 +327,7 @@ public class BM25Calculator {
 			} else if (!resBased) {
 				suffix = "_usercf_";
 			}
-			reader.setUserLines(reader.getUserLines().subList(trainSize, reader.getUserLines().size()));
+			reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 			PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 			String outputFile = filename + suffix + beta;
 			writer.writeFile(outputFile);
@@ -343,7 +343,7 @@ public class BM25Calculator {
 	
 	private static List<Map<Integer, Double>> startBM25CreationForTagPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, int beta) {
 		timeString = "";
-		int size = reader.getUserLines().size();
+		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		Stopwatch timer = new Stopwatch();
 		timer.start();
@@ -355,7 +355,7 @@ public class BM25Calculator {
 		timer = new Stopwatch();
 		timer.start();
 		for (int i = trainSize; i < size; i++) {
-			UserData data = reader.getUserLines().get(i);
+			Bookmark data = reader.getBookmarks().get(i);
 			Map<Integer, Double> map = null;
 			map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), true);
 			results.add(map);
@@ -379,7 +379,7 @@ public class BM25Calculator {
 	}
 	
 	private static List<Map<Integer, Double>> startBM25CreationForResourcesPrediction(BookmarkReader reader, int sampleSize) {
-		int size = reader.getUserLines().size();
+		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		BM25Calculator calculator = new BM25Calculator(reader, trainSize, false, true, true, 5); // TODO
 		

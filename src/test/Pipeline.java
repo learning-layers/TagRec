@@ -23,12 +23,13 @@ package test;
 import java.util.ArrayList;
 import java.util.List;
 
+import common.CalculationType;
+
 import processing.ActCalculator;
 import processing.BM25Calculator;
 import processing.BaselineCalculator;
 import processing.FolkRankCalculator;
 import processing.LanguageModelCalculator;
-import processing.LayersCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.RecCalculator;
@@ -59,7 +60,7 @@ public class Pipeline {
 				"-----------------------------------------------------------------------------\n\n");
 		
 		// Testing
-		//startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true);
+		startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.NONE);
 		//startRecCalculator("bib_core", "bib_core/bib_sample");
 		//startModelCalculator("bib_core", "bib_core/bib_sample", 1, -5);
 		//startBaselineCalculator("bib_core", "bib_core/bib_sample", 1);
@@ -107,7 +108,9 @@ public class Pipeline {
 		} else if (op.equals("fr")) {
 			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("bll_c")) {
-			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, true);
+			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, true, CalculationType.NONE);
+		} else if (op.equals("bll_c_ac")) {
+			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, true, CalculationType.USER_TO_RESOURCE);
 		} else if (op.equals("girptm")) {
 			startRecCalculator(sampleDir, samplePath);
 		} else if (op.equals("mp_ur")) {
@@ -131,28 +134,29 @@ public class Pipeline {
 	}
 
 	private static void startActCalculator(String sampleDir, String sampleName,
-			int sampleCount, int dUpperBound, int betaUpperBound, boolean all) {
+			int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type) {
 		getTrainTestSize(sampleName);
 		List<Integer> dValues = getBetaValues(dUpperBound);
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
-
+		String ac = type == CalculationType.USER_TO_RESOURCE ? "_ac" : "";
+		
 		for (int i = 1; i <= sampleCount; i++) {
 			for (int dVal : dValues) {
 				ActCalculator.predictSample(sampleName, TRAIN_SIZE,
-						TEST_SIZE, true, false, dVal, 5);
+						TEST_SIZE, true, false, dVal, 5, type);
 				writeMetrics(sampleDir, sampleName,
-						"bll_" + 5 + "_" + dVal, sampleCount, 10, null);
+						"bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null);
 				if (all) {
 					for (int betaVal : betaValues) {
 						ActCalculator.predictSample(sampleName,
 								TRAIN_SIZE, TEST_SIZE, true, true, dVal,
-								betaVal);
-						writeMetrics(sampleDir, sampleName, "bll_c_" + betaVal
+								betaVal, type);
+						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal
 								+ "_" + dVal, sampleCount, 10, null);
 					}
 					ActCalculator.predictSample(sampleName,
-							TRAIN_SIZE, TEST_SIZE, false, true, dVal, 5);
-					writeMetrics(sampleDir, sampleName, "bll_r_" + 5 + "_"
+							TRAIN_SIZE, TEST_SIZE, false, true, dVal, 5, type);
+					writeMetrics(sampleDir, sampleName, "bll_r" + ac + "_" + 5 + "_"
 							+ dVal, sampleCount, 10, null);
 				}
 			}
@@ -320,7 +324,7 @@ public class Pipeline {
 	private static void getStatistics(String dataset) {
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(dataset);
-		int bookmarks = reader.getUserLines().size();
+		int bookmarks = reader.getBookmarks().size();
 		System.out.println("Bookmarks: " + bookmarks);
 		int users = reader.getUsers().size();
 		System.out.println("Users: " + users);
@@ -335,11 +339,11 @@ public class Pipeline {
 	private static void getTrainTestSize(String sample) {
 		BookmarkReader trainReader = new BookmarkReader(-1, false);
 		trainReader.readFile(sample + "_train");
-		TRAIN_SIZE = trainReader.getUserLines().size();
+		TRAIN_SIZE = trainReader.getBookmarks().size();
 		System.out.println("Train-size: " + TRAIN_SIZE);
 		BookmarkReader testReader = new BookmarkReader(-1, false);
 		testReader.readFile(sample + "_test");
-		TEST_SIZE = testReader.getUserLines().size();
+		TEST_SIZE = testReader.getBookmarks().size();
 		System.out.println("Test-size: " + TEST_SIZE);
 	}
 }

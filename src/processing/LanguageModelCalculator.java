@@ -33,7 +33,7 @@ import file.PredictionFileWriter;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
 import common.DoubleMapComparator;
-import common.UserData;
+import common.Bookmark;
 import common.Utilities;
 
 public class LanguageModelCalculator {
@@ -56,7 +56,7 @@ public class LanguageModelCalculator {
 		this.userBased = userBased;
 		this.resBased = resBased;
 		
-		List<UserData> trainList = this.reader.getUserLines().subList(0, trainSize);
+		List<Bookmark> trainList = this.reader.getBookmarks().subList(0, trainSize);
 		if (this.userBased) {
 			this.userMaps = Utilities.getUserMaps(trainList);
 			this.userDenoms = getDenoms(this.userMaps);
@@ -124,7 +124,7 @@ public class LanguageModelCalculator {
 	
 	public static List<Map<Integer, Double>> startLanguageModelCreation(BookmarkReader reader, int sampleSize, boolean sorting, boolean userBased, boolean resBased, int beta, boolean smoothing) {
 		timeString = "";
-		int size = reader.getUserLines().size();
+		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		
 		Stopwatch timer = new Stopwatch();
@@ -140,7 +140,7 @@ public class LanguageModelCalculator {
 		timer = new Stopwatch();
 		timer.start();
 		for (int i = trainSize; i < size; i++) { // the test-set
-			UserData data = reader.getUserLines().get(i);
+			Bookmark data = reader.getBookmarks().get(i);
 			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), sorting, smoothing);
 			results.add(map);
 		}
@@ -172,7 +172,7 @@ public class LanguageModelCalculator {
 		} else if (!resBased) {
 			suffix = "_mp_u_";
 		}
-		reader.setUserLines(reader.getUserLines().subList(trainSize, reader.getUserLines().size()));
+		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		String outputFile = filename + suffix + beta;
 		writer.writeFile(outputFile);

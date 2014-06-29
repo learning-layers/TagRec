@@ -22,7 +22,7 @@ package file.filtering;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import common.UserData;
+import common.Bookmark;
 
 import file.BookmarkReader;
 
@@ -69,8 +69,8 @@ public class CoreFiltering {
 		}
 
 		System.out.println("Start removing ...");
-		ArrayList<UserData> keepData = new ArrayList<UserData>();
-		for (UserData data : this.reader.getUserLines()) {
+		ArrayList<Bookmark> keepData = new ArrayList<Bookmark>();
+		for (Bookmark data : this.reader.getBookmarks()) {
 			int resID = data.getWikiID();
 			int userID = data.getUserID();
 			if (resIDs.contains(resID) && userIDs.contains(userID)) {

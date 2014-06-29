@@ -20,7 +20,7 @@
 
 package processing.folkrank;
 
-import common.UserData;
+import common.Bookmark;
 import file.BookmarkReader;
 
 public class WikipediaFactReader implements FactReader {
@@ -40,7 +40,7 @@ public class WikipediaFactReader implements FactReader {
     }
 
     public String[] getFact() throws FactReadingException {
-    	UserData data = this.reader.getUserLines().get(this.lineIndex);
+    	Bookmark data = this.reader.getBookmarks().get(this.lineIndex);
     	String[] fact = new String[this.noOfDimensions];
 
     	fact[0] = data.getTags().get(this.tagIndex).toString();
@@ -52,7 +52,7 @@ public class WikipediaFactReader implements FactReader {
 
     public boolean hasNext() throws FactReadingException {
     	if (this.lineIndex < this.trainSize) {
-    		UserData data = this.reader.getUserLines().get(this.lineIndex);
+    		Bookmark data = this.reader.getBookmarks().get(this.lineIndex);
     		if (++this.tagIndex < data.getTags().size()) {
     			return true;
     		} else {

@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 import com.google.common.primitives.Ints;
 
 import common.IntMapComparator;
-import common.UserData;
+import common.Bookmark;
 import common.Utilities;
 import file.filtering.CoreFiltering;
 
@@ -52,15 +52,15 @@ public class BookmarkSplitter {
 	}
 	
 	public void splitFile(String filename, int testPercentage) {
-		int testUserSize = this.reader.getUserLines().size() * testPercentage / 100;
-		int trainUserSize = this.reader.getUserLines().size() - testUserSize;
-		Collections.shuffle(this.reader.getUserLines());
-		List<UserData> userSample = this.reader.getUserLines().subList(0, trainUserSize + testUserSize);
+		int testUserSize = this.reader.getBookmarks().size() * testPercentage / 100;
+		int trainUserSize = this.reader.getBookmarks().size() - testUserSize;
+		Collections.shuffle(this.reader.getBookmarks());
+		List<Bookmark> userSample = this.reader.getBookmarks().subList(0, trainUserSize + testUserSize);
 		
 		//Collections.sort(userSample);
 		
-		List<UserData> trainUserSample = userSample.subList(0, trainUserSize);
-		List<UserData> testUserSample = userSample.subList(trainUserSize, trainUserSize + testUserSize);
+		List<Bookmark> trainUserSample = userSample.subList(0, trainUserSize);
+		List<Bookmark> testUserSample = userSample.subList(trainUserSize, trainUserSize + testUserSize);
 			
 		writeWikiSample(this.reader, trainUserSample, filename + "_train", null);
 		writeWikiSample(this.reader, testUserSample, filename + "_test", null);
@@ -68,13 +68,13 @@ public class BookmarkSplitter {
 	}
 	
 	public void splitUserPercentage(String filename, int percentage) {
-		List<UserData> lines = new ArrayList<UserData>();
+		List<Bookmark> lines = new ArrayList<Bookmark>();
 		int userSize = this.reader.getUsers().size();
 		int userLimit = userSize * percentage / 100;
 		List<Integer> randomIndices = Utilities.getRandomIndices(0, userSize - 1).subList(0, userLimit);
 		int currentUser = -1;
 		boolean takeUser = false;
-		for (UserData data : this.reader.getUserLines()) {
+		for (Bookmark data : this.reader.getBookmarks()) {
 			if (currentUser != data.getUserID())  { // new user
 				currentUser = data.getUserID();
 				takeUser = randomIndices.contains(currentUser);
@@ -88,10 +88,10 @@ public class BookmarkSplitter {
 	}
 	
 	public void leaveLastOutSplit(String filename, boolean coldStart) {
-		List<UserData> trainLines = new ArrayList<UserData>();
-		List<UserData> testLines = new ArrayList<UserData>();
+		List<Bookmark> trainLines = new ArrayList<Bookmark>();
+		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		int currentUser = -1, userIndex = 1, userSize = -1;
-		for (UserData data : this.reader.getUserLines()) {
+		for (Bookmark data : this.reader.getBookmarks()) {
 			if (currentUser != data.getUserID())  { // new user
 				currentUser = data.getUserID();
 				userSize = this.reader.getUserCounts().get(currentUser);
@@ -115,10 +115,10 @@ public class BookmarkSplitter {
 	}
 	
 	public void leaveOneRandOutSplit(String filename) {
-		List<UserData> trainLines = new ArrayList<UserData>();
-		List<UserData> testLines = new ArrayList<UserData>();
+		List<Bookmark> trainLines = new ArrayList<Bookmark>();
+		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		int currentUser = -1, userIndex = -1, index = -1, userSize = -1;
-		for (UserData data : this.reader.getUserLines()) {
+		for (Bookmark data : this.reader.getBookmarks()) {
 			if (currentUser != data.getUserID())  { // new user
 				currentUser = data.getUserID();
 				userSize = this.reader.getUserCounts().get(currentUser);
@@ -144,16 +144,16 @@ public class BookmarkSplitter {
 	 * @param filename
 	 */
 	public void leaveSomeOutSplit(int index, String filename) {
-		List<UserData> trainLines = new ArrayList<UserData>();
-		List<UserData> testLines = new ArrayList<UserData>();
+		List<Bookmark> trainLines = new ArrayList<Bookmark>();
+		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		int currentUser = -1;
 		int userIndex = 0;
 		
-		Collections.sort(this.reader.getUserLines());
+		Collections.sort(this.reader.getBookmarks());
 
 		int cntUsers=0;
 		
-		for (UserData data : this.reader.getUserLines()) {
+		for (Bookmark data : this.reader.getBookmarks()) {
 			if (currentUser != data.getUserID())  { // new user
 				
 				cntUsers++;
@@ -180,12 +180,12 @@ public class BookmarkSplitter {
 	}
 	
 	public void leavePercentageOutSplit(String filename, int percentage, boolean random) {
-		List<UserData> trainLines = new ArrayList<UserData>();
-		List<UserData> testLines = new ArrayList<UserData>();
+		List<Bookmark> trainLines = new ArrayList<Bookmark>();
+		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		Set<Integer> indices = new HashSet<Integer>();
 		int currentUser = -1, userIndex = -1, userSize = -1;
-		for (int i = 0; i < this.reader.getUserLines().size(); i++) {
-			UserData data = this.reader.getUserLines().get(i);
+		for (int i = 0; i < this.reader.getBookmarks().size(); i++) {
+			Bookmark data = this.reader.getBookmarks().get(i);
 			if (currentUser != data.getUserID())  { // new user
 				currentUser = data.getUserID();
 				userSize = this.reader.getUserCounts().get(currentUser);
@@ -197,7 +197,7 @@ public class BookmarkSplitter {
 						indices.add(1 + (int)(Math.random() * ((userSize - 1) + 1)));
 					}
 				} else {
-					for (int index : getBestIndices(this.reader.getUserLines().subList(i, i + userSize), false)) {
+					for (int index : getBestIndices(this.reader.getBookmarks().subList(i, i + userSize), false)) {
 						if (indices.size() < limit) {
 							indices.add(index);
 						} else {
@@ -219,10 +219,10 @@ public class BookmarkSplitter {
 		writeWikiSample(this.reader, trainLines, filename, null);
 	}
 	
-	private Set<Integer> getBestIndices(List<UserData> lines, boolean rating) {
+	private Set<Integer> getBestIndices(List<Bookmark> lines, boolean rating) {
 		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
 		for (int i = 0; i < lines.size(); i++) {
-			UserData data = lines.get(i);
+			Bookmark data = lines.get(i);
 			countMap.put(i + 1, rating ? (int)data.getRating() : this.reader.getResourceCounts().get(data.getWikiID()));
 		}
 		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(new IntMapComparator(countMap));
@@ -232,27 +232,27 @@ public class BookmarkSplitter {
 	
 	// Statics -------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public static boolean writeWikiSample(BookmarkReader reader, List<UserData> userSample, String filename, List<int[]> catPredictions) {
+	public static boolean writeWikiSample(BookmarkReader reader, List<Bookmark> userSample, String filename, List<int[]> catPredictions) {
 		try {
 			FileWriter writer = new FileWriter(new File("./data/csv/" + filename + ".txt"));
 			BufferedWriter bw = new BufferedWriter(writer);
 			int userCount = 0;
 			// TODO: check encoding
-			for (UserData userData : userSample) {
-				bw.write("\"" + reader.getUsers().get(userData.getUserID()).replace("\"", "") + "\";");
-				bw.write("\"" + reader.getResources().get(userData.getWikiID()).replace("\"", "") + "\";");
-				bw.write("\"" + userData.getTimestamp().replace("\"", "") + "\";\"");
+			for (Bookmark bookmark : userSample) {
+				bw.write("\"" + reader.getUsers().get(bookmark.getUserID()).replace("\"", "") + "\";");
+				bw.write("\"" + reader.getResources().get(bookmark.getWikiID()).replace("\"", "") + "\";");
+				bw.write("\"" + bookmark.getTimestamp().replace("\"", "") + "\";\"");
 				int i = 0;
-				for (int tag : userData.getTags()) {
+				for (int tag : bookmark.getTags()) {
 					bw.write(URLEncoder.encode(reader.getTags().get(tag).replace("\"", ""), "UTF-8"));
-					if (++i < userData.getTags().size()) {
+					if (++i < bookmark.getTags().size()) {
 						bw.write(',');
 					}					
 				}
 				bw.write("\";\"");
 				
 				List<Integer> userCats = (catPredictions == null ? 
-						userData.getCategories() : Ints.asList(catPredictions.get(userCount++)));
+						bookmark.getCategories() : Ints.asList(catPredictions.get(userCount++)));
 				i = 0;
 				for (int cat : userCats) {
 					bw.write(URLEncoder.encode((catPredictions == null ? reader.getCategories().get(cat).replace("\"", "") : reader.getTags().get(cat)).replace("\"", ""), "UTF-8"));
@@ -261,8 +261,8 @@ public class BookmarkSplitter {
 					}					
 				}
 				bw.write("\"");
-				if (userData.getRating() != -2) {
-					bw.write(";\"" + userData.getRating() + "\"");
+				if (bookmark.getRating() != -2) {
+					bw.write(";\"" + bookmark.getRating() + "\"");
 				}
 				bw.write("\n");
 			}
@@ -299,18 +299,18 @@ public class BookmarkSplitter {
 		System.out.println("Unique users before filtering: " + reader.getUsers().size());
 		System.out.println("Unique resources before filtering: " + reader.getResources().size());
 		System.out.println("Unique tags before filtering: " + reader.getTags().size());
-		System.out.println("Lines before filtering: " + reader.getUserLines().size());
+		System.out.println("Lines before filtering: " + reader.getBookmarks().size());
 		if (userLevel > 0 || resLevel > 0 || tagLevel > 0) {		
 			int i = 0;
 			while (true) {
 				System.out.println("Core iteration: " + i);
-				int size = reader.getUserLines().size();
+				int size = reader.getBookmarks().size();
 				CoreFiltering filtering = new CoreFiltering(reader);
 				reader = filtering.filterOrphansIterative(userLevel, resLevel, tagLevel);
 				String coreResultfile = resultfile + "_c" + ++i;
-				writeWikiSample(reader, reader.getUserLines(), coreResultfile, null);
-				if (reader.getUserLines().size() >= size) {
-					return reader.getUserLines().size();
+				writeWikiSample(reader, reader.getBookmarks(), coreResultfile, null);
+				if (reader.getBookmarks().size() >= size) {
+					return reader.getBookmarks().size();
 				}
 				
 				// re-read the filtered dataset			
@@ -322,7 +322,7 @@ public class BookmarkSplitter {
 		} else {		
 			BookmarkSplitter splitter = new BookmarkSplitter(reader);
 			// TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-			Collections.sort(reader.getUserLines());
+			Collections.sort(reader.getBookmarks());
 			for (int i = 1; i <= count; i++) {
 				//splitter.splitFile(sampleName, 10);
 				//splitter.leavePercentageOutSplit(sampleName, 10, false);

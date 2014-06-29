@@ -37,7 +37,7 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 
 import common.DoubleMapComparator;
-import common.UserData;
+import common.Bookmark;
 import common.Utilities;
 import cc.mallet.pipe.Array2FeatureVector;
 import cc.mallet.pipe.CharSequence2TokenSequence;
@@ -290,7 +290,7 @@ public class MalletCalculator {
 	
 	public static List<Map<Integer, Double>> startLdaCreation(BookmarkReader reader, int sampleSize, boolean sorting, int numTopics, boolean userBased, boolean resBased, boolean topicCreation, boolean smoothing) {
 		timeString = "";
-		int size = reader.getUserLines().size();
+		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		
 		Stopwatch timer = new Stopwatch();
@@ -299,7 +299,7 @@ public class MalletCalculator {
 		List<Map<Integer, Integer>> userMaps = null;
 		//List<Double> userDenoms = null;
 		if (userBased) {
-			userMaps = Utilities.getUserMaps(reader.getUserLines().subList(0, trainSize));
+			userMaps = Utilities.getUserMaps(reader.getBookmarks().subList(0, trainSize));
 			userCalc = new MalletCalculator(userMaps, numTopics);
 			userCalc.predictValuesProbs();
 			//userDenoms = getDenoms(userPredictionValues);
@@ -309,7 +309,7 @@ public class MalletCalculator {
 		List<Map<Integer, Integer>> resMaps = null;
 		//List<Double> resDenoms = null;
 		if (resBased) {
-			resMaps = Utilities.getResMaps(reader.getUserLines().subList(0, trainSize));
+			resMaps = Utilities.getResMaps(reader.getBookmarks().subList(0, trainSize));
 			resCalc = new MalletCalculator(resMaps, numTopics);
 			resCalc.predictValuesProbs();
 			//resDenoms = getDenoms(resPredictionValues);
@@ -325,7 +325,7 @@ public class MalletCalculator {
 		timer = new Stopwatch();
 		timer.start();
 		for (int i = trainSize; i < size; i++) { // the test set
-			UserData data = reader.getUserLines().get(i);
+			Bookmark data = reader.getBookmarks().get(i);
 			int userID = data.getUserID();
 			int resID = data.getWikiID();
 			//Map<Integer, Integer> userMap = null;
@@ -380,7 +380,7 @@ public class MalletCalculator {
 			Map<Integer, Double> ldaVal = ldaValues.get(i);
 			predictionValues.add(Ints.toArray(ldaVal.keySet()));
 		}
-		reader.setUserLines(reader.getUserLines().subList(trainSize, reader.getUserLines().size()));
+		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(filename + "_lda_" + numTopics);
 		
@@ -396,7 +396,7 @@ public class MalletCalculator {
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
 
-		int trainSize = reader.getUserLines().size() - sampleSize;	
+		int trainSize = reader.getBookmarks().size() - sampleSize;	
 		List<Map<Integer, Double>> ldaValues = startLdaCreation(reader, 0, true, numTopics, userBased, resBased, true, true);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
@@ -420,9 +420,9 @@ public class MalletCalculator {
 			*/
 		}
 
-		List<UserData> trainUserSample = reader.getUserLines().subList(0, trainSize);
-		List<UserData> testUserSample = reader.getUserLines().subList(trainSize, trainSize + sampleSize);
-		List<UserData> userSample = reader.getUserLines().subList(0, trainSize + sampleSize);		
+		List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, trainSize);
+		List<Bookmark> testUserSample = reader.getBookmarks().subList(trainSize, trainSize + sampleSize);
+		List<Bookmark> userSample = reader.getBookmarks().subList(0, trainSize + sampleSize);		
 		BookmarkSplitter.writeWikiSample(reader, trainUserSample, outputFile + "_train", predictionValues);
 		BookmarkSplitter.writeWikiSample(reader, testUserSample, outputFile + "_test", predictionValues);
 		BookmarkSplitter.writeWikiSample(reader, userSample, outputFile, predictionValues);

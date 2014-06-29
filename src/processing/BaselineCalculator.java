@@ -30,7 +30,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 
 import common.IntMapComparator;
-import common.UserData;
+import common.Bookmark;
 import common.Utilities;
 
 import file.PredictionFileWriter;
@@ -61,9 +61,9 @@ public class BaselineCalculator {
 	
 	private static List<int[]> getPerfectTags(BookmarkReader reader, int sampleSize, int limit) {
 		List<int[]> tags = new ArrayList<int[]>();
-		int trainSize = reader.getUserLines().size() - sampleSize;
+		int trainSize = reader.getBookmarks().size() - sampleSize;
 		
-		for (UserData data : reader.getUserLines().subList(trainSize, trainSize + sampleSize)) {
+		for (Bookmark data : reader.getBookmarks().subList(trainSize, trainSize + sampleSize)) {
 			List<Integer> t = data.getTags();
 			while (t.size() < limit) {
 				t.add(-1);
@@ -107,7 +107,7 @@ public class BaselineCalculator {
 		sortedCountMap.putAll(countMap);
 		
 		for (int userID : reader.getUniqueUserListFromTestSet(trainSize)) {
-			List<Integer> userResources = UserData.getResourcesFromUser(reader.getUserLines().subList(0, trainSize), userID);
+			List<Integer> userResources = Bookmark.getResourcesFromUser(reader.getBookmarks().subList(0, trainSize), userID);
 			//System.out.println(userResources.size());
 			List<Integer> resIDs = new ArrayList<Integer>();
 			int i = 0;
@@ -131,7 +131,7 @@ public class BaselineCalculator {
 		int resCount = reader.getResources().size();
 	
 		for (int userID : reader.getUniqueUserListFromTestSet(trainSize)) {
-			List<Integer> userResources = UserData.getResourcesFromUser(reader.getUserLines().subList(0, trainSize), userID);
+			List<Integer> userResources = Bookmark.getResourcesFromUser(reader.getBookmarks().subList(0, trainSize), userID);
 			
 			List<Integer> resIDs = new ArrayList<Integer>();
 			int i = 0;
@@ -159,7 +159,7 @@ public class BaselineCalculator {
 		List<int[]> values = getPopularTags(reader, sampleSize, 10);
 		//List<int[]> values = getPerfectTags(reader, sampleSize, 10);
 		
-		reader.setUserLines(reader.getUserLines().subList(trainSize, reader.getUserLines().size()));
+		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, values);
 		writer.writeFile(filename + "_mp");
 		Utilities.writeStringToFile("./data/metrics/" + filename + "_mp" + "_TIME.txt", timeString);

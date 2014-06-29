@@ -31,7 +31,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 
 import common.DoubleMapComparator;
-import common.UserData;
+import common.Bookmark;
 import common.Utilities;
 import file.PredictionFileWriter;
 import file.BookmarkReader;
@@ -45,20 +45,20 @@ public class RecCalculator {
 	private boolean resBased;
 	
 	public RecCalculator(BookmarkReader reader, int trainSize, boolean userBased, boolean resBased) {
-		List<UserData> trainList = reader.getUserLines().subList(0, trainSize);
+		List<Bookmark> trainList = reader.getBookmarks().subList(0, trainSize);
 		this.userBased = userBased;
 		this.resBased = resBased;
 		
 		if (this.userBased) {
-			this.userMaps = Utilities.getRelativeMaps(trainList, false);
-			List<List<UserData>> userBookmarks = Utilities.getBookmarks(trainList, false);
+			this.userMaps = Utilities.getRelativeTagMaps(trainList, false);
+			List<List<Bookmark>> userBookmarks = Utilities.getBookmarks(trainList, false);
 			this.tagRecencies = new ArrayList<Map<Integer, Double>>();
-			for (List<UserData> userB : userBookmarks) {
+			for (List<Bookmark> userB : userBookmarks) {
 				this.tagRecencies.add(getTagRecencies(userB));
 			}
 		}
 		if (this.resBased) {
-			this.resMaps = Utilities.getRelativeMaps(trainList, true);
+			this.resMaps = Utilities.getRelativeTagMaps(trainList, true);
 		}
 	}
 	
@@ -94,7 +94,7 @@ public class RecCalculator {
 		return returnMap;
 	}
 	
-	private Map<Integer, Double> getTagRecencies(List<UserData> bookmarks) {
+	private Map<Integer, Double> getTagRecencies(List<Bookmark> bookmarks) {
 		//Collections.sort(bookmarks); // TODO: necessary?
 		int testIndex = bookmarks.size() + 1;
 		Map<Integer, Integer> firstUsages = new LinkedHashMap<Integer, Integer>();
@@ -134,7 +134,7 @@ public class RecCalculator {
 		RecCalculator calculator = new RecCalculator(reader, trainSize, userBased, resBased);
 
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
-			UserData data = reader.getUserLines().get(i);
+			Bookmark data = reader.getBookmarks().get(i);
 			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID());
 			predictionValues.add(Ints.toArray(map.keySet()));
 		}		
@@ -144,7 +144,7 @@ public class RecCalculator {
 		} else if (!resBased) {
 			suffix = "_girp";
 		}
-		reader.setUserLines(reader.getUserLines().subList(trainSize, reader.getUserLines().size()));
+		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(filename + suffix);
 	}

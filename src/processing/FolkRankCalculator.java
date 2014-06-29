@@ -34,7 +34,7 @@ import com.google.common.primitives.Ints;
 
 import common.DoubleMapComparator;
 import common.IntMapComparator;
-import common.UserData;
+import common.Bookmark;
 import common.Utilities;
 
 import file.PredictionFileWriter;
@@ -45,9 +45,9 @@ public class FolkRankCalculator {
 	
 	private static List<int[]> startFolkRankCreationForResources(BookmarkReader reader, int sampleSize) {
 		
-		int size = reader.getUserLines().size();
+		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
-		List<Map<Integer, Integer>> userMaps = Utilities.getUserMaps(reader.getUserLines());	
+		List<Map<Integer, Integer>> userMaps = Utilities.getUserMaps(reader.getBookmarks());	
 		System.out.println("\nStart FolkRank Calculation for Resources");
 		// TODO: should not use whole size!
 		//LeavePostOutFolkRankDataDuplicator dupl = new LeavePostOutFolkRankDataDuplicator();
@@ -80,7 +80,7 @@ public class FolkRankCalculator {
 	        FolkRankResult result = folk.computeFolkRank(facts, pref);
 	        SortedSet<ItemWithWeight> topKTags = ItemWithWeight.getTopK(facts, result.getWeights(), 100, 2); // TODO
 	        int count = 0;
-	        List<Integer> userResources = UserData.getResourcesFromUser(reader.getUserLines().subList(0, trainSize), userID);
+	        List<Integer> userResources = Bookmark.getResourcesFromUser(reader.getBookmarks().subList(0, trainSize), userID);
 	        for (ItemWithWeight item : topKTags) {
 	        	if (count < 10) {
 	        		if (!userResources.contains(item.getItem())) {
@@ -105,7 +105,7 @@ public class FolkRankCalculator {
 		System.out.println("\nStart FolkRank Calculation for Tags");
 		frResults = new ArrayList<int[]>();
 		prResults = new ArrayList<int[]>();
-		int size = reader.getUserLines().size();
+		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		Stopwatch timer = new Stopwatch();
 		timer.start();
@@ -129,7 +129,7 @@ public class FolkRankCalculator {
         // start FolkRank        
 		for (int i = trainSize; i < size; i++) {
 			timer.start();
-			UserData data = reader.getUserLines().get(i);
+			Bookmark data = reader.getBookmarks().get(i);
 	        int u = data.getUserID();
 	        int[] uPrefs = (u < usrCounts ? new int[]{u} : new int[]{});
 	        int r = data.getWikiID();
@@ -184,7 +184,7 @@ public class FolkRankCalculator {
 		}
 		
 		if (predictTags) {
-			reader.setUserLines(reader.getUserLines().subList(trainSize, reader.getUserLines().size()));
+			reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 			PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 			writer.writeFile(filename + "_fr");
 			PredictionFileWriter prWriter = new PredictionFileWriter(reader, prPredictionValues);

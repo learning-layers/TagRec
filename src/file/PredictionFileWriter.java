@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import common.UserData;
+import common.Bookmark;
 
 public class PredictionFileWriter {
 
@@ -56,11 +56,11 @@ public class PredictionFileWriter {
 				int j = 0;
 				String resultString = "";
 				int[] userResults = this.results.get(i);
-				UserData userData = this.reader.getUserLines().get(i);
-				List<Integer> userCats = userData.getTags();
+				Bookmark bookmark = this.reader.getBookmarks().get(i);
+				List<Integer> userCats = bookmark.getTags();
 				
-				resultString += (this.reader.getUsers().get(userData.getUserID()) +
-						(userData.getWikiID() == -1 ? "" : "-" + this.reader.getResources().get(userData.getWikiID())) + "|");
+				resultString += (this.reader.getUsers().get(bookmark.getUserID()) +
+						(bookmark.getWikiID() == -1 ? "" : "-" + this.reader.getResources().get(bookmark.getWikiID())) + "|");
 				for (int c : userCats) {
 					//if (j++ < OUTPUT_LIMIT) {
 						//resultString += (categories.get(c) + ", ");

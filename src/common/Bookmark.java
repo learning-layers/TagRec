@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class UserData implements Comparable<UserData> {
+public class Bookmark implements Comparable<Bookmark> {
 
 	private int userID;
 	private int resourceID;
@@ -34,7 +34,7 @@ public class UserData implements Comparable<UserData> {
 	private List<Integer> categories;
 	private List<Integer> tags;
 	
-	public UserData(int userID, int wikiID, String timestamp) {
+	public Bookmark(int userID, int wikiID, String timestamp) {
 		this.userID = userID;
 		this.resourceID = wikiID;
 		this.timestamp = timestamp;
@@ -45,7 +45,7 @@ public class UserData implements Comparable<UserData> {
 	}
 	
 	@Override
-	public int compareTo(UserData data) {
+	public int compareTo(Bookmark data) {
 		//return (Long.parseLong(getTimestamp()) <= Long.parseLong(data.getTimestamp()) ? - 1 : 1);
 		if (this.userID < data.getUserID()) {
 			return -1;
@@ -107,9 +107,9 @@ public class UserData implements Comparable<UserData> {
 	
 	// Statics ----------------------------------------------------------------------------------
 	
-	public static UserData getUserData(List<UserData> lines, int userID, int resID) {
-		UserData returnData = null;
-		for (UserData data : lines) {
+	public static Bookmark getUserData(List<Bookmark> lines, int userID, int resID) {
+		Bookmark returnData = null;
+		for (Bookmark data : lines) {
 			if (data.userID == userID) {
 				returnData = data;
 				if (data.resourceID == resID) {
@@ -120,9 +120,9 @@ public class UserData implements Comparable<UserData> {
 		return returnData;
 	}
 	
-	public static UserData getResData(List<UserData> lines, int userID, int resID) {
-		UserData returnData = null;
-		for (UserData data : lines) {
+	public static Bookmark getResData(List<Bookmark> lines, int userID, int resID) {
+		Bookmark returnData = null;
+		for (Bookmark data : lines) {
 			if (data.resourceID == resID) {
 				returnData = data;
 				if (data.userID == userID) {
@@ -133,10 +133,10 @@ public class UserData implements Comparable<UserData> {
 		return returnData;
 	}
 	
-	public static UserData getLastData(List<UserData> lines, Set<Integer> ids) {
+	public static Bookmark getLastData(List<Bookmark> lines, Set<Integer> ids) {
 		long maxTimestamp = Long.MAX_VALUE;
-		UserData returnData = null;
-		for (UserData data : lines) {
+		Bookmark returnData = null;
+		for (Bookmark data : lines) {
 			if (ids.contains(data.userID)) {
 				long timestamp = Long.parseLong(data.timestamp);
 				if (timestamp < maxTimestamp) {
@@ -148,9 +148,9 @@ public class UserData implements Comparable<UserData> {
 		return returnData;
 	}
 	
-	public static List<Integer> getResourcesFromUser(List<UserData> lines, int userID) {
+	public static List<Integer> getResourcesFromUser(List<Bookmark> lines, int userID) {
 		Set<Integer> resourceList = new HashSet<Integer>();		
-		for (UserData data : lines) {		
+		for (Bookmark data : lines) {		
 			if (data.userID == userID) {
 				resourceList.add(data.resourceID);
 			}
