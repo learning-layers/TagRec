@@ -4,7 +4,7 @@ TagRec
 ##Towards A Standardized Tag Recommender Benchmarking Framework
 
 ## Description
-The aim of this work (please [cite](https://github.com/domkowald/tagrecommender#citation) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
+The aim of this work (please [cite](https://github.com/learning-layers/TagRec/#citation) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
 
 Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting and LDA topic creation).
 
@@ -14,7 +14,7 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Please cite [the paper](https://github.com/domkowald/tagrecommender#citation) if you use this software in one of your publications.
+Please cite [the paper](https://github.com/learning-layers/TagRec/#citation) if you use this software in one of your publications.
 
 ## Download
 The source-code can be directly checked-out through this repository. It contains an Eclipse project to edit and build it and an already deployed .jar file for direct execution. Furthermore, the folder structure that is provided in the repository is needed, where _csv_ is the input directory and _metrics_ is the output directory in the _data_ folder. Both of these directories contain subdirectories for the different datasets:
@@ -27,20 +27,29 @@ The source-code can be directly checked-out through this repository. It contains
 ## How-to-use
 The _tagrecommender_ .jar uses three parameters:
 First the algorithm:
-* 3layers for 3Layers (based on ALCOVE theory) (Seitlinger et al., 2013)
-* 3LT for the time-based 3Layers on the levels of tags and topics (Kowald et al., 2014a)
-* bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
-* bll_c_ac for BLL and BLL+MPr together with semantic correlations (Kowald et al., 2014b)
-* lda for Latent Dirichlet Allocation (Krestel et al., 2009)
-* cf for Collaborative Filtering (Jäschke et al., 2007)
-* fr for Adapted PageRank and FolkRank (Hotho et al., 2006)
-* girptm for GIRP and GIRPTM (Zhang et al., 2012)
-* mp for MostPopular tags (Jäschke et al., 2007)
-* mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
-* core for calculating p-cores on a dataset
-* split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
-* split_8020 for splitting a dataset into training and test-sets using 80/20 split
-* lda_samples for creating LDA topics for the resources in a dataset
+* Tag-Recommender
+** 3layers for 3Layers (based on ALCOVE theory) (Seitlinger et al., 2013)
+** 3LT for the time-based 3Layers on the levels of tags and topics (Kowald et al., 2014a)
+** bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
+** bll_c_ac for BLL and BLL+MPr together with semantic correlations (Kowald et al., 2014b)
+** lda for Latent Dirichlet Allocation (Krestel et al., 2009)
+** cf for Collaborative Filtering (Jäschke et al., 2007)
+** fr for Adapted PageRank and FolkRank (Hotho et al., 2006)
+** girptm for GIRP and GIRPTM (Zhang et al., 2012)
+** mp for MostPopular tags (Jäschke et al., 2007)
+** mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
+* Resource-Recommender
+* item_cirtt for the tag- and time-based approach based on BLL (Lacic et al., 2014)
+* item_mp for MostPopular items
+* item_cft for user-based Collaborative Filtering based on tag-profiles
+* item_cfb for user-based Collaborative Filtering based on user-item matrix
+* item_zheng for the tag- and time-based approach by Zheng et al. (2011)
+* item_huang for the tag- and time-based appraoch by Huang et al. (2014)
+* Data-Processing:
+** core for calculating p-cores on a dataset
+** split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
+** split_8020 for splitting a dataset into training and test-sets using 80/20 split
+** lda_samples for creating LDA topics for the resources in a dataset
 
 , second the dataset(-directory):
 * bib for BibSonomy
