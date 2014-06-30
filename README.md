@@ -8,7 +8,7 @@ The aim of this work (see paper) is to provide the community with a simple to us
 
 Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting and LDA topic creation).
 
-The software already contains three novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) uses topic information and is based on the ALCOVE theory (Krutschke et al., 1992). The second one ([BLL+C](http://arxiv.org/pdf/1312.5111.pdf)) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) is a combination of the former two approaches and integrates the time component on the level of tags and topics.
+The software already contains three novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) uses topic information and is based on the ALCOVE theory (Krutschke et al., 1992). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) is a combination of the former two approaches and integrates the time component on the level of tags and topics.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
@@ -84,7 +84,7 @@ for _k_ = 1 to 10 (each line is one _k_)
 
 ## References
 * D. Kowald, P. Seitinger, C. Trattner, and T. Ley.: [Forgetting the Words but Remembering the Meaning: Modeling Forgetting in a Verbal and Semantic Tag Recommender](http://arxiv.org/pdf/1402.0728v2.pdf), 2014a. (under review)
-* D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://www.sheridanprinting.com/14-www-comp2ch4rv3-19/companion/p463.pdf). In Proceedings of the 23rd international conference on World Wide Web, WWW '14, Seoul, Korea, 2014b. ACM.
+* D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf). In Proceedings of the 23rd international conference on World Wide Web, WWW '14, Seoul, Korea, 2014b. ACM.
 * P. Seitinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
 * A. Hotho, R. Jäschke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411–426. Springer, 2006.
 * L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354–365. Springer, 2012.
