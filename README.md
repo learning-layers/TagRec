@@ -39,6 +39,7 @@ Tag-Recommender:
 * girptm for GIRP and GIRPTM (Zhang et al., 2012)
 * mp for MostPopular tags (Jäschke et al., 2007)
 * mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
+
 Resource-Recommender:
 * item_cirtt for the tag- and time-based approach based on BLL (Lacic et al., 2014)
 * item_mp for MostPopular items
@@ -46,7 +47,8 @@ Resource-Recommender:
 * item_cfb for user-based Collaborative Filtering based on user-item matrix
 * item_zheng for the tag- and time-based approach by Zheng et al. (2011)
 * item_huang for the tag- and time-based appraoch by Huang et al. (2014)
-### Data-Processing:
+
+Data-Processing:
 * core for calculating p-cores on a dataset
 * split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
 * split_8020 for splitting a dataset into training and test-sets using 80/20 split
@@ -128,6 +130,8 @@ Tag and Time Information. In Proceedings of the 25th ACM Conference on Hypertext
 * R. Krestel, P. Fankhauser, and W. Nejdl. Latent dirichlet allocation for tag recommendation. In Proceedings of the third ACM conference on Recommender systems, pages 61–68. ACM, 2009.
 * J. R. Anderson, M. D. Byrne, S. Douglass, C. Lebiere, and Y. Qin. An integrated theory of the mind. Psychological Review, 111(4):1036–1050, 2004.
 * J. K. Kruschke et al. Alcove: An exemplar-based connectionist model of category learning. Psychological review, 99(1):22–44, 1992.
+* N. Zheng and Q. Li. A recommender system based on tag and time information for social tagging systems. Expert Syst. Appl., 2011.
+* C.-L. Huang, P.-H. Yeh, C.-W. Lin, and D.-C. Wu. Utilizing user tag-based interests in recommender systems for social resource sharing websites. Knowledge-Based Systems, 2014.
 
 ## Contact
 * Dominik Kowald, Know-Center, Graz University of Technology, dkowald@know-center.at
