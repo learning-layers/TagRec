@@ -17,6 +17,7 @@
  You should have received a copy of the GNU Affero General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package file;
 
 import java.io.BufferedWriter;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 import common.Bookmark;
 
@@ -56,11 +58,10 @@ public class PredictionFileWriter {
 				int j = 0;
 				String resultString = "";
 				int[] userResults = this.results.get(i);
-				Bookmark bookmark = this.reader.getBookmarks().get(i);
-				List<Integer> userCats = bookmark.getTags();
+				Bookmark userData = this.reader.getBookmarks().get(i);
+				List<Integer> userCats = userData.getTags();
 				
-				resultString += (this.reader.getUsers().get(bookmark.getUserID()) +
-						(bookmark.getWikiID() == -1 ? "" : "-" + this.reader.getResources().get(bookmark.getWikiID())) + "|");
+				resultString += (userData.getUserID() + (userData.getWikiID() == -1 ? "" : "-" + userData.getWikiID()) + "|");
 				for (int c : userCats) {
 					//if (j++ < OUTPUT_LIMIT) {
 						//resultString += (categories.get(c) + ", ");
@@ -116,7 +117,8 @@ public class PredictionFileWriter {
 			int i=0;
 			String helpString = "";
 			for (Integer userID : reader.getUniqueUserListFromTestSet(trainSize)) {
-				String resultString = (this.reader.getUsers().get(userID) + "-XYZ|");
+				//String resultString = (this.reader.getUsers().get(userID) + "-XYZ|");
+				String resultString = userID + "|";
 				
 				String givenResourcesOfUser = "";
 								
@@ -167,7 +169,7 @@ public class PredictionFileWriter {
 			bw.flush();
 			bw.close();
 			writer.close();
-
+			
 			writer = new FileWriter(new File("./data/results/" + filename + "_positions" + (neighborSize != -1 ? ("_" + neighborSize) : "" ) + ".txt"));
 			bw = new BufferedWriter(writer);
 			

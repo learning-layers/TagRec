@@ -45,7 +45,7 @@ public class Utilities {
 	private final static String REV_END = "</rev>";
 	
 	public static boolean isEntityEvaluated(BookmarkReader reader, int id, Integer minBookmarks, Integer maxBookmarks, boolean resource) {
-		if (id == -1) {
+		if (reader == null || id == -1) {
 			return true;
 		}
 		List<Integer> entityCounts = (resource ? reader.getResourceCounts() : reader.getUserCounts());

@@ -319,10 +319,10 @@ public class Pipeline {
 			for (int j = 1; j <= sampleCount; j++) {
 				MetricsCalculator.calculateMetrics(sampleName
 						+ topicString + "_" + prefix, i, sampleDir + "/"
-						+ prefix + topicString + "_metrics", false);
+						+ prefix + topicString + "_metrics", false, null, null, null, null, null, true);
 			}
 			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix
-					+ topicString + "_metrics", i, (double) sampleCount);
+					+ topicString + "_metrics", i, (double) sampleCount, true, i == k);
 		}
 		MetricsCalculator.resetMetrics();
 	}
@@ -444,9 +444,9 @@ public class Pipeline {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix);
 		for (int i = 1; i <= k; i++) {
 			for (int j = 1; j <= sampleCount; j++) {
-				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false);
+				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, null, null, null, null, null, false);
 			}
-			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double)sampleCount);
+			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double)sampleCount, false, i == k);
 		}
 	}
 }

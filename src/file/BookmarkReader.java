@@ -17,6 +17,7 @@
  You should have received a copy of the GNU Affero General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package file;
 
 import java.io.BufferedReader;
@@ -75,7 +76,7 @@ public class BookmarkReader {
 			FileReader reader = new FileReader(new File("./data/csv/" + filename + ".txt"));
 			BufferedReader br = new BufferedReader(reader);
 			List<String> categories = new ArrayList<String>(), tags = new ArrayList<String>();
-			Bookmark bookmark = null;
+			Bookmark userData = null;
 			String userID = "", wikiID = "", timestamp = "";
 			String[] lineParts = null;
 			String line;
@@ -86,12 +87,12 @@ public class BookmarkReader {
 					System.out.println("Line too short: " + this.userLines.size());
 					continue;
 				}
-				processUserData(userID, bookmark, tags, categories, wikiID);			
+				processUserData(userID, userData, tags, categories, wikiID);			
 				// reset userdata
 				userID = lineParts[0].replace("\"", "");
 				wikiID = lineParts[1].replace("\"", "");
 				timestamp = lineParts[2].replace("\"", "");
-				bookmark = new Bookmark(-1, -1, timestamp);
+				userData = new Bookmark(-1, -1, timestamp);
 				categories.clear();
 				tags.clear();
 				for (String tag : lineParts[3].replace("\"", "").split(",")) {
@@ -108,17 +109,22 @@ public class BookmarkReader {
 				if (lineParts.length > 4) { // are there categories
 					for (String cat : lineParts[4].replace("\"", "").split(",")) {
 						if (!cat.isEmpty()) {
-							categories.add(cat.toLowerCase());
+							if (cat.contains("_")) {
+								categories.add(cat.substring(0, cat.indexOf("_")).toLowerCase());
+							} else {
+								categories.add(cat.toLowerCase());
+							}
 						}
 					}
 				}
 				if (lineParts.length > 5) { // is there a rating?
+					System.out.println("Rating available");
 					try {
-						bookmark.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
+						userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
 					} catch (Exception e) { /* do nothing */ }
 				}
 			}
-			processUserData(userID, bookmark, tags, categories, wikiID); // last user
+			processUserData(userID, userData, tags, categories, wikiID); // last user
 			br.close();
 			return true;
 		} catch (Exception e) {
@@ -128,10 +134,10 @@ public class BookmarkReader {
 		return false;
 	}
 	
-	private void processUserData(String userID, Bookmark bookmark, List<String> tags, List<String> categories, String wikiID) {
+	private void processUserData(String userID, Bookmark userData, List<String> tags, List<String> categories, String wikiID) {
 		if (userID != "" && tags.size() > 0/* && !userData.getTimestamp().isEmpty()*/) {
-			if (!bookmark.getTimestamp().isEmpty() && !StringUtils.isNumeric(bookmark.getTimestamp())) {
-				System.out.println("Invaled timestamp");
+			if (!userData.getTimestamp().isEmpty() && !StringUtils.isNumeric(userData.getTimestamp())) {
+				System.out.println("Invalid timestamp");
 				return;
 			}
 			
@@ -150,7 +156,7 @@ public class BookmarkReader {
 			} else if (doCount) {
 				this.userCounts.set(userIndex, this.userCounts.get(userIndex) + 1);
 			}
-			bookmark.setUserID(userIndex);
+			userData.setUserID(userIndex);
 			//int resIndex = this.resources.indexOf(wikiID);
 			Integer resIndex = this.resourceMap.get(wikiID);
 			if (resIndex == null) {
@@ -165,7 +171,7 @@ public class BookmarkReader {
 			} else if (doCount) {
 				this.resourceCounts.set(resIndex, this.resourceCounts.get(resIndex) + 1);
 			}
-			bookmark.setWikiID(resIndex);
+			userData.setWikiID(resIndex);
 			
 			for (String cat : categories) {
 				int index = 0;
@@ -175,7 +181,7 @@ public class BookmarkReader {
 				} else {
 					index = this.categories.indexOf(cat);
 				}
-				bookmark.getCategories().add(index);
+				userData.getCategories().add(index);
 			}			
 			for (String tag : tags) {
 				//int tagIndex = this.tags.indexOf(tag);
@@ -192,9 +198,9 @@ public class BookmarkReader {
 				} else if (doCount) {
 					this.tagCounts.set(tagIndex, this.tagCounts.get(tagIndex) + 1);
 				}
-				bookmark.getTags().add(tagIndex);
+				userData.getTags().add(tagIndex);
 			}
-			this.userLines.add(bookmark);
+			this.userLines.add(userData);
 			if (this.userLines.size() % 100000 == 0) {
 				System.out.println("Read in 10000000 lines");
 			}
@@ -248,6 +254,10 @@ public class BookmarkReader {
 	
 	public List<Integer> getUserCounts() {
 		return this.userCounts;
+	}
+	
+	public int getCountLimit() {
+		return this.countLimit;
 	}
 	
 	public List<Integer> getUniqueUserListFromTestSet(int trainSize) {

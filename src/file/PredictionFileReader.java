@@ -17,6 +17,7 @@
  You should have received a copy of the GNU Affero General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package file;
 
 import java.io.BufferedReader;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import common.PredictionData;
+import common.Utilities;
 
 public class PredictionFileReader {
 
@@ -39,7 +41,7 @@ public class PredictionFileReader {
 		this.predictionCount = 0;
 	}
 	
-	public boolean readFile(String filename, int k) {
+	public boolean readFile(String filename, int k, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks) {
 		try {
 			this.filename = filename;
 			FileReader reader = new FileReader(new File("./data/results/" + filename + ".txt"));
@@ -48,22 +50,34 @@ public class PredictionFileReader {
 			
 			while ((line = br.readLine()) != null) {
 				String[] lineParts = line.split("\\|");
-				String userID = lineParts[0];
+				String[] parts = lineParts[0].split("-");
+				int userID = Integer.parseInt(parts[0]);
+				int resID = -1;
+				if (parts.length > 1) {
+					resID = Integer.parseInt(parts[1]);
+				}
+				if (!Utilities.isEntityEvaluated(wikiReader, userID, minBookmarks, maxBookmarks, false) || !Utilities.isEntityEvaluated(wikiReader, resID, minResBookmarks, maxResBookmarks, true)) {
+					continue; // skip this user if it shoudln't be evaluated
+				}
 				List<String> realData = Arrays.asList(lineParts[1].split(", "));
 				if (lineParts.length > 2) {
 					List<String> predictionData = Arrays.asList(lineParts[2].split(", "));
 					if (predictionData.size() > 0) {
-						PredictionData data = new PredictionData(realData, predictionData, k);
+						PredictionData data = new PredictionData(userID, realData, predictionData, k);
 						this.predictions.add(data);
+						this.predictionCount++;
 					} else {
 						System.out.println("Line does not have predictions (inner)");
+						this.predictions.add(null);
 					}
 				} else {
 					System.out.println("Line does not have predictions (outer)");
+					this.predictions.add(null);
 				}
-				this.predictionCount++;
 			}
-			
+			if (k == 1) {
+				System.out.println("Number of users to predict: " + this.predictions.size());
+			}
 			br.close();
 			return true;
 		} catch (Exception e) {
