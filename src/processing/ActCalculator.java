@@ -1,3 +1,23 @@
+/*
+ TagRecommender:
+ A framework to implement and evaluate algorithms for the recommendation
+ of tags.
+ Copyright (C) 2013 Dominik Kowald
+ 
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+ 
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package processing;
 
 import java.util.ArrayList;
@@ -32,13 +52,11 @@ public class ActCalculator {
 	private boolean userBased;
 	private boolean resBased;
 	
-	// one list entry per user - map: tags, bll value - Bi value per user 
 	private List<Map<Integer, Double>> userMaps;
 	private List<Map<Integer, Double>> userCounts;
 	private List<Double> userDenoms;
 	private List<Long> userTimestamps;
 	
-	// tag , relative hauefigkeit
 	private List<Map<Integer, Double>> resMaps;
 	private List<Map<Integer, Double>> resCounts;
 	private List<Double> resDenoms;
@@ -48,7 +66,6 @@ public class ActCalculator {
 	
 	private BM25Calculator cfCalc;
 	private CooccurenceMatrix rMatrix;
-	//private Map<Integer, Integer> tagMap;
 		
 	public ActCalculator(BookmarkReader reader, int trainSize, int dVal, int beta, boolean userBased, boolean resBased, CalculationType cType) {
 		this.reader = reader;

@@ -390,8 +390,8 @@ public class MalletCalculator {
 	public static void createSample(String filename, int sampleSize, short numTopics, boolean userBased, boolean resBased) {
 		String outputFile = new String(filename) + "_lda_" + numTopics;
 
-		filename += "_res";
-		outputFile += "_res";
+		//filename += "_res";
+		//outputFile += "_res";
 
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);

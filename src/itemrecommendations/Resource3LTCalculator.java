@@ -1,4 +1,24 @@
-package processing;
+/*
+ TagRecommender:
+ A framework to implement and evaluate algorithms for the recommendation
+ of tags.
+ Copyright (C) 2013 Dominik Kowald, Emanuel Lacic
+ 
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+ 
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package itemrecommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +32,8 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import processing.ActCalculator;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
@@ -206,7 +228,7 @@ public class Resource3LTCalculator {
 		MAX_NEIGHBORS = neighborSize;
 		
 		// read input
-		filename += "_res";
+		//filename += "_res";
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 		// get recommendations

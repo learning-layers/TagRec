@@ -279,18 +279,16 @@ public class BookmarkSplitter {
 	public static int determineMaxCore(String filename, String sampleName) {
 		int core = 2;
 		while(true) {
-			if (splitSample(filename, sampleName, 1, core++) <= 0) {
+			int coreCount = splitSample(filename, sampleName, 1, core, core, core, false);
+			core++;
+			if (coreCount <= 0) {
 				break;
 			}
 		}
 		return core;
 	}
 	
-	public static int splitSample(String filename, String sampleName, int count, int level) {
-		return splitSample(filename, sampleName, count, level, level, level);
-	}
-	
-	public static int splitSample(String filename, String sampleName, int count, int userLevel, int resLevel, int tagLevel) {
+	public static int splitSample(String filename, String sampleName, int count, int userLevel, int resLevel, int tagLevel, boolean resSplit) {
 		
 		String resultfile = sampleName + "_core_u" + userLevel + "_r" + resLevel + "_t" + tagLevel;
 		BookmarkReader reader = new BookmarkReader(0, false);
@@ -325,10 +323,11 @@ public class BookmarkSplitter {
 			Collections.sort(reader.getBookmarks());
 			for (int i = 1; i <= count; i++) {
 				//splitter.splitFile(sampleName, 10);
-				//splitter.leavePercentageOutSplit(sampleName, 10, false);
-				//splitter.leaveOneRandOutSplit(sampleName);
-				
-				splitter.leaveLastOutSplit(sampleName, true);
+				if (resSplit) {
+					splitter.leavePercentageOutSplit(sampleName, 10, false);
+				} else {
+					splitter.leaveLastOutSplit(sampleName, true);
+				}
 				//splitter.splitUserPercentage(filename, 15);
 			}
 		}

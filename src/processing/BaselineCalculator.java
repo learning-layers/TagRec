@@ -165,7 +165,7 @@ public class BaselineCalculator {
 	}
 	
 	public static BookmarkReader predictPopularResources(String filename, int trainSize) {
-		filename += "_res";
+		//filename += "_res";
 
 		BookmarkReader reader = new BookmarkReader(trainSize, false); // TODO: size
 		reader.readFile(filename);
@@ -177,7 +177,7 @@ public class BaselineCalculator {
 	}
 	
 	public static BookmarkReader predictRandomResources(String filename, int trainSize) {
-		filename += "_res";
+		//filename += "_res";
 
 		BookmarkReader reader = new BookmarkReader(trainSize, false); // TODO: size?
 		reader.readFile(filename);
