@@ -85,6 +85,9 @@ for _k_ = 1 to 10 (each line is one _k_)
 ## References
 * D. Kowald, P. Seitinger, C. Trattner, and T. Ley.: [Forgetting the Words but Remembering the Meaning: Modeling Forgetting in a Verbal and Semantic Tag Recommender](http://arxiv.org/pdf/1402.0728v2.pdf), 2014a. (under review)
 * D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf). In Proceedings of the 23rd international conference on World Wide Web, WWW '14, Seoul, Korea, 2014b. ACM.
+* D. Kowald, E. Lacic, and C. Trattner. Tagrec: Towards a standardized tag recommender benchmarking framework. In Proceedings of the 25th ACM Conference on Hypertext and Social Media, HT'14, New York, NY, USA, 2014c. ACM.
+* E. Lacic, D. Kowald, P. Seitlinger, C. Trattner, and D. Parra. Recommending Items in Social Tagging Systems Using
+Tag and Time Information. In Proceedings of the 25th ACM Conference on Hypertext and Social Media, HT'14, New York, NY, USA, 2014. ACM.
 * P. Seitinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
 * A. Hotho, R. Jäschke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411–426. Springer, 2006.
 * L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354–365. Springer, 2012.
@@ -96,5 +99,4 @@ for _k_ = 1 to 10 (each line is one _k_)
 ## Contact
 * Dominik Kowald, Know-Center, Graz University of Technology, dkowald@know-center.at
 * Christoph Trattner, Know-Center, Graz University of Technology, ctrattner@know-center.at
-
-
+* Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (for resource recommender algorithms)
