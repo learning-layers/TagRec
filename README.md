@@ -4,11 +4,13 @@ TagRec
 ##Towards A Standardized Tag Recommender Benchmarking Framework
 
 ## Description
-The aim of this work (please [cite](https://github.com/learning-layers/TagRec/#citation) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
+The aim of this work (please [cite](https://github.com/learning-layers/TagRec/#citation)) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
 
 Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting and LDA topic creation).
 
-The software already contains three novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) uses topic information and is based on the ALCOVE theory (Krutschke et al., 1992). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) is a combination of the former two approaches and integrates the time component on the level of tags and topics.
+The software already contains three novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) (Seitlinger et al, 2013) uses topic information and is based on the ALCOVE theory (Krutschke et al., 1992). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) (Kowald et al., 2014b) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) (Kowald et al., 2014a) is a combination of the former two approaches and integrates the time component on the level of tags and topics.
+
+Based on our latest strand of research, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called CIRTT (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004)
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
@@ -26,6 +28,7 @@ The source-code can be directly checked-out through this repository. It contains
 
 ## How-to-use
 The _tagrecommender_ .jar uses three parameters:
+
 First the algorithm,
 
 Tag-Recommender:
