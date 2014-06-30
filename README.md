@@ -27,29 +27,29 @@ The source-code can be directly checked-out through this repository. It contains
 ## How-to-use
 The _tagrecommender_ .jar uses three parameters:
 First the algorithm:
-* Tag-Recommender
-** 3layers for 3Layers (based on ALCOVE theory) (Seitlinger et al., 2013)
-** 3LT for the time-based 3Layers on the levels of tags and topics (Kowald et al., 2014a)
-** bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
-** bll_c_ac for BLL and BLL+MPr together with semantic correlations (Kowald et al., 2014b)
-** lda for Latent Dirichlet Allocation (Krestel et al., 2009)
-** cf for Collaborative Filtering (Jäschke et al., 2007)
-** fr for Adapted PageRank and FolkRank (Hotho et al., 2006)
-** girptm for GIRP and GIRPTM (Zhang et al., 2012)
-** mp for MostPopular tags (Jäschke et al., 2007)
-** mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
-* Resource-Recommender
+###Tag-Recommender###
+* 3layers for 3Layers (based on ALCOVE theory) (Seitlinger et al., 2013)
+* 3LT for the time-based 3Layers on the levels of tags and topics (Kowald et al., 2014a)
+* bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
+* bll_c_ac for BLL and BLL+MPr together with semantic correlations (Kowald et al., 2014b)
+* lda for Latent Dirichlet Allocation (Krestel et al., 2009)
+* cf for Collaborative Filtering (Jäschke et al., 2007)
+* fr for Adapted PageRank and FolkRank (Hotho et al., 2006)
+* girptm for GIRP and GIRPTM (Zhang et al., 2012)
+* mp for MostPopular tags (Jäschke et al., 2007)
+* mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
+###Resource-Recommender###
 * item_cirtt for the tag- and time-based approach based on BLL (Lacic et al., 2014)
 * item_mp for MostPopular items
 * item_cft for user-based Collaborative Filtering based on tag-profiles
 * item_cfb for user-based Collaborative Filtering based on user-item matrix
 * item_zheng for the tag- and time-based approach by Zheng et al. (2011)
 * item_huang for the tag- and time-based appraoch by Huang et al. (2014)
-* Data-Processing:
-** core for calculating p-cores on a dataset
-** split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
-** split_8020 for splitting a dataset into training and test-sets using 80/20 split
-** lda_samples for creating LDA topics for the resources in a dataset
+###Data-Processing###
+* core for calculating p-cores on a dataset
+* split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
+* split_8020 for splitting a dataset into training and test-sets using 80/20 split
+* lda_samples for creating LDA topics for the resources in a dataset
 
 , second the dataset(-directory):
 * bib for BibSonomy
