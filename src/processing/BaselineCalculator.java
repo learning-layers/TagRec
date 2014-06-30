@@ -32,7 +32,6 @@ import com.google.common.primitives.Ints;
 import common.IntMapComparator;
 import common.Bookmark;
 import common.Utilities;
-
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
@@ -165,27 +164,26 @@ public class BaselineCalculator {
 		Utilities.writeStringToFile("./data/metrics/" + filename + "_mp" + "_TIME.txt", timeString);
 	}
 	
-	public static void predictPopularResources(String filename, int trainSize) {
-		//filename += "_res";
+	public static BookmarkReader predictPopularResources(String filename, int trainSize) {
+		filename += "_res";
 
-		// TODO: do not use complete size
-		BookmarkReader reader = new BookmarkReader(0, false);
+		BookmarkReader reader = new BookmarkReader(trainSize, false); // TODO: size
 		reader.readFile(filename);
 
-		List<int[]> values = getPopularResources(reader, 10, trainSize);
+		List<int[]> values = getPopularResources(reader, 20, trainSize);
 		PredictionFileWriter writer = new PredictionFileWriter(reader, values);
-		writer.writeResourcePredictionsToFile(filename + "_mp", trainSize, 0);
+		writer.writeResourcePredictionsToFile(filename + "_pop", trainSize, 0);
+		return reader;
 	}
 	
-	public static void predictRandomResources(String filename, int trainSize) {
-		//filename += "_res";
+	public static BookmarkReader predictRandomResources(String filename, int trainSize) {
+		filename += "_res";
 
-		// TODO: do not use complete size
-		BookmarkReader reader = new BookmarkReader(0, false);
+		BookmarkReader reader = new BookmarkReader(trainSize, false); // TODO: size?
 		reader.readFile(filename);
-
-		List<int[]> values = getRandomResources(reader, 10, trainSize);
+		List<int[]> values = getRandomResources(reader, 20, trainSize);
 		PredictionFileWriter writer = new PredictionFileWriter(reader, values);
 		writer.writeResourcePredictionsToFile(filename + "_rand", trainSize, 0);
+		return reader;
 	}
 }

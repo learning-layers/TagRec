@@ -20,11 +20,14 @@
 
 package test;
 
+import itemrecommendations.HuangCalculator;
+import itemrecommendations.ZhengCalculator;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import common.CalculationType;
-
+import common.Features;
 import processing.ActCalculator;
 import processing.BM25Calculator;
 import processing.BaselineCalculator;
@@ -33,6 +36,7 @@ import processing.LanguageModelCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.RecCalculator;
+import processing.Resource3LTCalculator;
 import processing.ThreeLayersCalculator;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
@@ -60,7 +64,7 @@ public class Pipeline {
 				"-----------------------------------------------------------------------------\n\n");
 		
 		// Testing
-		startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.NONE);
+//		startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.NONE);
 		//startRecCalculator("bib_core", "bib_core/bib_sample");
 		//startModelCalculator("bib_core", "bib_core/bib_sample", 1, -5);
 		//startBaselineCalculator("bib_core", "bib_core/bib_sample", 1);
@@ -130,6 +134,23 @@ public class Pipeline {
 			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 3);
 		} else if (op.equals("split")) {
 			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 3);
+		} else if (op.equals("item_mp")) {
+			startBaselineCalculatorForResources(sampleDir, samplePath, sampleCount, false);
+		} else if (op.equals("item_cft")) {
+			boolean userBased = true, resoruceBased = false, allResources  = false;
+			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, userBased, resoruceBased, allResources, false, Features.TAGS);
+		} else if (op.equals("item_cfb")) {
+			boolean userBased = true, resoruceBased = false, allResources  = false;
+			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, userBased, resoruceBased, allResources, false, Features.ENTITIES);
+		} else if (op.equals("item_zheng")) {
+			// Start Zheng
+			startZhengResourceCalculator(sampleDir, samplePath, sampleCount);
+		} else if (op.equals("item_huang")) {
+			// Start Huang
+			startHuangResourceCalculator(sampleDir, samplePath, sampleCount);
+		} else if (op.equals("item_cirtt")) {
+			boolean calculateUserSim = false, calculateBLL = true, calculateOnTag = true, novelty = false;
+			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, calculateUserSim, calculateBLL, novelty, calculateOnTag);
 		}
 	}
 
@@ -345,5 +366,91 @@ public class Pipeline {
 		testReader.readFile(sample + "_test");
 		TEST_SIZE = testReader.getBookmarks().size();
 		System.out.println("Test-size: " + TEST_SIZE);
+	}
+	
+	// Item Recommendation
+	
+	private static void startBaselineCalculatorForResources(String sampleDir, String sampleName, int size, boolean random) {
+		BookmarkReader reader = null;
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName + "_" + i);
+			if (random) {
+				reader = BaselineCalculator.predictRandomResources(sampleName + "_" + i, TRAIN_SIZE);
+			} else {
+				reader = BaselineCalculator.predictPopularResources(sampleName + "_" + i, TRAIN_SIZE);
+			}
+		}
+		if (random) {
+			writeMetricsForResources(sampleDir, sampleName, "rand", size, 20, null, reader);
+		} else {
+			writeMetricsForResources(sampleDir, sampleName, "pop", size, 20, null, reader);
+		}
+	}
+	
+	private static void startResourceCIRTTCalculator(String sampleDir, String sampleName, String topicString, int size, int neighborSize, Features features, 
+			boolean userSim, boolean bll, boolean novelty, boolean calculateOnTag) {
+		BookmarkReader reader = null;
+		String suffix = "r3l_" + features;
+		if (bll) {
+			suffix += "_bll";
+		}
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName + "_" + i);
+			reader = Resource3LTCalculator.predictSample(sampleName + "_" + i + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, 
+					neighborSize, features, userSim, bll, novelty, calculateOnTag);
+		}
+		writeMetricsForResources(sampleDir, sampleName, suffix, size, 20, !topicString.isEmpty() ? topicString : null, reader);
+	}
+	
+	private static void startZhengResourceCalculator(String sampleDir, String sampleName, int size) {
+		BookmarkReader reader = null;
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName + "_" + i);
+			reader = ZhengCalculator.predictSample(sampleName + "_" + i, TRAIN_SIZE);
+		}
+		writeMetricsForResources(sampleDir, sampleName, "zheng_tagtime", size, 20, null, reader);
+
+	}
+	
+	private static void startHuangResourceCalculator(String sampleDir, String sampleName, int size) {
+		BookmarkReader reader = null;
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName + "_" + i);
+			reader = HuangCalculator.predictSample(sampleName + "_" + i, TRAIN_SIZE);
+		}
+		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, null, reader);
+	}
+	
+	private static void startCfResourceCalculator(String sampleDir, String sampleName, int size, int neighborSize, 
+			boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
+		BookmarkReader reader = null;
+		String suffix = "cf_";
+		if (!userBased) {
+			suffix = "rescf_";
+		} else if (!resBased) {
+			suffix = "usercf_";
+		}
+		if (!userBased && !allResources) {
+			suffix += "mixed_";
+		}
+		if (bll) {
+			suffix += "bll_";
+		}
+		suffix += features + "_"; 
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName + "_" + i);
+			reader = BM25Calculator.predictResources(sampleName + "_" + i, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
+		}
+		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
+	}
+	
+	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
+		String topicString = ((posfix == null || posfix == "0") ? "" : "_" + posfix);
+		for (int i = 1; i <= k; i++) {
+			for (int j = 1; j <= sampleCount; j++) {
+				MetricsCalculator.calculateMetrics(sampleName + "_" + j + topicString + "_res_" + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false);
+			}
+			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double)sampleCount);
+		}
 	}
 }
