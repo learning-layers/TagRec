@@ -27,7 +27,7 @@ The source-code can be directly checked-out through this repository. It contains
 ## How-to-use
 The _tagrecommender_ .jar uses three parameters:
 First the algorithm:
-###Tag-Recommender###
+### Tag-Recommender
 * 3layers for 3Layers (based on ALCOVE theory) (Seitlinger et al., 2013)
 * 3LT for the time-based 3Layers on the levels of tags and topics (Kowald et al., 2014a)
 * bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
@@ -38,14 +38,14 @@ First the algorithm:
 * girptm for GIRP and GIRPTM (Zhang et al., 2012)
 * mp for MostPopular tags (Jäschke et al., 2007)
 * mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
-###Resource-Recommender###
+### Resource-Recommender
 * item_cirtt for the tag- and time-based approach based on BLL (Lacic et al., 2014)
 * item_mp for MostPopular items
 * item_cft for user-based Collaborative Filtering based on tag-profiles
 * item_cfb for user-based Collaborative Filtering based on user-item matrix
 * item_zheng for the tag- and time-based approach by Zheng et al. (2011)
 * item_huang for the tag- and time-based appraoch by Huang et al. (2014)
-###Data-Processing###
+### Data-Processing
 * core for calculating p-cores on a dataset
 * split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
 * split_8020 for splitting a dataset into training and test-sets using 80/20 split
