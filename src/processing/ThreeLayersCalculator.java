@@ -35,8 +35,8 @@ import common.DoubleMapComparator;
 import common.Bookmark;
 import common.Utilities;
 
-import file.BookmarkReader;
 import file.PredictionFileWriter;
+import file.BookmarkReader;
 
 public class ThreeLayersCalculator {
 
@@ -46,8 +46,6 @@ public class ThreeLayersCalculator {
 	private double dValue; // used for time
 	private boolean userBased;
 	private boolean resBased;
-	private boolean tagBLL;
-	private boolean topicBLL;
 	private boolean bookmarkBLL;
 	
 	private List<List<Bookmark>> userBookmarks;
@@ -55,7 +53,7 @@ public class ThreeLayersCalculator {
 	
 	private BM25Calculator cfCalc;
 	
-	public ThreeLayersCalculator(BookmarkReader reader, int trainSize, int dValue, int beta, boolean userBased, boolean resBased, boolean tagBLL, boolean topicBLL, boolean bookmarkBLL) {
+	public ThreeLayersCalculator(BookmarkReader reader, int trainSize, int dValue, int beta, boolean userBased, boolean resBased, boolean bookmarkBLL) {
 		this.reader = reader;
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
 		this.userBookmarks = Utilities.getBookmarks(this.trainList, false);
@@ -63,8 +61,6 @@ public class ThreeLayersCalculator {
 		this.dValue = (double)dValue / 10.0;
 		this.userBased = userBased;
 		this.resBased = resBased;		
-		this.tagBLL = tagBLL;
-		this.topicBLL = topicBLL;
 		this.bookmarkBLL = bookmarkBLL;
 		
 		if (this.resBased) {
@@ -98,24 +94,42 @@ public class ThreeLayersCalculator {
 		return usageMap;
 	}
 	
-	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp) {	
+	private Map<Integer, Double> getAllUsages(List<Bookmark> bookmarks, double timestamp, boolean categories) {
+		Map<Integer, Double> usageMap = new LinkedHashMap<Integer, Double>();
+		for (Bookmark data : bookmarks) {
+			List<Integer> keys = (categories ? data.getCategories() : data.getTags());
+			double targetTimestamp = Double.parseDouble(data.getTimestamp());
+			Double rec = Math.pow(timestamp - targetTimestamp + 1.0, this.dValue * (-1.0));
+			if (!rec.isInfinite() && !rec.isNaN()) {
+				for (int key : keys) {
+					Double oldVal = usageMap.get(key);
+					usageMap.put(key, (oldVal != null ? oldVal + rec : rec));
+				}
+			} else {
+				System.out.println("BLL - NAN");
+			}
+		}
+		return usageMap;
+	}
+	
+	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL) {	
 		Map<Integer, Double> userResultMap = null;
 		if (this.userBased) {
 			List<Bookmark> userB = null;
 			Map<Integer, Double> userTagMap = null;
 			Map<Integer, Double> userCatMap = null;
-			if (userID < this.userBookmarks.size()) {
+			if (userID != -1 && userID < this.userBookmarks.size()) {
 				userB = this.userBookmarks.get(userID);
-				if (this.tagBLL) {
+				if (tagBLL) {
 					userTagMap = getLastUsages(userB, testTimestamp, false);
 				}
-				if (this.topicBLL) {
+				if (topicBLL) {
 					userCatMap = getLastUsages(userB, testTimestamp, true);
 				}
 			} else {
 				userB = new ArrayList<Bookmark>();
 			}
-			userResultMap = getResultMap(userB, testCats, userTagMap, userCatMap, testTimestamp);
+			userResultMap = getResultMap(userB, testCats, userTagMap, userCatMap, testTimestamp, topicBLL);
 		} else {
 			userResultMap = new LinkedHashMap<Integer, Double>();
 		}
@@ -123,7 +137,7 @@ public class ThreeLayersCalculator {
 		Map<Integer, Double> resResultMap = null;
 		if (this.resBased) {
 			if (this.resMaps != null) {
-				if (resID < this.resMaps.size()) {
+				if (resID != -1 && resID < this.resMaps.size()) {
 					resResultMap = this.resMaps.get(resID);
 				} else {
 					resResultMap = new LinkedHashMap<Integer, Double>();
@@ -165,7 +179,7 @@ public class ThreeLayersCalculator {
 		sortedResultMap.putAll(resultMap);
 		int count = 0;
 		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
-			if (count++ < 10) {
+			if (count++ < limit) {
 				returnMap.put(entry.getKey(), entry.getValue());
 			} else {
 				break;
@@ -174,7 +188,7 @@ public class ThreeLayersCalculator {
 		return returnMap;
 	}
 
-	private Map<Integer, Double> getResultMap(List<Bookmark> bookmarks, List<Integer> testCats, Map<Integer, Double> userTagMap, Map<Integer, Double> userCatMap, double testTimestamp) {
+	private Map<Integer, Double> getResultMap(List<Bookmark> bookmarks, List<Integer> testCats, Map<Integer, Double> userTagMap, Map<Integer, Double> userCatMap, double testTimestamp, boolean topicBLL) {
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
 		Map<Integer, Double> testCatsMap = getMapFromList(testCats, null);
 		for (Bookmark data : bookmarks) {
@@ -189,7 +203,7 @@ public class ThreeLayersCalculator {
 				System.out.println("Cos - NAN");
 			}
 			// new version for topicBLL
-			if (this.topicBLL) {
+			if (topicBLL) {
 				double topicRecSum = 0.0;
 				Map<Integer, Double> catsRecMap = getMapFromList(data.getCategories(), userCatMap);
 				for (double catRec : catsRecMap.values()) {
@@ -211,8 +225,10 @@ public class ThreeLayersCalculator {
 		
 		// normalize and return
 		double denom = 0.0;
-		for (double val : resultMap.values()) {
+		for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
+			Double val = Math.log(entry.getValue());
 			denom += Math.exp(val);
+			entry.setValue(val);
 		}
 		for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
 			entry.setValue(Math.exp(entry.getValue()) / denom);
@@ -249,14 +265,14 @@ public class ThreeLayersCalculator {
 	private static String timeString = "";
 	
 	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int d, int beta, boolean userBased, boolean resBased, boolean tagBLL, boolean topicBLL) {
-		//filename += "_res";
+		filename += "_res";
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
 		Stopwatch timer = new Stopwatch();
 		timer.start();
-		ThreeLayersCalculator calculator = new ThreeLayersCalculator(reader, trainSize, d, beta, userBased, resBased, tagBLL, topicBLL, false);
+		ThreeLayersCalculator calculator = new ThreeLayersCalculator(reader, trainSize, d, beta, userBased, resBased, false);
 		timer.stop();
 		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
 		
@@ -265,7 +281,7 @@ public class ThreeLayersCalculator {
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
 			double timestamp = Double.parseDouble((data.getTimestamp()));
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp);
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL);
 			predictionValues.add(Ints.toArray(map.keySet()));
 		}
 		timer.stop();
@@ -289,7 +305,8 @@ public class ThreeLayersCalculator {
 			suffix += "topicbll";
 		}
 		String outputFile = filename + suffix + "_" + beta + "_" + d;
-		Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);		
+		// TODO: time
+		//Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);		
 		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(outputFile);
