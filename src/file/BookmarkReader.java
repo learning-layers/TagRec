@@ -51,6 +51,8 @@ public class BookmarkReader {
 	private Map<String, Integer> userMap;
 	private List<Integer> userCounts;
 	private englishStemmer stemmer;
+	
+	private boolean hasTimestamp = false;
  	
 	public BookmarkReader(int countLimit, boolean stemming) {
 		this.countLimit = countLimit;
@@ -136,9 +138,12 @@ public class BookmarkReader {
 	
 	private void processUserData(String userID, Bookmark userData, List<String> tags, List<String> categories, String wikiID) {
 		if (userID != "" && tags.size() > 0/* && !userData.getTimestamp().isEmpty()*/) {
-			if (!userData.getTimestamp().isEmpty() && !StringUtils.isNumeric(userData.getTimestamp())) {
-				System.out.println("Invalid timestamp");
-				return;
+			if (!userData.getTimestamp().isEmpty()) {
+				if (!StringUtils.isNumeric(userData.getTimestamp())) {
+					System.out.println("Invalid timestamp");
+					return;
+				}
+				this.hasTimestamp = true;
 			}
 			
 			boolean doCount = (this.countLimit == 0 || this.userLines.size() < this.countLimit);
@@ -258,6 +263,10 @@ public class BookmarkReader {
 	
 	public int getCountLimit() {
 		return this.countLimit;
+	}
+	
+	public boolean hasTimestamp() {
+		return this.hasTimestamp;
 	}
 	
 	public List<Integer> getUniqueUserListFromTestSet(int trainSize) {

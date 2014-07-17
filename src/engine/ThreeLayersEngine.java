@@ -29,7 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ThreeLayersEngine {
+public class ThreeLayersEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
 	private ThreeLayersCalculator calculator = null;
@@ -58,8 +58,10 @@ public class ThreeLayersEngine {
 		resetStructure(reader, calculator);
 	}
 
-	public synchronized Map<String, Double> getTagsWithLikelihood(String user, String resource,
-			List<String> topics, int count, boolean timeBased) {
+	public synchronized Map<String, Double> getTagsWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+		if (count == null || count.doubleValue() < 1) {
+			count = 10;
+		}
 		Map<String, Double> tagMap = new LinkedHashMap<>();
 		if (this.reader == null || this.calculator == null) {
 			return tagMap;
@@ -78,7 +80,7 @@ public class ThreeLayersEngine {
 
 		Map<Integer, Double> tagIDs = this.calculator.getRankedTagList(userID,
 				resID, topicIDs, System.currentTimeMillis() / 1000.0, count,
-				timeBased, false);
+				this.reader.hasTimestamp(), false);
 		for (Map.Entry<Integer, Double> tEntry : tagIDs.entrySet()) {
 			tagMap.put(this.reader.getTags().get(tEntry.getKey()), tEntry.getValue());
 		}

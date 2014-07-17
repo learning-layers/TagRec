@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class LanguageModelEngine {
+public class LanguageModelEngine implements EngineInterface {
 
 	private BookmarkReader reader;
 	private final Map<String, Map<Integer, Double>> userMaps;
@@ -78,8 +78,10 @@ public class LanguageModelEngine {
 		resetStructures(userMaps, resMaps, reader);
 	}
 
-	public synchronized Map<String, Double> getTagsWithLikelihood(String user,
-			String resource, int count) {
+	public synchronized Map<String, Double> getTagsWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+		if (count == null || count.doubleValue() < 1) {
+			count = 10;
+		}
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
 		Map<Integer, Double> userMap = this.userMaps.get(user);
 		Map<Integer, Double> resMap = this.resMaps.get(resource);

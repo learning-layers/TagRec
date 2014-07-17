@@ -40,6 +40,7 @@ import processing.MetricsCalculator;
 import processing.RecCalculator;
 import processing.ThreeLayersCalculator;
 import engine.BaseLevelLearningEngine;
+import engine.EngineInterface;
 import engine.LanguageModelEngine;
 import engine.ThreeLayersEngine;
 import file.BookmarkReader;
@@ -81,30 +82,28 @@ public class Pipeline {
 		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
 		
 		// Engine Testing
-		/*
-		ThreeLayersEngine engine = new ThreeLayersEngine();
+		EngineInterface engine = new ThreeLayersEngine();
 		try {
 			engine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
-		System.out.println("3L: " + engine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10, true));
-		System.out.println("3LT: " + engine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10, false));
+		System.out.println("3L: " + engine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
+		System.out.println("3LT: " + engine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
 		BaseLevelLearningEngine bllEngine = new BaseLevelLearningEngine();
 		try {
 			bllEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		System.out.println("BLL: " + bllEngine.getTagsWithLikelihood("41", "545", 10));
-		LanguageModelEngine lmEngine = new LanguageModelEngine();
+		System.out.println("BLL: " + bllEngine.getTagsWithLikelihood("41", "545", null, 10));
+		EngineInterface lmEngine = new LanguageModelEngine();
 		try {
 			lmEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
 		} catch (Exception e3) {
 			e3.printStackTrace();
 		}
-		System.out.println("LM: " + lmEngine.getTagsWithLikelihood("41", "545", 10));
-		*/
+		System.out.println("LM: " + lmEngine.getTagsWithLikelihood("41", "545", null, 10));
 		
 		// Commandline Arguments
 		if (args.length < 3) {
