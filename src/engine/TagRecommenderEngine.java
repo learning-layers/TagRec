@@ -24,6 +24,7 @@ public class TagRecommenderEngine implements EngineInterface {
 		this.threelEngine = null;
 		
 		BookmarkReader reader = new BookmarkReader(0, false);
+		reader.readFile(filename);
 		if (reader.getCategories().size() > 0) {
 			this.threelEngine = new ThreeLayersEngine();
 			this.threelEngine.loadFile(filename);

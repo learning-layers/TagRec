@@ -42,6 +42,7 @@ import processing.ThreeLayersCalculator;
 import engine.BaseLevelLearningEngine;
 import engine.EngineInterface;
 import engine.LanguageModelEngine;
+import engine.TagRecommenderEngine;
 import engine.ThreeLayersEngine;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
@@ -82,13 +83,13 @@ public class Pipeline {
 		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
 		
 		// Engine Testing
+		/*
 		EngineInterface engine = new ThreeLayersEngine();
 		try {
 			engine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
-		System.out.println("3L: " + engine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
 		System.out.println("3LT: " + engine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
 		BaseLevelLearningEngine bllEngine = new BaseLevelLearningEngine();
 		try {
@@ -104,6 +105,15 @@ public class Pipeline {
 			e3.printStackTrace();
 		}
 		System.out.println("LM: " + lmEngine.getTagsWithLikelihood("41", "545", null, 10));
+		EngineInterface tagrecEngine = new TagRecommenderEngine();
+		try {
+			tagrecEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("TagRec with Topics: " + tagrecEngine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
+		System.out.println("TagRec without Topics: " + tagrecEngine.getTagsWithLikelihood("41", "545", null, 10));
+		*/
 		
 		// Commandline Arguments
 		if (args.length < 3) {

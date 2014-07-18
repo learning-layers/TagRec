@@ -206,9 +206,9 @@ public class BookmarkReader {
 				userData.getTags().add(tagIndex);
 			}
 			this.userLines.add(userData);
-			if (this.userLines.size() % 100000 == 0) {
-				System.out.println("Read in 10000000 lines");
-			}
+			//if (this.userLines.size() % 100000 == 0) {
+			//	System.out.println("Read in 10000000 lines");
+			//}
 		}
 	}
 	
