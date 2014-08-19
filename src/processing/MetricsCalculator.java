@@ -67,14 +67,15 @@ public class MetricsCalculator {
 		this.reader = reader;
 		this.wikiReader = wikiReader;
 		BufferedWriter bw = null;
-		if (k == 5 || k == 10) {
+		// Enable if you need data for statistical tests
+		/*if (k == 5 || k == 10) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
 				bw = new BufferedWriter(writer);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 		
 		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
 		double count = this.reader.getPredictionData().size();		 // all users

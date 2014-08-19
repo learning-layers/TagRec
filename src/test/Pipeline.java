@@ -33,6 +33,7 @@ import common.Features;
 import processing.ActCalculator;
 import processing.BM25Calculator;
 import processing.BaselineCalculator;
+import processing.ContentBasedCalculator;
 import processing.FolkRankCalculator;
 import processing.LanguageModelCalculator;
 import processing.MalletCalculator;
@@ -68,6 +69,9 @@ public class Pipeline {
 				"You should have received a copy of the GNU Affero General Public License\n" +
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
+		
+		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
+		startContentBasedCalculator("bib_core", "bib_core/bib_sample");
 		
 		// Method Testing
 		//startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.NONE);
@@ -191,6 +195,12 @@ public class Pipeline {
 	}
 
 	// helper methods ---------------------------------------------------------------------------------------------------------------------------------------------
+	private static void startContentBasedCalculator(String sampleDir, String sampleName) {
+		getTrainTestSize(sampleName);
+		ContentBasedCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
+		writeMetrics(sampleDir, sampleName, "cb", 1, 10, null);
+	}
+	
 	private static void startActCalculator(String sampleDir, String sampleName,
 			int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type) {
 		getTrainTestSize(sampleName);

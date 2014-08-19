@@ -120,11 +120,13 @@ public class BookmarkReader {
 					}
 				}
 				if (lineParts.length > 5) { // is there a rating?
-					System.out.println("Rating available");
 					try {
 						userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
 					} catch (Exception e) { /* do nothing */ }
 				}
+				
+				// TODO ----------------------
+				// extend common/Bookmark class with fields for title/url (= lineParts[6]) and description (= lineParts[7])
 			}
 			processUserData(userID, userData, tags, categories, wikiID); // last user
 			br.close();
@@ -271,7 +273,6 @@ public class BookmarkReader {
 	
 	public List<Integer> getUniqueUserListFromTestSet(int trainSize) {
 		Set<Integer> userList = new HashSet<Integer>();	
-		// TODO: necessary
 		if (trainSize == -1) {
 			trainSize = 0;
 		}	
