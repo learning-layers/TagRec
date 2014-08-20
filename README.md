@@ -123,7 +123,7 @@ _Bibtex:_
 
 ## References
 * D. Kowald, P. Seitinger, C. Trattner, and T. Ley.: [Forgetting the Words but Remembering the Meaning: Modeling Forgetting in a Verbal and Semantic Tag Recommender](http://arxiv.org/pdf/1402.0728v2.pdf), 2014a. (under review)
-* D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf). In Proceedings of the 23rd international conference on World Wide Web Companion, WWW '14, Seoul, Korea, 2014b. ACM.
+* D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://www2014.kr/wp-content/uploads/2014/05/companion_p463.pdf). In Proceedings of the 23rd international conference on World Wide Web Companion, WWW '14, Seoul, Korea, 2014b. ACM.
 * E. Lacic, D. Kowald, P. Seitlinger, C. Trattner, and D. Parra. [Recommending Items in Social Tagging Systems Using
 Tag and Time Information](http://arxiv.org/pdf/1406.7727v1.pdf). In Proceedings of the 1st Social Personalization Workshop co-located with the 25th ACM Conference on Hypertext and Social Media, HT'14, New York, NY, USA, 2014. ACM.
 * P. Seitinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
