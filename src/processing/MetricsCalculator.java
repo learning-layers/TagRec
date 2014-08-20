@@ -238,7 +238,7 @@ public class MetricsCalculator {
 			bw.write(Double.toString(recall).replace('.', ',') + ";");		
 			bw.write(Double.toString(precision).replace('.', ',') + ";");		
 			//bw.write(Double.toString((fMeasureSum / size)).replace('.', ',') + ";");
-			bw.write(Double.toString(2.0 * recall * precision / (recall + precision)).replace('.', ',') + ";");
+			bw.write(Double.toString(2.0 * recall * precision / (recall + precision == 0 ? 1.0 : recall + precision)).replace('.', ',') + ";");
 			bw.write(Double.toString((mrrSum / size)).replace('.', ',') + ";");		
 			bw.write(Double.toString((mapSum / size)).replace('.', ',') + ";");
 			bw.write(Double.toString((nDCGSum / size)).replace('.', ',') + ";");

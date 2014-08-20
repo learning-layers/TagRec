@@ -67,11 +67,11 @@ public class PredictionFileReader {
 						this.predictions.add(data);
 						this.predictionCount++;
 					} else {
-						System.out.println("Line does not have predictions (inner)");
+						//System.out.println("Line does not have predictions (inner)");
 						this.predictions.add(null);
 					}
 				} else {
-					System.out.println("Line does not have predictions (outer)");
+					//System.out.println("Line does not have predictions (outer)");
 					this.predictions.add(null);
 				}
 			}

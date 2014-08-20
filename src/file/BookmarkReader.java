@@ -126,7 +126,7 @@ public class BookmarkReader {
 				}
 				
 				// TODO ----------------------
-				// extend common/Bookmark class with fields for title/url (= lineParts[6]) and description (= lineParts[7])
+				// extend common/Bookmark class with fields for title (= lineParts[6]) and description (= lineParts[7])
 			}
 			processUserData(userID, userData, tags, categories, wikiID); // last user
 			br.close();

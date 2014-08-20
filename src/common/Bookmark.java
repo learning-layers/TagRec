@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 // TODO -----------------------------------------------------
-// extend with fields and methods for title/url and description
+// extend with fields and methods for title and description
 public class Bookmark implements Comparable<Bookmark> {
 
 	private int userID;

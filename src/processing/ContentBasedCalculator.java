@@ -49,6 +49,8 @@ public class ContentBasedCalculator {
 		// TODO: calculate your recommendations here and return the top-10 (=REC_LIMIT) tags with probability value
 		// have also a look on the other calculator classes!
 		
+		// TODO: in order to improve your content-based recommender, you can merge your results with other approaches like the ones from the LanguageModelCalculator or ActCalculator
+		
 		return resultMap;
 	}
 	
