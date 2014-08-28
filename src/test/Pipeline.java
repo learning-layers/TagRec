@@ -73,18 +73,39 @@ public class Pipeline {
 		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
 		startContentBasedCalculator("bib_core", "bib_core/bib_sample");
 		
-		// Method Testing
+		// Method Testing -> just uncomment the methods you want to test
+		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
 		//startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.NONE);
+		
+		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
+		//startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.USER_TO_RESOURCE);
+		
+		// Test the GIRP and GIRPTM algorithms
 		//startRecCalculator("bib_core", "bib_core/bib_sample");
+		
+		// Test the MP_u, MP_r and MP_u_r algorithms
 		//startModelCalculator("bib_core", "bib_core/bib_sample", 1, -5);
+		
+		// Test the MP algorithm
 		//startBaselineCalculator("bib_core", "bib_core/bib_sample", 1);
+		
+		// Test the CF_u, CF_r and CF_u_r algorithms with 20 neighbors (change it if you want)
 		//startCfTagCalculator("bib_core", "bib_core/bib_sample", 1, 20, -5);
+		
+		// Test the PR and FR algorithms
 		//startFolkRankCalculator("bib_core", "bib_core/bib_sample", 1);
+		
+		// Test the LDA algorithm with 100 topics (change it if you want)
 		//startLdaCalculator("bib_core", "bib_core/bib_sample", 100, 1);
-		//start3LayersJavaCalculator("bib_core", "bib_core/bib_sample", "", 1, -5);
-		//startBaselineCalculatorForResources("bib_core", "bib_core/bib_sample", 1, false);
-		//startCfResourceCalculator("bib_core", "bib_core/bib_sample", 1, 20, true, false, false, false, Features.ENTITIES);
-		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
+		
+		// Test the 3L algorithm
+		//start3LayersJavaCalculator("bib_core", "bib_core/bib_sample", "", 1, -5, -5, true, false, false);
+		
+		// Test the 3L_tag algorithm
+		//start3LayersJavaCalculator("bib_core", "bib_core/bib_sample", "", 1, -5, -5, true, false, false);
+		
+		// Test the 3LT_topic algorithm
+		//start3LayersJavaCalculator("bib_core", "bib_core/bib_sample", "", 1, -5, -5, true, false, false);
 		
 		// Engine Testing
 		/*
@@ -118,6 +139,10 @@ public class Pipeline {
 		System.out.println("TagRec with Topics: " + tagrecEngine.getTagsWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
 		System.out.println("TagRec without Topics: " + tagrecEngine.getTagsWithLikelihood("41", "545", null, 10));
 		*/
+		// Resource-Recommender testing
+		//startCfResourceCalculator("bib_core", "bib_core/bib_sample", 1, 20, true, false, false, false, Features.ENTITIES);
+		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
+		//startBaselineCalculatorForResources("bib_core", "bib_core/bib_sample", 1, false);
 		
 		// Commandline Arguments
 		if (args.length < 3) {
@@ -377,6 +402,7 @@ public class Pipeline {
 		MetricsCalculator.resetMetrics();
 	}
 
+	// e.g., -5 will be transformed to 0.5 and 2 will be transformed to 0.1 and 0.2
 	private static List<Integer> getBetaValues(int betaUpperBound) {
 		List<Integer> betaValues = new ArrayList<Integer>();
 		if (betaUpperBound < 0) {
