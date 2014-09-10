@@ -63,6 +63,7 @@ Data-Processing:
 , second the dataset(-directory):
 * bib for BibSonomy
 * cul for CiteULike
+* del for Delicious
 * flickr for Flickr
 * ml for MovieLens
 * wiki for Wikipedia (based on bookmarks from Delicious)
@@ -130,7 +131,7 @@ _Bibtex:_
 * C. Trattner, D. Kowald, P. Seitlinger, S. Kopeinik, and T. Ley. Modeling Activation Processes in Human Memory to Predict the Reuse of Tags. Submitted to the Journal of Web Science (under review), 2014.
 * E. Lacic, D. Kowald, P. Seitlinger, C. Trattner, and D. Parra. [Recommending Items in Social Tagging Systems Using
 Tag and Time Information](http://www.christophtrattner.info/pubs/sp2014.pdf). In Proceedings of the 1st Social Personalization Workshop co-located with the 25th ACM Conference on Hypertext and Social Media, HT'14, New York, NY, USA, 2014. ACM.
-* P. Seitinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
+* P. Seitlinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
 * A. Hotho, R. Jäschke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411–426. Springer, 2006.
 * L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354–365. Springer, 2012.
 * R. Jäschke, L. Marinho, A. Hotho, L. Schmidt-Thieme, and G. Stumme. Tag recommendations in folksonomies. In Knowledge Discovery in Databases: PKDD 2007, pages 506–514. Springer, 2007.
