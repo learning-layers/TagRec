@@ -10,7 +10,7 @@ The aim of this [work](http://www.christophtrattner.info/pubs/ht241-kowald.pdf) 
 
 Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting and LDA topic creation).
 
-The software already contains four novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) (Seitlinger et al, 2013) uses topic information and is based on the ALCOVE theory (Krutschke et al., 1992). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) (Kowald et al., 2014b) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) (Kowald et al., 2014a) is a combination of the former two approaches and integrates the time component on the level of tags and topics. Finally, the fourth one (BLLac+C) extends the BLL+C algorithm with semantic correlations (Trattner et al., 2014).
+The software already contains four novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) (Seitlinger et al, 2013) uses topic information and is based on the ALCOVE/MINERVA2 theories (Krutschke, 1992; Hintzman, 1984). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) (Kowald et al., 2014b) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) (Kowald et al., 2014a) is a combination of the former two approaches and integrates the time component on the level of tags and topics. Finally, the fourth one (BLLac+C) extends the BLL+C algorithm with semantic correlations (Trattner et al., 2014).
 
 Based on our latest strand of research, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://arxiv.org/pdf/1406.7727v1.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004)
 
@@ -35,7 +35,7 @@ The _tagrecommender_ .jar uses three parameters:
 First the algorithm,
 
 Tag-Recommender:
-* 3layers for 3Layers (based on ALCOVE theory) (Seitlinger et al., 2013)
+* 3layers for 3Layers (based on ALCOVE/MINERVA2 theories) (Seitlinger et al., 2013)
 * 3LT for the time-based 3Layers on the levels of tags and topics (Kowald et al., 2014a)
 * bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
 * bll_c_ac for BLL and BLL+MPr together with semantic correlations (Trattner et al., 2014)
@@ -138,6 +138,7 @@ Tag and Time Information](http://www.christophtrattner.info/pubs/sp2014.pdf). In
 * R. Krestel, P. Fankhauser, and W. Nejdl. Latent dirichlet allocation for tag recommendation. In Proceedings of the third ACM conference on Recommender systems, pages 61–68. ACM, 2009.
 * J. R. Anderson, M. D. Byrne, S. Douglass, C. Lebiere, and Y. Qin. An integrated theory of the mind. Psychological Review, 111(4):1036–1050, 2004.
 * J. K. Kruschke et al. Alcove: An exemplar-based connectionist model of category learning. Psychological review, 99(1):22–44, 1992.
+* D. L Hintzman. Minerva 2: A simulation model of human memory. Behavior Research Methods, Instruments, & Computers 16 (2), 96–101, 1984.
 * N. Zheng and Q. Li. A recommender system based on tag and time information for social tagging systems. Expert Syst. Appl., 2011.
 * C.-L. Huang, P.-H. Yeh, C.-W. Lin, and D.-C. Wu. Utilizing user tag-based interests in recommender systems for social resource sharing websites. Knowledge-Based Systems, 2014.
 
