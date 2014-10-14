@@ -99,7 +99,7 @@ public class BM25Calculator {
 		}
 	}
 		
-	private Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll) {
+	public Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll) {
 		List<Integer> userResources = null;
 		Map<Integer, Double> userBllResources = null;
 		if (this.resBased) {

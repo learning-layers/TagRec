@@ -53,4 +53,26 @@ public class EngineUtils {
 
 		return tagMap;
 	}
+	
+	public static Map<String, Double> calcTopResources(BookmarkReader reader) {
+		Map<String, Double> resourceMap = new LinkedHashMap<>();
+		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
+
+		Integer countSum = 0;
+		for (int i = 0; i < reader.getResourceCounts().size(); i++) {
+			countMap.put(i, reader.getResourceCounts().get(i));
+
+			countSum += reader.getResourceCounts().get(i);
+		}
+
+		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(
+				new IntMapComparator(countMap));
+		sortedCountMap.putAll(countMap);
+
+		for (Map.Entry<Integer, Integer> entry : sortedCountMap.entrySet()) {
+			resourceMap.put(reader.getResources().get(entry.getKey()), ((double) entry.getValue()) / countSum);
+		}
+
+		return resourceMap;
+	}
 }

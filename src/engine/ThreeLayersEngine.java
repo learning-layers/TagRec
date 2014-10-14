@@ -44,9 +44,6 @@ public class ThreeLayersEngine implements EngineInterface {
 	public void loadFile(String filename) throws Exception {
 
 		BookmarkReader reader = new BookmarkReader(0, false);
-
-		// CHANGED dtheiler: throwing exception; re-implemented if exception
-		// handling is necessary here
 		reader.readFile(filename);
 
 		Collections.sort(reader.getBookmarks());
@@ -58,7 +55,7 @@ public class ThreeLayersEngine implements EngineInterface {
 		resetStructure(reader, calculator);
 	}
 
-	public synchronized Map<String, Double> getTagsWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}

@@ -78,7 +78,7 @@ public class LanguageModelEngine implements EngineInterface {
 		resetStructures(userMaps, resMaps, reader);
 	}
 
-	public synchronized Map<String, Double> getTagsWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}

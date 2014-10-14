@@ -27,5 +27,5 @@ public interface EngineInterface {
 	
 	public void loadFile(String filename) throws Exception;
 	
-	public Map<String, Double> getTagsWithLikelihood(String user, String resource, List<String> topics, Integer count);
+	public Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count);
 }
