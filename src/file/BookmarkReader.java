@@ -139,7 +139,7 @@ public class BookmarkReader {
 	}
 	
 	private void processUserData(String userID, Bookmark userData, List<String> tags, List<String> categories, String wikiID) {
-		if (userID != "" && tags.size() > 0/* && !userData.getTimestamp().isEmpty()*/) {
+		if (userID != "" /*&& tags.size() > 0 && !userData.getTimestamp().isEmpty()*/) {
 			if (!userData.getTimestamp().isEmpty()) {
 				if (!StringUtils.isNumeric(userData.getTimestamp())) {
 					System.out.println("Invalid timestamp");

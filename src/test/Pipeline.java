@@ -133,7 +133,7 @@ public class Pipeline {
 		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10));		
 		EngineInterface tagrecEngine = new TagRecommenderEngine();
 		try {
-			tagrecEngine.loadFile("bib_core/bib_sample");
+			tagrecEngine.loadFile("hugo2");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -141,7 +141,7 @@ public class Pipeline {
 		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("41", "545", null, 10));
 		EngineInterface resrecEngine = new CFResourceRecommenderEngine();
 		try {
-			resrecEngine.loadFile("bib_core/bib_sample");
+			resrecEngine.loadFile("hugo2");
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
