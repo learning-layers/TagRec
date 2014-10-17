@@ -130,10 +130,10 @@ public class Pipeline {
 		} catch (Exception e3) {
 			e3.printStackTrace();
 		}
-		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10));
+		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10));		
 		EngineInterface tagrecEngine = new TagRecommenderEngine();
 		try {
-			tagrecEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
+			tagrecEngine.loadFile("bib_core/bib_sample");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -147,7 +147,6 @@ public class Pipeline {
 		}
 		System.out.println("CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 10));
 		*/
-
 		// Resource-Recommender testing
 		//startCfResourceCalculator("bib_core", "bib_core/bib_sample", 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);

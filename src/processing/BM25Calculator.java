@@ -106,14 +106,14 @@ public class BM25Calculator {
 			// ####################################################### TODO: check log! and normalization!
 			userBllResources = Bookmark.getResourcesFromUserWithRec(this.trainList, this.testList, userID, 0.5, bll);
 			userResources = new ArrayList<Integer>(userBllResources.keySet());
-		} else {
+		} else if (userID != -1) {
 			userResources = Bookmark.getResourcesFromUser(this.trainList, userID);
 		}
 		Map<Integer, Double> rankedResources = new LinkedHashMap<Integer, Double>();
 		
 		int i = 0;
 		double denom = 0.0;
-		if (this.userBased) {
+		if (this.userBased && userID != -1) {
 			Map<Integer, Double> sortedNeighbors = Utilities.getNeighbors(userID, -1, this.allUsers, this.userMaps, this.trainList, this.sim);
 			for (Map.Entry<Integer, Double> neighbor : sortedNeighbors.entrySet()) {		
 				if (i++ > MAX_NEIGHBORS) {

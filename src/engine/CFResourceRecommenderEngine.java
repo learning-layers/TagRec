@@ -63,11 +63,16 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		if (this.reader == null || this.calculator == null) {
 			return resourceMap;
 		}
-		int userID = this.reader.getUsers().indexOf(user);
+		int userID = -1;
+		if (user != null) {
+			userID = this.reader.getUsers().indexOf(user);
+		}
 
 		Map<Integer, Double> resourceIDs = this.calculator.getRankedResourcesList(userID, true, false, false);
 		for (Map.Entry<Integer, Double> tEntry : resourceIDs.entrySet()) {
-			resourceMap.put(this.reader.getResources().get(tEntry.getKey()), tEntry.getValue());
+			if (resourceMap.size() < count) {
+				resourceMap.put(this.reader.getResources().get(tEntry.getKey()), tEntry.getValue());
+			}
 		}
 		
 		if (resourceMap.size() < count) {

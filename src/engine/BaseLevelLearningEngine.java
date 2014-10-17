@@ -104,7 +104,6 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		int i = 0;
 		Map<String, Double> tagMap = new LinkedHashMap<>();
 		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
-
 			if (i++ < count) {
 				tagMap.put(this.reader.getTags().get(entry.getKey()),
 						(double) entry.getValue());

@@ -63,8 +63,14 @@ public class ThreeLayersEngine implements EngineInterface {
 		if (this.reader == null || this.calculator == null) {
 			return tagMap;
 		}
-		int userID = this.reader.getUsers().indexOf(user);
-		int resID = this.reader.getResources().indexOf(resource);
+		int userID = -1;
+		if (user != null) {
+			userID = this.reader.getUsers().indexOf(user);
+		}
+		int resID = -1;
+		if (resource != null) {
+			resID = this.reader.getResources().indexOf(resource);
+		}
 		List<Integer> topicIDs = new ArrayList<>();
 		if (topics != null) {
 			for (String t : topics) {
@@ -79,7 +85,9 @@ public class ThreeLayersEngine implements EngineInterface {
 				resID, topicIDs, System.currentTimeMillis() / 1000.0, count,
 				this.reader.hasTimestamp(), false);
 		for (Map.Entry<Integer, Double> tEntry : tagIDs.entrySet()) {
-			tagMap.put(this.reader.getTags().get(tEntry.getKey()), tEntry.getValue());
+			if (tagMap.size() < count) {
+				tagMap.put(this.reader.getTags().get(tEntry.getKey()), tEntry.getValue());
+			}
 		}
 		
 		if (tagMap.size() < count) {
