@@ -288,6 +288,11 @@ public class BookmarkSplitter {
 		return core;
 	}
 	
+	// default call
+	public static int splitSample(String filename, String sampleName, int level) {
+		return splitSample(filename, sampleName, 1, level, level, level, false);
+	}
+	
 	public static int splitSample(String filename, String sampleName, int count, int userLevel, int resLevel, int tagLevel, boolean resSplit) {
 		
 		String resultfile = sampleName + "_core_u" + userLevel + "_r" + resLevel + "_t" + tagLevel;
@@ -319,7 +324,6 @@ public class BookmarkSplitter {
 			}			
 		} else {		
 			BookmarkSplitter splitter = new BookmarkSplitter(reader);
-			// TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 			Collections.sort(reader.getBookmarks());
 			for (int i = 1; i <= count; i++) {
 				//splitter.splitFile(sampleName, 10);

@@ -20,7 +20,7 @@
 
 package engine;
 
-import processing.ActCalculator;
+import processing.BLLCalculator;
 import common.DoubleMapComparator;
 import file.BookmarkReader;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 		System.out.println("read in and sorted file");
-		List<Map<Integer, Double>> userRecencies = ActCalculator
+		List<Map<Integer, Double>> userRecencies = BLLCalculator
 				.getArtifactMaps(reader, reader.getBookmarks(), null, false,
 						new ArrayList<Long>(), new ArrayList<Double>(), 0.5,
 						true);
@@ -63,7 +63,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		for (Map<Integer, Double> map : userRecencies) {
 			userMaps.put(reader.getUsers().get(i++), map);
 		}
-		List<Map<Integer, Double>> resRecencies = ActCalculator
+		List<Map<Integer, Double>> resRecencies = BLLCalculator
 				.getArtifactMaps(reader, reader.getBookmarks(), null, true,
 						new ArrayList<Long>(), new ArrayList<Double>(), 0.0,
 						true);

@@ -64,7 +64,7 @@ public class ThreeLayersCalculator {
 		this.bookmarkBLL = bookmarkBLL;
 		
 		if (this.resBased) {
-			this.resMaps = ActCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true);		
+			this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true);		
 			//this.cfCalc = new BM25Calculator(this.reader, trainSize, true, true, false, 5);
 		}
 	}

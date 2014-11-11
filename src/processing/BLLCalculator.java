@@ -42,7 +42,7 @@ import common.Utilities;
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
-public class ActCalculator {
+public class BLLCalculator {
 
 	private final static int REC_LIMIT = 10;
 	
@@ -67,7 +67,7 @@ public class ActCalculator {
 	private BM25Calculator cfCalc;
 	private CooccurenceMatrix rMatrix;
 		
-	public ActCalculator(BookmarkReader reader, int trainSize, int dVal, int beta, boolean userBased, boolean resBased, CalculationType cType) {
+	public BLLCalculator(BookmarkReader reader, int trainSize, int dVal, int beta, boolean userBased, boolean resBased, CalculationType cType) {
 		this.reader = reader;
 		this.dVal = (double)dVal / 10.0;
 		this.beta = (double)beta / 10.0;
@@ -339,7 +339,7 @@ public class ActCalculator {
 		
 		Stopwatch timer = new Stopwatch();
 		timer.start();
-		ActCalculator calculator = new ActCalculator(reader, trainSize, dVal, beta, userBased, resBased, cType);
+		BLLCalculator calculator = new BLLCalculator(reader, trainSize, dVal, beta, userBased, resBased, cType);
 		timer.stop();
 		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
@@ -361,6 +361,11 @@ public class ActCalculator {
 		timeString += ("Average test time: " + testTime / (double)sampleSize) + "\n";
 		timeString += ("Total time: " + (trainingTime + testTime) + "\n");
 		return results;
+	}
+	
+	// default call
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize) {
+		return predictSample(filename, trainSize, sampleSize, true, true, -5, -5, CalculationType.NONE);
 	}
 	
 	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int dVal, int beta, CalculationType cType ) {

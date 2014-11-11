@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import processing.ActCalculator;
+import processing.BLLCalculator;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
@@ -96,7 +96,7 @@ public class Resource3LTCalculator {
 		this.userTopics = Utilities.getUniqueTopicMaps(this.trainList, false);//Utilities.getRelativeTopicMaps(this.trainList, false);
 		this.allUsers = Utilities.getAllEntities(this.trainList, false);
 		if (this.bll) {
-			this.bllValues = ActCalculator.getArtifactMaps(reader, this.trainList, this.testList, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
+			this.bllValues = BLLCalculator.getArtifactMaps(reader, this.trainList, this.testList, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
 		}
 		
 		/*if (this.features == Features.ENTITIES) {
