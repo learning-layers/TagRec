@@ -48,17 +48,21 @@ import engine.TagRecommenderEngine;
 import engine.ThreeLayersEngine;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
+import file.postprocessing.CatDescFiltering;
+import file.preprocessing.TensorProcessor;
 
 public class Pipeline {
 
 	// are set automatically in code
 	private static int TRAIN_SIZE;
 	private static int TEST_SIZE;
-	// set for postprocessing
+	// set for postprocessing (number of bookmarks - null is nothing)
 	private static Integer MIN_USER_BOOKMARKS = null;
 	private static Integer MAX_USER_BOOKMARKS = null;
 	private static Integer MIN_RESOURCE_BOOKMARKS = null;
 	private static Integer MAX_RESOURCE_BOOKMARKS = null;
+	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
+	private static Boolean DESCRIBER = null;
 
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -216,6 +220,8 @@ public class Pipeline {
 			startLdaCalculator(sampleDir, samplePath, 1000, sampleCount);
 		} else if (op.equals("lda_samples")) {
 			createLdaSamples(samplePath, sampleCount, 1000);
+		} else if (op.equals("tensor_samples")) {
+			writeTensorFiles(samplePath, true);
 		} else if (op.equals("core")) {
 			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 3, 3, 3, false);
 		} else if (op.equals("split_l1o")) {
@@ -313,9 +319,7 @@ public class Pipeline {
 		}
 	}
 
-	private static void startCfTagCalculator(String sampleDir,
-			String sampleName, int sampleCount, int neighbors,
-			int betaUpperBound) {
+	private static void startCfTagCalculator(String sampleDir, String sampleName, int sampleCount, int neighbors, int betaUpperBound) {
 		getTrainTestSize(sampleName);
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
 		BookmarkReader reader = null;
@@ -369,10 +373,21 @@ public class Pipeline {
 	}
 	
 	private static void createLdaSamples(String sampleName, int size, int topics) {
-		getTrainTestSize(sampleName + "_" + 1);
+		getTrainTestSize(sampleName);
 		for (int i = 1; i <= size; i++) {
 			MalletCalculator.createSample(sampleName, TEST_SIZE, (short)topics, false, true);			
 		}
+	}
+	
+	private static void writeTensorFiles(String sampleName, boolean tagRec) {
+		getTrainTestSize(sampleName);
+		CatDescFiltering filter = null;
+		if (DESCRIBER != null) {
+			filter = CatDescFiltering.instantiate(sampleName, TRAIN_SIZE);
+			filter.setDescriber(DESCRIBER.booleanValue());
+		}
+		
+		TensorProcessor.writeFiles(sampleName + "_" + 1, TRAIN_SIZE, TEST_SIZE, tagRec, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, filter);
 	}
 		
 	private static void start3LayersJavaCalculator(String sampleDir, String sampleName, String topicString, int size, int dUpperBound, int betaUpperBound, boolean resBased, boolean tagBLL, boolean topicBLL) {
@@ -410,16 +425,21 @@ public class Pipeline {
 	}
 	
 	private static void writeMetrics(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
-		String topicString = ((posfix == null || posfix == "0") ? "" : "_"
-				+ posfix);
+		CatDescFiltering filter = null;
+		if (DESCRIBER != null) {
+			//getTrainTestSize(sampleName + "_1");
+			filter = CatDescFiltering.instantiate(sampleName, TRAIN_SIZE);
+			filter.setDescriber(DESCRIBER.booleanValue());
+		}
+		
+		String topicString = ((posfix == null || posfix == "0") ? "" : "_" + posfix);
 		for (int i = 1; i <= k; i++) {
 			for (int j = 1; j <= sampleCount; j++) {
 				MetricsCalculator.calculateMetrics(sampleName
 						+ topicString + "_" + prefix, i, sampleDir + "/"
-						+ prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, true);
+						+ prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, filter, true);
 			}
-			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix
-					+ topicString + "_metrics", i, (double) sampleCount, true, i == k);
+			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double) sampleCount, true, i == k, DESCRIBER);
 		}
 		MetricsCalculator.resetMetrics();
 	}
@@ -515,8 +535,7 @@ public class Pipeline {
 		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, null, reader);
 	}
 	
-	private static void startCfResourceCalculator(String sampleDir, String sampleName, int size, int neighborSize, 
-			boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
+	private static void startCfResourceCalculator(String sampleDir, String sampleName, int size, int neighborSize, boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
 		BookmarkReader reader = null;
 		String suffix = "cf_";
 		if (!userBased) {
@@ -542,9 +561,9 @@ public class Pipeline {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix);
 		for (int i = 1; i <= k; i++) {
 			for (int j = 1; j <= sampleCount; j++) {
-				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, null, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, false);
+				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, null, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);
 			}
-			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double)sampleCount, false, i == k);
+			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double)sampleCount, false, i == k, null);
 		}
 	}
 }

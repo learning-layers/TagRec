@@ -36,6 +36,7 @@ import common.Utilities;
 
 import file.PredictionFileReader;
 import file.BookmarkReader;
+import file.postprocessing.CatDescFiltering;
 
 public class MetricsCalculator {
 
@@ -67,7 +68,7 @@ public class MetricsCalculator {
 		this.reader = reader;
 		this.wikiReader = wikiReader;
 		BufferedWriter bw = null;
-		// Enable if you need data for statistical tests
+		// TODO: Enable if you need data for statistical tests
 		/*if (k == 5 || k == 10) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
@@ -196,11 +197,15 @@ public class MetricsCalculator {
 	
 	// Statics ----------------------------------------------------------------------------------------------------------------------
 	
-	public static void calculateMetrics(String filename, int k, String outputFile, boolean endline, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, boolean calcTags) {
+	public static void calculateMetrics(String filename, int k, String outputFile, boolean endline, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering describer, boolean calcTags) {
 		PredictionFileReader reader = new PredictionFileReader();
-		reader.readFile(filename, k, wikiReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks);
+		reader.readFile(filename, k, wikiReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);	
+		String suffix = "";
+		if (describer != null) {
+			suffix += ("_" + (describer.getDescriber() ? "desc" : "cat"));
+		}
 		
-		MetricsCalculator calc = new MetricsCalculator(reader, "./data/metrics/" + outputFile + "_all", k, calcTags ? null : wikiReader);
+		MetricsCalculator calc = new MetricsCalculator(reader, "./data/metrics/" + outputFile + suffix + "_all", k, calcTags ? null : wikiReader);
 		recallSum += calc.getRecall();
 		precisionSum += calc.getPrecision();
 		fMeasureSum += calc.getFMeasure();
@@ -229,9 +234,14 @@ public class MetricsCalculator {
 		*/
 	}
 	
-	public static void writeAverageMetrics(String outputFile, int k, double size, boolean calcTags, boolean endLine) {
+	public static void writeAverageMetrics(String outputFile, int k, double size, boolean calcTags, boolean endLine, Boolean describer) {
 		try {
-			FileWriter writer = new FileWriter(new File("./data/metrics/" + outputFile + "_avg.txt"), true);
+			// TODO: add also suffix for minBookmarks post-processing
+			String suffix = "";
+			if (describer != null) {
+				suffix += ("_" + (describer.booleanValue() ? "desc" : "cat"));
+			}
+			FileWriter writer = new FileWriter(new File("./data/metrics/" + outputFile + suffix + "_avg.txt"), true);
 			BufferedWriter bw = new BufferedWriter(writer);
 			double recall = recallSum / size;
 			double precision = precisionSum / size;

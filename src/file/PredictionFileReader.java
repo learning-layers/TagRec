@@ -29,6 +29,7 @@ import java.util.List;
 
 import common.PredictionData;
 import common.Utilities;
+import file.postprocessing.CatDescFiltering;
 
 public class PredictionFileReader {
 
@@ -41,7 +42,7 @@ public class PredictionFileReader {
 		this.predictionCount = 0;
 	}
 	
-	public boolean readFile(String filename, int k, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks) {
+	public boolean readFile(String filename, int k, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering categorizer) {
 		try {
 			this.filename = filename;
 			FileReader reader = new FileReader(new File("./data/results/" + filename + ".txt"));
@@ -57,7 +58,12 @@ public class PredictionFileReader {
 					resID = Integer.parseInt(parts[1]);
 				}
 				if (!Utilities.isEntityEvaluated(wikiReader, userID, minBookmarks, maxBookmarks, false) || !Utilities.isEntityEvaluated(wikiReader, resID, minResBookmarks, maxResBookmarks, true)) {
-					continue; // skip this user if it shoudln't be evaluated
+					continue; // skip this user if it shoudln't be evaluated - # bookmarks case
+				}
+				if (categorizer != null) {
+					if (!categorizer.evaluate(userID)) {
+						continue; // skip this user if it shoudln't be evaluated - categorizer case
+					}
 				}
 				List<String> realData = Arrays.asList(lineParts[1].split(", "));
 				if (lineParts.length > 2) {

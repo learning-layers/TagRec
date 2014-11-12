@@ -40,7 +40,7 @@ import com.google.common.primitives.Ints;
 import common.IntMapComparator;
 import common.Bookmark;
 import common.Utilities;
-import file.filtering.CoreFiltering;
+import file.preprocessing.CoreFiltering;
 
 public class BookmarkSplitter {
 
