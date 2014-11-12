@@ -48,8 +48,8 @@ import engine.TagRecommenderEngine;
 import engine.ThreeLayersEngine;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
-import file.filtering.TensorProcessor;
 import file.postprocessing.CatDescFiltering;
+import file.preprocessing.TensorProcessor;
 
 public class Pipeline {
 
