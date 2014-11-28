@@ -27,6 +27,7 @@ import java.util.Map;
 public class PredictionData {
 	
 	private int userID;
+	private int k;
 	private List<String> realData;
 	private List<String> predictionData;
 	
@@ -35,6 +36,7 @@ public class PredictionData {
 	public PredictionData(int userID, List<String> realData, List<String> predictionData, int k) {
 		this.userID = userID;
 		this.realData = realData;
+		this.k = k;
 		if (k == 0) {
 			this.predictionData = predictionData;
 		} else if (predictionData.size() < k) {
@@ -58,16 +60,16 @@ public class PredictionData {
 		return 0.0;
 	}
 	
-	public double getPrecision() {
+	public double getPrecision(boolean recommTags) {
 		if (this.predictionData.size() != 0) {
-			return this.numFoundRelevantDocs / this.predictionData.size();
+			return this.numFoundRelevantDocs / (recommTags ? this.predictionData.size() : this.k);
 		}
 		return 0.0;
 	}
 	
-	public double getFMeasure() {
-		if (getPrecision() + getRecall() != 0) {
-			return 2.0 * ((getPrecision() * getRecall()) / (getPrecision() + getRecall()));
+	public double getFMeasure(boolean recommTags) {
+		if (getPrecision(recommTags) + getRecall() != 0) {
+			return 2.0 * ((getPrecision(recommTags) * getRecall()) / (getPrecision(recommTags) + getRecall()));
 		}
 		return 0.0;
 	}

@@ -109,13 +109,8 @@ public class PredictionFileWriter {
 		try {
 			FileWriter writer = new FileWriter(new File("./data/results/" + filename + ".txt"));
 			BufferedWriter bw = new BufferedWriter(writer);
-						
-			int correctResourceRecommendation = 0;
-			int noMatchOfResources = 0;
-			List<Integer> positions = new ArrayList<Integer>();
 			
 			int i=0;
-			String helpString = "";
 			for (Integer userID : reader.getUniqueUserListFromTestSet(trainSize)) {
 				//String resultString = (this.reader.getUsers().get(userID) + "-XYZ|");
 				String resultString = userID + "|";
@@ -123,7 +118,7 @@ public class PredictionFileWriter {
 				String givenResourcesOfUser = "";
 								
 				for (Integer resourceID : resourcesOfTestUsers.get(userID)) {
-					givenResourcesOfUser += /*resourceList.get(*/resourceID/*)*/ + ", ";
+					givenResourcesOfUser += resourceList.get(resourceID) + ", ";
 				}
 				
 				if (givenResourcesOfUser != "") {
@@ -139,29 +134,18 @@ public class PredictionFileWriter {
 
 				for (int recResourceID : recommendedResources) {
 				
-					if (cnt++ < 10) {
-						recString += /*resourceList.get(*/recResourceID/*)*/ + ", ";
-						if (resourcesOfTestUsers.get(userID).contains(recResourceID)) {
-							helpString += this.reader.getUsers().get(userID) + " " + resourceList.get(recResourceID) + ", ";
-						}
+					if (cnt++ < 20) {
+						recString += resourceList.get(recResourceID) + ", ";
 					} else {
 						break;
 					}
-					
-					/*if (resourcesOfUsers.get(userID).contains(recResourceID)) {
-						correctResourceRecommendation++;
-						positions.add(cnt);
-					}*/
 				}
 				
-				if (recString.equals("")) {
-					noMatchOfResources++;
-				} else {
+				if (!recString.equals("")) {
 					recString = recString.substring(0, recString.length() - 2);
 				}
 				
 				resultString += recString + "\n";
-				helpString += "\n";
 				bw.write(resultString);
 				i++;
 			}
@@ -169,17 +153,6 @@ public class PredictionFileWriter {
 			bw.flush();
 			bw.close();
 			writer.close();
-			
-			writer = new FileWriter(new File("./data/results/" + filename + "_positions" + (neighborSize != -1 ? ("_" + neighborSize) : "" ) + ".txt"));
-			bw = new BufferedWriter(writer);
-			
-			//String recPositions = positions.toString().substring(1, positions.toString().length()-1);
-			//bw.write(recPositions);
-			
-			bw.write(helpString);
-			
-			bw.flush();
-			bw.close();
 						
 			return true;
 		} catch (IOException e) {

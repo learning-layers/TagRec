@@ -68,6 +68,7 @@ public class MetricsCalculator {
 		this.reader = reader;
 		this.wikiReader = wikiReader;
 		BufferedWriter bw = null;
+		boolean recommTags = (reader == null);
 		// TODO: Enable if you need data for statistical tests
 		/*if (k == 5 || k == 10) {
 			try {
@@ -78,8 +79,8 @@ public class MetricsCalculator {
 			}
 		}*/
 		
-		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
-		double count = this.reader.getPredictionData().size();		 // all users
+		double count = this.reader.getPredictionCount(); // only user where there are recommendations
+		//double count = this.reader.getPredictionData().size();		 // all users
 		double recall = 0.0, precision = 0.0, mrr = 0.0, fMeasure = 0.0, map = 0.0;
 		double diversity = 0.0, serendipity = 0.0;
 		double nDCG = 0.0;
@@ -108,8 +109,8 @@ public class MetricsCalculator {
 			}
 			
 			recall += data.getRecall();
-			precision += data.getPrecision();
-			fMeasure += data.getFMeasure();
+			precision += data.getPrecision(recommTags);
+			fMeasure += data.getFMeasure(recommTags);
 			mrr += data.getMRR();
 			map += data.getMAP();
 			if (resourceTopics != null) {
@@ -123,8 +124,8 @@ public class MetricsCalculator {
 			if (bw != null) {
 				try {
 					bw.write(Double.toString(data.getRecall()).replace(',', '.') + ";");
-					bw.write(Double.toString(data.getPrecision()).replace(',', '.') + ";");
-					bw.write(Double.toString(data.getFMeasure()).replace(',', '.') + ";");
+					bw.write(Double.toString(data.getPrecision(recommTags)).replace(',', '.') + ";");
+					bw.write(Double.toString(data.getFMeasure(recommTags)).replace(',', '.') + ";");
 					bw.write(Double.toString(data.getMRR()).replace(',', '.') + ";");
 					bw.write(Double.toString(data.getMAP()).replace(',', '.') + ";");
 					bw.write(Double.toString(data.getNDCG()).replace(',', '.'));

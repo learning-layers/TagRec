@@ -138,9 +138,6 @@ public class BM25Calculator {
 				}
 			}
 			// ####################################################### TODO: check if necessary
-			for (Map.Entry<Integer, Double> entry : rankedResources.entrySet()) {
-				entry.setValue(entry.getValue() / denom);
-			}
 			// Neighbor-weighted CF
 			//for (Map.Entry<Integer, Double> entry : rankedResources.entrySet()) {
 			//	entry.setValue(Math.log10(1 + this.reader.getResourceCounts().get(entry.getKey())) * entry.getValue());
@@ -191,6 +188,7 @@ public class BM25Calculator {
 			// return the sorted resources
 			Map<Integer, Double> sortedRankedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(rankedResources));
 			sortedRankedResources.putAll(rankedResources);
+			int size = sortedRankedResources.size();
 			return sortedRankedResources;
 		} else {
 			return rankedResources;
@@ -320,6 +318,7 @@ public class BM25Calculator {
 		for (int i = 0; i < cfValues.size(); i++) {
 			Map<Integer, Double> modelVal = cfValues.get(i);
 			predictionValues.add(Ints.toArray(modelVal.keySet()));
+			System.out.println(modelVal.values().toString());
 		}		
 		String suffix = "_cf_";
 		if (!userBased) {
@@ -327,7 +326,7 @@ public class BM25Calculator {
 		} else if (!resBased) {
 			suffix = "_usercf_";
 		}
-		suffix += features + "_"; 
+		//suffix += features + "_"; 
 		if (predictTags) {
 			reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 			PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);

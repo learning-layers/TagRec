@@ -52,7 +52,12 @@ public class PredictionFileReader {
 			while ((line = br.readLine()) != null) {
 				String[] lineParts = line.split("\\|");
 				String[] parts = lineParts[0].split("-");
-				int userID = Integer.parseInt(parts[0]);
+				int userID = -1;
+				try {
+					userID = Integer.parseInt(parts[0]);
+				} catch (Exception e) {
+					// string id - do nothing
+				}
 				int resID = -1;
 				if (parts.length > 1) {
 					resID = Integer.parseInt(parts[1]);

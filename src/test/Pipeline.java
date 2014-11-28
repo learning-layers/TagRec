@@ -57,13 +57,15 @@ public class Pipeline {
 	private static int TRAIN_SIZE;
 	private static int TEST_SIZE;
 	// set for postprocessing (number of bookmarks - null is nothing)
-	private static Integer MIN_USER_BOOKMARKS = null;
-	private static Integer MAX_USER_BOOKMARKS = null;
-	private static Integer MIN_RESOURCE_BOOKMARKS = null;
-	private static Integer MAX_RESOURCE_BOOKMARKS = null;
+	private final static Integer MIN_USER_BOOKMARKS = null;
+	private final static Integer MAX_USER_BOOKMARKS = null;
+	private final static Integer MIN_RESOURCE_BOOKMARKS = null;
+	private final static Integer MAX_RESOURCE_BOOKMARKS = null;
 	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
-	private static Boolean DESCRIBER = null;
+	private final static Boolean DESCRIBER = null;
 
+	private final static String DATASET = "del"; // placeholder for the used dataset
+	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
 				"A framework to implement and evaluate algorithms for the recommendation\n" +
@@ -80,6 +82,15 @@ public class Pipeline {
 				"You should have received a copy of the GNU Affero General Public License\n" +
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
+		// Resource-Recommender testing
+		String dir = DATASET + "_core";
+		String path = dir + "/" + DATASET + "_sample";
+		//getStatistics(path);
+		//startCfResourceCalculator("del_core", "del_core/del_sample", 1, 20, true, false, false, false, Features.ENTITIES);
+		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
+		//startBaselineCalculatorForResources("del_core", "del_core/del_sample", 1, false);
+		
+		
 		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
 		//startContentBasedCalculator("bib_core", "bib_core/bib_sample");
 		
@@ -164,10 +175,6 @@ public class Pipeline {
 		}
 		System.out.println("CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 10));
 		*/
-		// Resource-Recommender testing
-		//startCfResourceCalculator("bib_core", "bib_core/bib_sample", 1, 20, true, false, false, false, Features.ENTITIES);
-		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
-		//startBaselineCalculatorForResources("bib_core", "bib_core/bib_sample", 1, false);
 		
 		// Commandline Arguments
 		if (args.length < 3) {
@@ -549,7 +556,7 @@ public class Pipeline {
 		if (bll) {
 			suffix += "bll_";
 		}
-		suffix += features + "_"; 
+		//suffix += features + "_"; 
 		for (int i = 1; i <= size; i++) {
 			getTrainTestSize(sampleName);
 			reader = BM25Calculator.predictResources(sampleName, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
