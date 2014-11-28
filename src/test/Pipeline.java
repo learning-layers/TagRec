@@ -88,7 +88,7 @@ public class Pipeline {
 		//getStatistics(path);
 		//startCfResourceCalculator("del_core", "del_core/del_sample", 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
-		//startBaselineCalculatorForResources("del_core", "del_core/del_sample", 1, false);
+		//startBaselineCalculatorForResources(dir, path, 1, false);
 		
 		
 		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
@@ -568,9 +568,9 @@ public class Pipeline {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix);
 		for (int i = 1; i <= k; i++) {
 			for (int j = 1; j <= sampleCount; j++) {
-				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, null, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);
+				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);
 			}
-			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double)sampleCount, false, i == k, null);
+			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "metrics", i, (double)sampleCount, false, i == k, null);
 		}
 	}
 }

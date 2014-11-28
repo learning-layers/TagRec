@@ -90,8 +90,8 @@ public class MetricsCalculator {
 		if (wikiReader != null) {
 			trainSize = this.wikiReader.getCountLimit();
 			// TODO: could be replaced by tags
-//			resourceTopics = Utilities.getUniqueTopicMaps(wikiReader.getBookmarks().subList(0, trainSize), true);
-			resourceTopics = Utilities.getRelativeTagMaps(wikiReader.getBookmarks().subList(0, trainSize), true);
+			resourceTopics = Utilities.getUniqueTopicMaps(wikiReader.getBookmarks().subList(0, trainSize), true);
+			//resourceTopics = Utilities.getRelativeTagMaps(wikiReader.getBookmarks().subList(0, trainSize), true);
 		}		
 		for (PredictionData data : this.reader.getPredictionData()) {
 			if (data == null) {
@@ -149,7 +149,8 @@ public class MetricsCalculator {
 		this.serendipity = serendipity / count;
 		this.nDCG = nDCG / count;
 		
-		if (bw != null) {
+		// TODO: enable in case statistics are needed
+		/*if (bw != null) {
 			try {
 				//bw.write("\n");
 				bw.flush();
@@ -157,7 +158,7 @@ public class MetricsCalculator {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 	}
 	
 	public double getRecall() {
