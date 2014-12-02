@@ -90,7 +90,7 @@ public class MetricsCalculator {
 		if (wikiReader != null) {
 			trainSize = this.wikiReader.getCountLimit();
 			// TODO: could be replaced by tags
-			resourceTopics = Utilities.getUniqueTopicMaps(wikiReader.getBookmarks().subList(0, trainSize), true);
+			resourceTopics = Utilities.getUniqueTopicMaps(wikiReader.getBookmarks(), true);
 			//resourceTopics = Utilities.getRelativeTagMaps(wikiReader.getBookmarks().subList(0, trainSize), true);
 		}		
 		for (PredictionData data : this.reader.getPredictionData()) {

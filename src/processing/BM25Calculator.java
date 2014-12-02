@@ -318,7 +318,8 @@ public class BM25Calculator {
 		for (int i = 0; i < cfValues.size(); i++) {
 			Map<Integer, Double> modelVal = cfValues.get(i);
 			predictionValues.add(Ints.toArray(modelVal.keySet()));
-			System.out.println(modelVal.values().toString());
+			// just for debugging
+			//System.out.println(modelVal.values().toString());
 		}		
 		String suffix = "_cf_";
 		if (!userBased) {

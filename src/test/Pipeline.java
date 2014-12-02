@@ -86,8 +86,8 @@ public class Pipeline {
 		String dir = DATASET + "_core";
 		String path = dir + "/" + DATASET + "_sample";
 		//getStatistics(path);
-		//startCfResourceCalculator("del_core", "del_core/del_sample", 1, 20, true, false, false, false, Features.ENTITIES);
-		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
+		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
+		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
 		
 		
