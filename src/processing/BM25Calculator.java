@@ -99,7 +99,7 @@ public class BM25Calculator {
 		}
 	}
 		
-	public Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll) {
+	public Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll, boolean filterOwnEntities) {
 		List<Integer> userResources = null;
 		Map<Integer, Double> userBllResources = null;
 		if (this.resBased) {
@@ -127,7 +127,7 @@ public class BM25Calculator {
 				if (bm25 != 0.0) {
 					List<Integer> resources = Bookmark.getResourcesFromUser(this.trainList, neighbor.getKey());				
 					for (Integer resID : resources) {
-						if (!userResources.contains(resID)) {
+						if (!filterOwnEntities || !userResources.contains(resID)) {
 							double bllVal = (bll ? userBllResources.get(resID) : 1.0);
 							Double val = rankedResources.get(resID);
 							double entryVal = bllVal * bm25;
@@ -284,7 +284,7 @@ public class BM25Calculator {
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
 		for (Integer userID : reader.getUniqueUserListFromTestSet(trainSize)) {
 			Map<Integer, Double> map = null;
-			map = calculator.getRankedResourcesList(userID, true, allResources, bll); // TODO
+			map = calculator.getRankedResourcesList(userID, true, allResources, bll, true); // TODO
 			results.add(map);
 		}
 	

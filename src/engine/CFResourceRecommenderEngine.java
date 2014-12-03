@@ -31,7 +31,7 @@ import java.util.Map;
 import common.Features;
 import common.Similarity;
 
-public class CFResourceRecommenderEngine implements EngineInterface {
+public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 
 	private BookmarkReader reader = null;
 	private BM25Calculator calculator = null;
@@ -55,9 +55,12 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		resetStructure(reader, calculator);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
+		}
+		if (filterOwnEntities == null) {
+			filterOwnEntities = true;
 		}
 		Map<String, Double> resourceMap = new LinkedHashMap<>();
 		if (this.reader == null || this.calculator == null) {
@@ -68,7 +71,7 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 			userID = this.reader.getUsers().indexOf(user);
 		}
 
-		Map<Integer, Double> resourceIDs = this.calculator.getRankedResourcesList(userID, true, false, false);
+		Map<Integer, Double> resourceIDs = this.calculator.getRankedResourcesList(userID, true, false, false, filterOwnEntities.booleanValue());
 		for (Map.Entry<Integer, Double> tEntry : resourceIDs.entrySet()) {
 			if (resourceMap.size() < count) {
 				resourceMap.put(this.reader.getResources().get(tEntry.getKey()), tEntry.getValue());

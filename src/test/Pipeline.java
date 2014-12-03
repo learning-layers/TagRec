@@ -44,6 +44,7 @@ import engine.BaseLevelLearningEngine;
 import engine.CFResourceRecommenderEngine;
 import engine.EngineInterface;
 import engine.LanguageModelEngine;
+import engine.ResourceEngineInterface;
 import engine.TagRecommenderEngine;
 import engine.ThreeLayersEngine;
 import file.BookmarkReader;
@@ -167,14 +168,16 @@ public class Pipeline {
 		}
 		System.out.println("TagRec with Topics: " + tagrecEngine.getEntitiesWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
 		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("41", "545", null, 10));
-		EngineInterface resrecEngine = new CFResourceRecommenderEngine();
+		ResourceEngineInterface resrecEngine = new CFResourceRecommenderEngine();
 		try {
-			resrecEngine.loadFile("hugo2");
+			resrecEngine.loadFile(path);
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
-		System.out.println("CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 10));
+		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true));
+		System.out.println("CF -Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false));
 		*/
+		
 		
 		// Commandline Arguments
 		if (args.length < 3) {

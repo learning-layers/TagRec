@@ -65,8 +65,7 @@ public class EngineUtils {
 			countSum += reader.getResourceCounts().get(i);
 		}
 
-		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(
-				new IntMapComparator(countMap));
+		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(new IntMapComparator(countMap));
 		sortedCountMap.putAll(countMap);
 
 		for (Map.Entry<Integer, Integer> entry : sortedCountMap.entrySet()) {
