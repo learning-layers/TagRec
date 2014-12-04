@@ -64,6 +64,7 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 		}
 		Map<String, Double> resourceMap = new LinkedHashMap<>();
 		if (this.reader == null || this.calculator == null) {
+			System.out.println("No data has been loaded");
 			return resourceMap;
 		}
 		int userID = -1;

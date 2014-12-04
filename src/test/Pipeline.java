@@ -168,7 +168,7 @@ public class Pipeline {
 		}
 		System.out.println("TagRec with Topics: " + tagrecEngine.getEntitiesWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
 		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("41", "545", null, 10));
-		ResourceEngineInterface resrecEngine = new CFResourceRecommenderEngine();
+		final ResourceEngineInterface resrecEngine = new CFResourceRecommenderEngine();
 		try {
 			resrecEngine.loadFile(path);
 		} catch (Exception e2) {
@@ -177,7 +177,6 @@ public class Pipeline {
 		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true));
 		System.out.println("CF -Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false));
 		*/
-		
 		
 		// Commandline Arguments
 		if (args.length < 3) {

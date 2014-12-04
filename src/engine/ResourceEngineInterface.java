@@ -25,7 +25,7 @@ import java.util.Map;
 
 public interface ResourceEngineInterface {
 	
-	public void loadFile(String filename) throws Exception;
+	void loadFile(String filename) throws Exception;
 	
-	public Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities);
+	Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities);
 }
