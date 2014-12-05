@@ -64,8 +64,10 @@ public class Pipeline {
 	private final static Integer MAX_RESOURCE_BOOKMARKS = null;
 	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
 	private final static Boolean DESCRIBER = null;
-
-	private final static String DATASET = "del"; // placeholder for the used dataset
+	// placeholder for the topic posfix
+	private final static String TOPIC_NAME = null;
+	// placeholder for the used dataset
+	private final static String DATASET = "lastfm";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -87,6 +89,7 @@ public class Pipeline {
 		String dir = DATASET + "_core";
 		String path = dir + "/" + DATASET + "_sample";
 		//getStatistics(path);
+		//createLdaSamples(path, 1, 100, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
@@ -228,7 +231,7 @@ public class Pipeline {
 		} else if (op.equals("lda")) {
 			startLdaCalculator(sampleDir, samplePath, 1000, sampleCount);
 		} else if (op.equals("lda_samples")) {
-			createLdaSamples(samplePath, sampleCount, 1000);
+			createLdaSamples(samplePath, sampleCount, 1000, true);
 		} else if (op.equals("tensor_samples")) {
 			writeTensorFiles(samplePath, true);
 		} else if (op.equals("core")) {
@@ -381,10 +384,10 @@ public class Pipeline {
 		writeMetrics(sampleDir, sampleName, "lda_" + topics, sampleCount, 10, null, reader);
 	}
 	
-	private static void createLdaSamples(String sampleName, int size, int topics) {
+	private static void createLdaSamples(String sampleName, int size, int topics, boolean tagrec) {
 		getTrainTestSize(sampleName);
 		for (int i = 1; i <= size; i++) {
-			MalletCalculator.createSample(sampleName, TEST_SIZE, (short)topics, false, true);			
+			MalletCalculator.createSample(sampleName, TEST_SIZE, (short)topics, false, true, tagrec);			
 		}
 	}
 	
@@ -495,30 +498,38 @@ public class Pipeline {
 	// Item Recommendation ------------------------------------------------------------------------------------------------------------------------------------	
 	private static void startBaselineCalculatorForResources(String sampleDir, String sampleName, int size, boolean random) {
 		BookmarkReader reader = null;
+		String posfix = "";
+		if (TOPIC_NAME != null) {
+			posfix = "_" + TOPIC_NAME;
+		}
 		for (int i = 1; i <= size; i++) {
-			getTrainTestSize(sampleName);
+			getTrainTestSize(sampleName + posfix);
 			if (random) {
-				reader = BaselineCalculator.predictRandomResources(sampleName, TRAIN_SIZE);
+				reader = BaselineCalculator.predictRandomResources(sampleName + posfix, TRAIN_SIZE);
 			} else {
-				reader = BaselineCalculator.predictPopularResources(sampleName, TRAIN_SIZE);
+				reader = BaselineCalculator.predictPopularResources(sampleName + posfix, TRAIN_SIZE);
 			}
 		}
 		if (random) {
-			writeMetricsForResources(sampleDir, sampleName, "rand", size, 20, null, reader);
+			writeMetricsForResources(sampleDir, sampleName, "rand", size, 20, TOPIC_NAME, reader);
 		} else {
-			writeMetricsForResources(sampleDir, sampleName, "pop", size, 20, null, reader);
+			writeMetricsForResources(sampleDir, sampleName, "pop", size, 20, TOPIC_NAME, reader);
 		}
 	}
 	
 	private static void startResourceCIRTTCalculator(String sampleDir, String sampleName, String topicString, int size, int neighborSize, Features features, 
 			boolean userSim, boolean bll, boolean novelty, boolean calculateOnTag) {
 		BookmarkReader reader = null;
+		String posfix = "";
+		if (TOPIC_NAME != null) {
+			posfix = "_" + TOPIC_NAME;
+		}
 		String suffix = "r3l_" + features;
 		if (bll) {
 			suffix += "_bll";
 		}
 		for (int i = 1; i <= size; i++) {
-			getTrainTestSize(sampleName);
+			getTrainTestSize(sampleName + posfix);
 			reader = Resource3LTCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, 
 					neighborSize, features, userSim, bll, novelty, calculateOnTag);
 		}
@@ -527,25 +538,37 @@ public class Pipeline {
 	
 	private static void startZhengResourceCalculator(String sampleDir, String sampleName, int size) {
 		BookmarkReader reader = null;
-		for (int i = 1; i <= size; i++) {
-			getTrainTestSize(sampleName);
-			reader = ZhengCalculator.predictSample(sampleName, TRAIN_SIZE);
+		String posfix = "";
+		if (TOPIC_NAME != null) {
+			posfix = "_" + TOPIC_NAME;
 		}
-		writeMetricsForResources(sampleDir, sampleName, "zheng_tagtime", size, 20, null, reader);
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName + posfix);
+			reader = ZhengCalculator.predictSample(sampleName + posfix, TRAIN_SIZE);
+		}
+		writeMetricsForResources(sampleDir, sampleName, "zheng_tagtime", size, 20, TOPIC_NAME, reader);
 
 	}
 	
 	private static void startHuangResourceCalculator(String sampleDir, String sampleName, int size) {
 		BookmarkReader reader = null;
-		for (int i = 1; i <= size; i++) {
-			getTrainTestSize(sampleName);
-			reader = HuangCalculator.predictSample(sampleName, TRAIN_SIZE);
+		String posfix = "";
+		if (TOPIC_NAME != null) {
+			posfix = "_" + TOPIC_NAME;
 		}
-		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, null, reader);
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName + posfix);
+			reader = HuangCalculator.predictSample(sampleName + posfix, TRAIN_SIZE);
+		}
+		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, TOPIC_NAME, reader);
 	}
 	
 	private static void startCfResourceCalculator(String sampleDir, String sampleName, int size, int neighborSize, boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
 		BookmarkReader reader = null;
+		String posfix = "";
+		if (TOPIC_NAME != null) {
+			posfix = "_" + TOPIC_NAME;
+		}
 		String suffix = "cf_";
 		if (!userBased) {
 			suffix = "rescf_";
@@ -560,14 +583,14 @@ public class Pipeline {
 		}
 		//suffix += features + "_"; 
 		for (int i = 1; i <= size; i++) {
-			getTrainTestSize(sampleName);
-			reader = BM25Calculator.predictResources(sampleName, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
+			getTrainTestSize(sampleName + posfix);
+			reader = BM25Calculator.predictResources(sampleName + posfix, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
 		}
-		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
+		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, TOPIC_NAME, reader);
 	}
 	
 	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
-		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix);
+		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix + "_");
 		for (int i = 1; i <= k; i++) {
 			for (int j = 1; j <= sampleCount; j++) {
 				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);

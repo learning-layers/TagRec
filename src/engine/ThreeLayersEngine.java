@@ -47,7 +47,7 @@ public class ThreeLayersEngine implements EngineInterface {
 		reader.readFile(filename);
 
 		Collections.sort(reader.getBookmarks());
-		System.out.println("read in and sorted file");
+		//System.out.println("read in and sorted file");
 
 		ThreeLayersCalculator calculator = new ThreeLayersCalculator(reader, reader
 				.getBookmarks().size(), 5, 5, true, true, false);

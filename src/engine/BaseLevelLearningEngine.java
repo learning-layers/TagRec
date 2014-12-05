@@ -54,7 +54,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
-		System.out.println("read in and sorted file");
+		//System.out.println("read in and sorted file");
 		List<Map<Integer, Double>> userRecencies = BLLCalculator
 				.getArtifactMaps(reader, reader.getBookmarks(), null, false,
 						new ArrayList<Long>(), new ArrayList<Double>(), 0.5,

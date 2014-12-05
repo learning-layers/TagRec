@@ -48,7 +48,7 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 		reader.readFile(filename);
 
 		Collections.sort(reader.getBookmarks());
-		System.out.println("read in and sorted file");
+		//System.out.println("read in and sorted file");
 
 		BM25Calculator calculator = new BM25Calculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		

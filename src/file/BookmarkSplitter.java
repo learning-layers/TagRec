@@ -251,11 +251,11 @@ public class BookmarkSplitter {
 				}
 				bw.write("\";\"");
 				
-				List<Integer> userCats = (catPredictions == null ? 
-						bookmark.getCategories() : Ints.asList(catPredictions.get(userCount++)));
+				List<Integer> userCats = (catPredictions == null ? bookmark.getCategories() : Ints.asList(catPredictions.get(userCount++)));
 				i = 0;
 				for (int cat : userCats) {
-					bw.write(URLEncoder.encode((catPredictions == null ? reader.getCategories().get(cat).replace("\"", "") : reader.getTags().get(cat)).replace("\"", ""), "UTF-8"));
+					//bw.write(URLEncoder.encode((catPredictions == null ? reader.getCategories().get(cat).replace("\"", "") : reader.getTags().get(cat)).replace("\"", ""), "UTF-8"));
+					bw.write("t" + cat);
 					if (++i < userCats.size()) {
 						bw.write(',');
 					}					

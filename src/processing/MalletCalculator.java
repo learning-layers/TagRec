@@ -68,7 +68,7 @@ public class MalletCalculator {
 	private final static int NUM_ITERATIONS = 2000;
 	private final static double ALPHA = 0.01;
 	private final static double BETA = 0.01;
-	private final static double TOPIC_THRESHOLD = 0.001;
+	private static double TOPIC_THRESHOLD = 0.001;
 	
 	private int numTopics;
 	private List<Map<Integer, Integer>> maps;
@@ -387,11 +387,16 @@ public class MalletCalculator {
 		Utilities.writeStringToFile("./data/metrics/" + filename + "_lda_" + numTopics + "_TIME.txt", timeString);
 	}
 	
-	public static void createSample(String filename, int sampleSize, short numTopics, boolean userBased, boolean resBased) {
+	public static void createSample(String filename, int sampleSize, short numTopics, boolean userBased, boolean resBased, boolean tagRec) {
 		String outputFile = new String(filename) + "_lda_" + numTopics;
 
 		//filename += "_res";
 		//outputFile += "_res";
+		if (tagRec) {
+			TOPIC_THRESHOLD = 0.001;
+		} else {
+			TOPIC_THRESHOLD = 0.01;
+		}
 
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
