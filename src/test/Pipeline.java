@@ -22,6 +22,7 @@ package test;
 
 import itemrecommendations.HuangCalculator;
 import itemrecommendations.Resource3LTCalculator;
+import itemrecommendations.SustainApproach;
 import itemrecommendations.ZhengCalculator;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class Pipeline {
 	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
 	private final static Boolean DESCRIBER = null;
 
-	private final static String DATASET = "del"; // placeholder for the used dataset
+	private final static String DATASET = "delicious"; // placeholder for the used dataset
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -83,11 +84,14 @@ public class Pipeline {
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
 		// Resource-Recommender testing
-		String dir = DATASET + "_core";
-		String path = dir + "/" + DATASET + "_sample";
+		String dir = DATASET;
+		//String path = dir + "/" +"hetrec_sample";
+		String path = dir + "/" +"hetrec_sample_1_lda_24_res";
 		//getStatistics(path);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
+		startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
+		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
 		
 		
@@ -491,6 +495,7 @@ public class Pipeline {
 	}
 	
 	// Item Recommendation ------------------------------------------------------------------------------------------------------------------------------------	
+	// MP or Random Algorithm
 	private static void startBaselineCalculatorForResources(String sampleDir, String sampleName, int size, boolean random) {
 		BookmarkReader reader = null;
 		for (int i = 1; i <= size; i++) {
@@ -533,6 +538,7 @@ public class Pipeline {
 
 	}
 	
+	
 	private static void startHuangResourceCalculator(String sampleDir, String sampleName, int size) {
 		BookmarkReader reader = null;
 		for (int i = 1; i <= size; i++) {
@@ -563,6 +569,16 @@ public class Pipeline {
 		}
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
 	}
+	
+	private static void startSustainApproach(String sampleDir, String sampleName, int size, r, tau, beta, ) {
+		BookmarkReader reader = null;
+		for (int i = 1; i <= size; i++) {
+			getTrainTestSize(sampleName);
+			reader = SustainApproach.predictResources(sampleName, TRAIN_SIZE);
+		}
+		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, null, reader);
+	}
+	
 	
 	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix);
