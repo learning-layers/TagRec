@@ -67,7 +67,7 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private final static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "lastfm";
+	private final static String DATASET = "bib";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -89,6 +89,7 @@ public class Pipeline {
 		String dir = DATASET + "_core";
 		String path = dir + "/" + DATASET + "_sample";
 		//getStatistics(path);
+		//writeTensorFiles(path, false);
 		//createLdaSamples(path, 1, 100, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
@@ -177,8 +178,8 @@ public class Pipeline {
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
-		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true));
-		System.out.println("CF -Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false));
+		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, true));
+		System.out.println("CF -Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, false));
 		*/
 		
 		// Commandline Arguments
@@ -234,6 +235,8 @@ public class Pipeline {
 			createLdaSamples(samplePath, sampleCount, 1000, true);
 		} else if (op.equals("tensor_samples")) {
 			writeTensorFiles(samplePath, true);
+		} else if (op.equals("mymedialite_samples")) {
+			writeTensorFiles(samplePath, false);
 		} else if (op.equals("core")) {
 			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 3, 3, 3, false);
 		} else if (op.equals("split_l1o")) {
@@ -399,7 +402,7 @@ public class Pipeline {
 			filter.setDescriber(DESCRIBER.booleanValue());
 		}
 		
-		TensorProcessor.writeFiles(sampleName + "_" + 1, TRAIN_SIZE, TEST_SIZE, tagRec, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, filter);
+		TensorProcessor.writeFiles(sampleName, TRAIN_SIZE, TEST_SIZE, tagRec, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, filter);
 	}
 		
 	private static void start3LayersJavaCalculator(String sampleDir, String sampleName, String topicString, int size, int dUpperBound, int betaUpperBound, boolean resBased, boolean tagBLL, boolean topicBLL) {

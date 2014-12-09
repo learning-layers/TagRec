@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import common.Bookmark;
 import common.Features;
 import common.Similarity;
 
@@ -62,6 +63,7 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 		if (filterOwnEntities == null) {
 			filterOwnEntities = true;
 		}
+		
 		Map<String, Double> resourceMap = new LinkedHashMap<>();
 		if (this.reader == null || this.calculator == null) {
 			System.out.println("No data has been loaded");
@@ -70,6 +72,11 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 		int userID = -1;
 		if (user != null) {
 			userID = this.reader.getUsers().indexOf(user);
+		}
+		// used to filter own resources if necessary
+		List<Integer> userResources = null;
+		if (filterOwnEntities.booleanValue()) {
+			userResources = Bookmark.getResourcesFromUser(this.reader.getBookmarks(), userID);
 		}
 
 		Map<Integer, Double> resourceIDs = this.calculator.getRankedResourcesList(userID, true, false, false, filterOwnEntities.booleanValue());
@@ -82,7 +89,8 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 		if (resourceMap.size() < count) {
 			for (Map.Entry<String, Double> t : this.topResources.entrySet()) {
 				if (resourceMap.size() < count) {
-					if (!resourceMap.containsKey(t.getKey())) {
+					// add MP resources if they are not already in the recommeded list or already known by this user
+					if (!resourceMap.containsKey(t.getKey()) && (userResources == null || userResources.contains(t.getKey()))) {
 						resourceMap.put(t.getKey(), t.getValue());
 					}
 				} else {

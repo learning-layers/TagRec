@@ -157,6 +157,9 @@ public class Bookmark implements Comparable<Bookmark> {
 	}
 	
 	public static List<Integer> getResourcesFromUser(List<Bookmark> lines, int userID) {
+		if (userID == -1) {
+			return null;
+		}
 		Set<Integer> resourceList = new HashSet<Integer>();		
 		for (Bookmark data : lines) {		
 			if (data.userID == userID) {
