@@ -27,23 +27,24 @@ public class TensorProcessor {
 		reader.readFile(filename);	
 		List<Bookmark> trainList = reader.getBookmarks().subList(0, trainSize);
 		List<Bookmark> testList = reader.getBookmarks().subList(trainSize, trainSize + testSize);
-		String name = (tagRec ? "tensor" : "mymedialite");
+		String name = "";//(tagRec ? "_tensor" : "_mymedialite");
+		String outputFilename = filename.split("_")[0];
 		// train file
-		createFile(trainList, "./data/csv/" + filename + "_train_" + name + ".txt", null, tagRec, minBookmarks, maxBookmarks, null);
+		createFile(trainList, "./data/csv/" + outputFilename + "_train" + name + ".txt", reader, false, tagRec, minBookmarks, maxBookmarks, null);
 		// test file
 		String suffix = "";
 		if (filter != null) {
 			suffix += ("_" + (filter.getDescriber() ? "desc" : "cat"));
 		}
-		createFile(testList, "./data/csv/" + filename + suffix + "_test_" + name + ".txt", reader, tagRec, minBookmarks, maxBookmarks, filter);
+		createFile(testList, "./data/csv/" + outputFilename + suffix + "_test" + name + ".txt", reader, true, tagRec, minBookmarks, maxBookmarks, filter);
 	}
 	
-	private static void createFile(List<Bookmark> list, String filename, BookmarkReader reader, boolean tagRec, Integer minBookmarks, Integer maxBookmarks, CatDescFiltering filter) {
+	private static void createFile(List<Bookmark> list, String filename, BookmarkReader reader, boolean testset, boolean tagRec, Integer minBookmarks, Integer maxBookmarks, CatDescFiltering filter) {
 		try {
 			File tempFile = new File(filename);
 			BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
 			for (Bookmark data : list) {
-				if (reader != null) { // means test-set
+				if (testset && reader != null) { // means test-set
 					// TODO: check for resource
 					if (!Utilities.isEntityEvaluated(reader, data.getUserID(), minBookmarks, maxBookmarks, false)) {
 						continue; // skip this user if it shoudln't be evaluated
@@ -61,7 +62,7 @@ public class TensorProcessor {
 							bw.write(data.getUserID() + "\t" + data.getWikiID() + "\t" + tag + "\n");
 						}
 					} else {
-						bw.write(data.getUserID() + "\t" + data.getWikiID() + "\n");
+						bw.write(data.getUserID() + "\t" + (reader == null ? data.getWikiID() : reader.getResources().get(data.getWikiID())) + "\n");
 					}
 					entries.add(data.getUserID() + "_" + data.getWikiID());
 				}

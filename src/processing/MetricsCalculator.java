@@ -79,8 +79,8 @@ public class MetricsCalculator {
 			}
 		}*/
 		
-		double count = this.reader.getPredictionCount(); // only user where there are recommendations
-		//double count = this.reader.getPredictionData().size();		 // all users
+		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
+		double count = this.reader.getPredictionData().size();		 // all users
 		double recall = 0.0, precision = 0.0, mrr = 0.0, fMeasure = 0.0, map = 0.0;
 		double diversity = 0.0, serendipity = 0.0;
 		double nDCG = 0.0;
@@ -199,15 +199,19 @@ public class MetricsCalculator {
 	
 	// Statics ----------------------------------------------------------------------------------------------------------------------
 	
-	public static void calculateMetrics(String filename, int k, String outputFile, boolean endline, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering describer, boolean calcTags) {
+	public static void calculateMetrics(String filename, int k, String outputFile, boolean endline, BookmarkReader bookmarkReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering describer, boolean calcTags, Integer trainSize) {
 		PredictionFileReader reader = new PredictionFileReader();
-		reader.readFile(filename, k, wikiReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);	
+		if (trainSize == null) {
+			reader.readFile(filename, k, bookmarkReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);
+		} else { // means my MyMediaLite files
+			reader.readMyMediaLiteFile(filename, k, trainSize.intValue(), bookmarkReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);
+		}
 		String suffix = "";
 		if (describer != null) {
 			suffix += ("_" + (describer.getDescriber() ? "desc" : "cat"));
 		}
 		
-		MetricsCalculator calc = new MetricsCalculator(reader, "./data/metrics/" + outputFile + suffix + "_all", k, calcTags ? null : wikiReader);
+		MetricsCalculator calc = new MetricsCalculator(reader, "./data/metrics/" + outputFile + suffix + "_all", k, calcTags ? null : bookmarkReader);
 		recallSum += calc.getRecall();
 		precisionSum += calc.getPrecision();
 		fMeasureSum += calc.getFMeasure();

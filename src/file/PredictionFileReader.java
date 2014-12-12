@@ -26,6 +26,10 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.base.Functions;
+import com.google.common.collect.Lists;
 
 import common.PredictionData;
 import common.Utilities;
@@ -74,6 +78,76 @@ public class PredictionFileReader {
 				if (lineParts.length > 2) {
 					List<String> predictionData = Arrays.asList(lineParts[2].split(", "));
 					if (predictionData.size() > 0) {
+						PredictionData data = new PredictionData(userID, realData, predictionData, k);
+						this.predictions.add(data);
+						this.predictionCount++;
+					} else {
+						//System.out.println("Line does not have predictions (inner)");
+						this.predictions.add(null);
+					}
+				} else {
+					//System.out.println("Line does not have predictions (outer)");
+					this.predictions.add(null);
+				}
+			}
+			if (k == 1) {
+				System.out.println("Number of users to predict: " + this.predictions.size());
+			}
+			br.close();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public boolean readMyMediaLiteFile(String filename, int k, int trainSize, BookmarkReader bookmarkReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering categorizer) {
+		try {
+			this.filename = filename;
+			List<Integer> testUsers = bookmarkReader.getUniqueUserListFromTestSet(trainSize);
+			Map<Integer, List<Integer>> resourcesOfTestUsers = bookmarkReader.getResourcesOfTestUsers(trainSize);
+			FileReader reader = new FileReader(new File("./data/results/" + filename + ".txt"));
+			BufferedReader br = new BufferedReader(reader);
+			String line = null;
+			
+			while ((line = br.readLine()) != null) {
+				String[] lineParts = line.split("\\t");
+				if (lineParts.length == 0) {
+					continue; // skip invalid line
+				}
+				
+				int userID = -1;
+				try {
+					userID = Integer.parseInt(lineParts[0]);
+				} catch (Exception e) {
+					continue; // skip user if userid is invalid
+				}
+				
+				if (!testUsers.contains(userID)) {
+					continue; // skip user if it is not part of the test-set
+				}
+				if (!Utilities.isEntityEvaluated(bookmarkReader, userID, minBookmarks, maxBookmarks, false)) {
+					continue; // skip this user if it shoudln't be evaluated - # bookmarks case
+				}
+				if (categorizer != null) {
+					if (!categorizer.evaluate(userID)) {
+						continue; // skip this user if it shoudln't be evaluated - categorizer case
+					}
+				}
+				List<Integer> testResources = resourcesOfTestUsers.get(userID);
+				List<String> realData = new ArrayList<String>();
+				for (int testRes : testResources) {
+					realData.add(bookmarkReader.getResources().get(testRes));
+				}
+				
+				if (lineParts.length > 1) {
+					String recommendationString = lineParts[1].replace("[", "").replace("]", "");
+					List<String> predictionStringData = Arrays.asList(recommendationString.split(","));
+					if (predictionStringData.size() > 0) {
+						List<String> predictionData = new ArrayList<String>();
+						for (String predictionString : predictionStringData) {
+							predictionData.add(predictionString.substring(0, predictionString.indexOf(":")));
+						}
 						PredictionData data = new PredictionData(userID, realData, predictionData, k);
 						this.predictions.add(data);
 						this.predictionCount++;

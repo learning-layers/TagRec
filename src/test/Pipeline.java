@@ -67,7 +67,7 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private final static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "bib";
+	private final static String DATASET = "del";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -88,8 +88,9 @@ public class Pipeline {
 		// Resource-Recommender testing
 		String dir = DATASET + "_core";
 		String path = dir + "/" + DATASET + "_sample";
-		//getStatistics(path);
+		getStatistics(path);
 		//writeTensorFiles(path, false);
+		evaluate(dir, path, "usercf_mml", null, false, true);
 		//createLdaSamples(path, 1, 100, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
@@ -442,7 +443,6 @@ public class Pipeline {
 	private static void writeMetrics(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
 		CatDescFiltering filter = null;
 		if (DESCRIBER != null) {
-			//getTrainTestSize(sampleName + "_1");
 			filter = CatDescFiltering.instantiate(sampleName, TRAIN_SIZE);
 			filter.setDescriber(DESCRIBER.booleanValue());
 		}
@@ -452,7 +452,7 @@ public class Pipeline {
 			for (int j = 1; j <= sampleCount; j++) {
 				MetricsCalculator.calculateMetrics(sampleName
 						+ topicString + "_" + prefix, i, sampleDir + "/"
-						+ prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, filter, true);
+						+ prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, filter, true, null);
 			}
 			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double) sampleCount, true, i == k, DESCRIBER);
 		}
@@ -498,6 +498,18 @@ public class Pipeline {
 		System.out.println("Test-size: " + TEST_SIZE);
 	}
 	
+	// passing the trainSize means that MyMediaLite files will be evaluated
+	private static void evaluate(String sampleDir, String sampleName, String prefix, String postfix, boolean calcTags, boolean mymedialite) {
+		getTrainTestSize(sampleName);
+		BookmarkReader reader = new BookmarkReader(TRAIN_SIZE, false);
+		reader.readFile(sampleName);
+		if (calcTags) {
+			writeMetrics(sampleDir, sampleName, prefix, 1, 10, postfix, reader);
+		} else {
+			writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, postfix, reader, mymedialite ? TRAIN_SIZE : null);
+		}
+	}
+	
 	// Item Recommendation ------------------------------------------------------------------------------------------------------------------------------------	
 	private static void startBaselineCalculatorForResources(String sampleDir, String sampleName, int size, boolean random) {
 		BookmarkReader reader = null;
@@ -514,9 +526,9 @@ public class Pipeline {
 			}
 		}
 		if (random) {
-			writeMetricsForResources(sampleDir, sampleName, "rand", size, 20, TOPIC_NAME, reader);
+			writeMetricsForResources(sampleDir, sampleName, "rand", size, 20, TOPIC_NAME, reader, null);
 		} else {
-			writeMetricsForResources(sampleDir, sampleName, "pop", size, 20, TOPIC_NAME, reader);
+			writeMetricsForResources(sampleDir, sampleName, "pop", size, 20, TOPIC_NAME, reader, null);
 		}
 	}
 	
@@ -536,7 +548,7 @@ public class Pipeline {
 			reader = Resource3LTCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, 
 					neighborSize, features, userSim, bll, novelty, calculateOnTag);
 		}
-		writeMetricsForResources(sampleDir, sampleName, suffix, size, 20, !topicString.isEmpty() ? topicString : null, reader);
+		writeMetricsForResources(sampleDir, sampleName, suffix, size, 20, !topicString.isEmpty() ? topicString : null, reader, null);
 	}
 	
 	private static void startZhengResourceCalculator(String sampleDir, String sampleName, int size) {
@@ -549,7 +561,7 @@ public class Pipeline {
 			getTrainTestSize(sampleName + posfix);
 			reader = ZhengCalculator.predictSample(sampleName + posfix, TRAIN_SIZE);
 		}
-		writeMetricsForResources(sampleDir, sampleName, "zheng_tagtime", size, 20, TOPIC_NAME, reader);
+		writeMetricsForResources(sampleDir, sampleName, "zheng_tagtime", size, 20, TOPIC_NAME, reader, null);
 
 	}
 	
@@ -563,7 +575,7 @@ public class Pipeline {
 			getTrainTestSize(sampleName + posfix);
 			reader = HuangCalculator.predictSample(sampleName + posfix, TRAIN_SIZE);
 		}
-		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, TOPIC_NAME, reader);
+		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, TOPIC_NAME, reader, null);
 	}
 	
 	private static void startCfResourceCalculator(String sampleDir, String sampleName, int size, int neighborSize, boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
@@ -589,14 +601,14 @@ public class Pipeline {
 			getTrainTestSize(sampleName + posfix);
 			reader = BM25Calculator.predictResources(sampleName + posfix, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
 		}
-		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, TOPIC_NAME, reader);
+		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, TOPIC_NAME, reader, null);
 	}
 	
-	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
+	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader, Integer trainSize) {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix + "_");
 		for (int i = 1; i <= k; i++) {
 			for (int j = 1; j <= sampleCount; j++) {
-				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);
+				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false, trainSize);
 			}
 			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "metrics", i, (double)sampleCount, false, i == k, null);
 		}
