@@ -88,9 +88,9 @@ public class Pipeline {
 		// Resource-Recommender testing
 		String dir = DATASET + "_core";
 		String path = dir + "/" + DATASET + "_sample";
-		getStatistics(path);
+		//getStatistics(path);
 		//writeTensorFiles(path, false);
-		evaluate(dir, path, "usercf_mml", null, false, true);
+		//evaluate(dir, path, "usercf_mml", null, false, true);
 		//createLdaSamples(path, 1, 100, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
