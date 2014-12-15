@@ -67,7 +67,7 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private final static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "del";
+	private final static String DATASET = "cul";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -93,6 +93,7 @@ public class Pipeline {
 		//evaluate(dir, path, "usercf_mml", null, false, true);
 		//createLdaSamples(path, 1, 100, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
+		//startCfResourceCalculator(dir, path, 1, 20, false, true, true, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
 		

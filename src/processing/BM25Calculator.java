@@ -103,7 +103,6 @@ public class BM25Calculator {
 		List<Integer> userResources = null;
 		Map<Integer, Double> userBllResources = null;
 		if (this.resBased) {
-			// ####################################################### TODO: check log! and normalization!
 			userBllResources = Bookmark.getResourcesFromUserWithRec(this.trainList, this.testList, userID, 0.5, bll);
 			userResources = new ArrayList<Integer>(userBllResources.keySet());
 		} else if (userID != -1) {
@@ -137,15 +136,10 @@ public class BM25Calculator {
 					}
 				}
 			}
-			// ####################################################### TODO: check if necessary
-			// Neighbor-weighted CF
-			//for (Map.Entry<Integer, Double> entry : rankedResources.entrySet()) {
-			//	entry.setValue(Math.log10(1 + this.reader.getResourceCounts().get(entry.getKey())) * entry.getValue());
-			//}
 		}
 		if (this.resBased) {
 			denom = 0.0;
-			// TODO: Threshold
+
 			Map<Integer, Double> sortedResources = null;
 			if (allResources) {
 				sortedResources = new LinkedHashMap<Integer, Double>();
