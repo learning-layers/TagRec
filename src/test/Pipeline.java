@@ -90,9 +90,17 @@ public class Pipeline {
 		//getStatistics(path);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
-		startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
+//		startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator("bib_core", "bib_core/bib_sample", "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
+		
+		
+		double r=2;
+		double beta =1;
+		double learning_rate=0.7;
+		double tau_cluster=0.7;
+		startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate);
+		
 		
 		
 		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
@@ -570,13 +578,18 @@ public class Pipeline {
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
 	}
 	
-	private static void startSustainApproach(String sampleDir, String sampleName, int size, r, tau, beta, ) {
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate) {
 		BookmarkReader reader = null;
-		for (int i = 1; i <= size; i++) {
-			getTrainTestSize(sampleName);
-			reader = SustainApproach.predictResources(sampleName, TRAIN_SIZE);
-		}
-		writeMetricsForResources(sampleDir, sampleName, "huang_tag_user", size, 20, null, reader);
+		int sampleSize = 5;
+		getTrainTestSize(sampleName);
+		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE, TEST_SIZE, sampleSize);
+		//for (int i = 1; i <= size; i++) {
+		reader = sustain.predictResources(r, tau, beta, learning_rate);
+		//}
+		
+		// todo check whether size is needed as a parameter
+		int size =20;
+		writeMetricsForResources(sampleDir, sampleName, "sustain", size, 20, null, reader);
 	}
 	
 	
