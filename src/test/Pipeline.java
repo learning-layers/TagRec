@@ -582,7 +582,7 @@ public class Pipeline {
 		BookmarkReader reader = null;
 		int sampleSize = 5;
 		getTrainTestSize(sampleName);
-		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE, TEST_SIZE, sampleSize);
+		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE, sampleSize);
 		//for (int i = 1; i <= size; i++) {
 		reader = sustain.predictResources(r, tau, beta, learning_rate);
 		//}
