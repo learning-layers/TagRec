@@ -87,6 +87,7 @@ public class Pipeline {
 		String dir = DATASET;
 		//String path = dir + "/" +"hetrec_sample";
 		String path = dir + "/" +"hetrec_sample_1_lda_24_res";
+		//String path = dir + "/" +"hetrec_sample_1_lda_24_res_small";
 		//getStatistics(path);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
@@ -589,7 +590,13 @@ public class Pipeline {
 		
 		// todo check whether size is needed as a parameter
 		int size =20;
-		writeMetricsForResources(sampleDir, sampleName, "sustain", size, 20, null, reader);
+		//writeMetricsForResources(sampleDir, sampleName, "sustain", size, 20, null, reader);
+		String topicString="_";
+		String prefix = "sustain";
+		for (int i = 1; i <= size; i++) {
+			MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);
+			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "metrics", i, (double)size, false, i == size, null);
+		}	
 	}
 	
 	

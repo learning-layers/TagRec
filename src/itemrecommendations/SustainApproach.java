@@ -49,6 +49,7 @@ public class SustainApproach {
 	
 	public SustainApproach(String sampleName, int trainSize, int sampleSize){
 		
+		this.trainSize = trainSize;
 		this.sampleName = sampleName;
 		this.reader = new BookmarkReader(trainSize, false);
 		this.reader.readFile(sampleName);
@@ -97,7 +98,7 @@ public class SustainApproach {
 		
 		PredictionFileWriter writer = new PredictionFileWriter(reader, sortedResourcesPerUser);
 		String outputFile = this.sampleName;
-		writer.writeResourcePredictionsToFile(outputFile + "_sutain", this.trainSize, 0);
+		writer.writeResourcePredictionsToFile(outputFile + "_sustain", this.trainSize, 0);
 	 
 	   return this.reader;
 	}
