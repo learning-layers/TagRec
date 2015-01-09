@@ -27,6 +27,7 @@ import itemrecommendations.ZhengCalculator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import common.CalculationType;
@@ -85,8 +86,14 @@ public class Pipeline {
 				"-----------------------------------------------------------------------------\n\n");
 		// Resource-Recommender testing
 		String dir = DATASET;
+		List<String> files = new LinkedList<String>();
+		files.add(dir + "/" +"hetrec_sample_1_lda_24_res");
+		files.add(dir + "/" +"del_sample_lda_100");
+		files.add(dir + "/" +"del_sample_lda_500");
 		//String path = dir + "/" +"hetrec_sample";
-		String path = dir + "/" +"hetrec_sample_1_lda_24_res";
+		//String path = dir + "/" +"hetrec_sample_1_lda_24_res";
+		//String path = dir + "/" +"del_sample_lda_100";
+		//String path = dir + "/" +"del_sample_lda_500";
 		//String path = dir + "/" +"hetrec_sample_1_lda_24_res_small";
 		//getStatistics(path);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
@@ -100,8 +107,24 @@ public class Pipeline {
 		double beta =1;
 		double learning_rate=0.7;
 		double tau_cluster=0.7;
-		startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate);
-		
+		// number of resources predicted for a user
+		int sampleSize = 20;
+		// number of resources considered for prediction prefiltered with CF
+        int candidateNumber = 0;
+		// number of recent resources considered for training
+        int trainingRecency = 0;
+        
+        int []candidateNumbers = {0, 10, 20, 30, 40, 50}; 
+        int []trainingRecencies = {0, 5, 10, 20};
+                
+        for (int cn =0; cn<candidateNumbers.length; cn++){
+        	for (int tr=0; tr<trainingRecencies.length; tr++){
+        		for (String path : files)
+        			startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate, trainingRecencies[tr], candidateNumbers[cn], sampleSize);
+        	}	
+        }
+        //startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize);
+		//evaluate(dir, path, "sustain", null, false);
 		
 		
 		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
@@ -212,6 +235,9 @@ public class Pipeline {
 		} else if (args[1].equals("ml")) {
 			samplePath = "ml_core/" + args[2];
 			sampleDir = "ml_core";
+		} else if (args[1].equals("del")) {
+			samplePath = "delicious/" + args[2];
+			sampleDir = "delicious";
 		} else {
 			System.out.println("Dataset not available");
 			return;
@@ -263,6 +289,10 @@ public class Pipeline {
 		} else if (op.equals("item_cirtt")) {
 			boolean calculateUserSim = false, calculateBLL = true, calculateOnTag = true, novelty = false;
 			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, calculateUserSim, calculateBLL, novelty, calculateOnTag);
+		}else if (op.equals("sustain")) {
+			if (args.length>3)
+				trainingRecency = Integer.valueOf(args[3]);
+			startSustainApproach(sampleDir, samplePath, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize);
 		}
 	}
 
@@ -305,6 +335,18 @@ public class Pipeline {
 		}
 	}
 
+	// passing the trainSize means that MyMediaLite files will be evaluated
+	private static void evaluate(String sampleDir, String sampleName, String prefix, String postfix, boolean calcTags) {
+	getTrainTestSize(sampleName);
+	BookmarkReader reader = new BookmarkReader(TRAIN_SIZE, false);
+	reader.readFile(sampleName);
+	if (calcTags) {
+	writeMetrics(sampleDir, sampleName, prefix, 1, 10, postfix, reader);
+	} else {
+		writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, postfix, reader);
+		}
+	}
+	
 	private static void startRecCalculator(String sampleDir, String sampleName) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
@@ -579,24 +621,18 @@ public class Pipeline {
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
 	}
 	
-	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate) {
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize) {
 		BookmarkReader reader = null;
-		int sampleSize = 5;
 		getTrainTestSize(sampleName);
-		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE, sampleSize);
+		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
 		//for (int i = 1; i <= size; i++) {
-		reader = sustain.predictResources(r, tau, beta, learning_rate);
+		reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize);
 		//}
 		
 		// todo check whether size is needed as a parameter
-		int size =20;
 		//writeMetricsForResources(sampleDir, sampleName, "sustain", size, 20, null, reader);
-		String topicString="_";
 		String prefix = "sustain";
-		for (int i = 1; i <= size; i++) {
-			MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);
-			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "metrics", i, (double)size, false, i == size, null);
-		}	
+		writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, null, reader);
 	}
 	
 	

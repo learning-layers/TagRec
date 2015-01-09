@@ -2,6 +2,7 @@ package itemrecommendations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.TreeMap;
 
 import common.Bookmark;
 import common.DoubleMapComparator;
+import common.Features;
+import common.Similarity;
 import common.Utilities;
 import file.BookmarkReader;
 import file.PredictionFileWriter;
@@ -19,6 +22,8 @@ import javax.vecmath.*;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+
+import processing.BM25Calculator;
 
 
 public class SustainApproach {
@@ -32,22 +37,25 @@ public class SustainApproach {
 	List<Integer> user;
 	private int numberOfTopics;
 	private List<Bookmark> trainList;
-	private List<Bookmark> testList;	
 	double lambda;
+	BM25Calculator rankedResourseCalculator;
 	
 	//listId = userId, Set= resourceIds
-	private List<Set<Integer>> userResourceTrainList;
+	//private List<Set<Integer>> userResourceTrainList;
+	
+	
 	// listId = resourceId; mapKey = topicId; mapValue = count
 	private List<Map<Integer, Integer>> resTopicTrainList;
 
-	private List<Set<Integer>> userResourceTestList;
-	private List<Map<Integer, Integer>> resTopicTestList;
-	private LinkedList<ArrayList<GVector>> userClusterList;
-	private LinkedList<GVector> userLambdaList;
+	private Map<Integer, ArrayList<GVector>> userClusterList;
+	private Map<Integer, GVector> userLambdaList;
 	private String sampleName;
 	private int trainSize;
+	private List<Integer> uniqueUserList;
+	private Map<Integer, List<Integer>> resourceListPerUser;
 	
-	public SustainApproach(String sampleName, int trainSize, int sampleSize){
+	public SustainApproach(String sampleName, int trainSize){
+		
 		
 		this.trainSize = trainSize;
 		this.sampleName = sampleName;
@@ -56,44 +64,56 @@ public class SustainApproach {
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
 	//	this.testList = this.reader.getBookmarks().subList(trainSize, trainSize + testSize);
 	
+		rankedResourseCalculator = new BM25Calculator(this.reader, this.trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
+		
 		this.numberOfTopics = this.reader.getCategories().size();
-		//go through all users - matrix user-resource
-		// Set is ordered per user?
-		this.userResourceTrainList = Utilities.getUserResourceLists(this.trainList);
 	
+		//go through all users - matrix user-resource
+		// Set is ordered per user? TODO: ask Dominik, Set can not be ordered linkedHashSet can. Is there a method to get sorted resources? 
+		//this.userResourceTrainList = Utilities.getUserResourceLists(this.trainList);
+		
+		
 		//this.userResourceTestList =  Utilities.getUserResourceLists(this.testList);
 	    //go through all unique resources - Erstelle resourcen topic matrix
 		
-		//TODO: ask Dominik
+	
 		this.resTopicTrainList = Utilities.getResTopics(this.trainList);
 		
 		//this.resTopicTestList = Utilities.getResTopics(this.testList);
 		
+		this.uniqueUserList = reader.getUniqueUserListFromTestSet(trainSize);
+		
+		
 		//saves Cluster per user
-		this.userClusterList = new LinkedList<ArrayList<GVector>>();
+		this.userClusterList = new HashMap<Integer, ArrayList<GVector>>();
 		//saves lambda per user
-		this.userLambdaList = new LinkedList<GVector>();
+		this.userLambdaList = new HashMap<Integer, GVector>();
+		
 		
 		//TODO: check, is this necessary
 		//this.reader.setUserLines(reader.getBookmarks().subList(trainSize, trainSize + testSize));
 	}
 	
 	
-	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate) {
-			// for every user
-		for (Set<Integer> resourceSet : this.userResourceTrainList){
-			train(resourceSet, r, tau, learningRate, beta);
+	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, int trainingRecency, int candidateNumber, int sampleSize) {
+		
+		// for every user
+		for (Integer userId : this.uniqueUserList) {
+			//TODO: pass the last 5 items
+			List<Integer> resourceList = Bookmark.getResourcesFromUser(this.trainList, userId);
+		    if (resourceList.size()>=trainingRecency && trainingRecency!=0)
+		    	resourceList = resourceList.subList(resourceList.size()-trainingRecency, resourceList.size()); 
+			
+		    train(userId, resourceList, r, tau, learningRate, beta);
 		}
 		
-		int id = 0;
 		LinkedList<int[]> sortedResourcesPerUser = new LinkedList<int[]>();
-		int sampleSize = 20;
-
-		for (Set<Integer> resourceSet : this.userResourceTrainList){
-			if (id%100 ==0)
-				System.out.println("user "+id+" of "+this.userResourceTrainList.size());
-			sortedResourcesPerUser.add(predict(resourceSet, id,  r, tau, learningRate, beta, sampleSize));
-			id ++;
+		
+		for (Integer userId : this.uniqueUserList) {
+			if (userId%100 ==0)
+				System.out.println("user "+userId+" of "+this.uniqueUserList.size());
+			
+			sortedResourcesPerUser.add(predict(userId,  r, tau, learningRate, beta, candidateNumber, sampleSize));
 		}
 		
 		PredictionFileWriter writer = new PredictionFileWriter(reader, sortedResourcesPerUser);
@@ -104,7 +124,7 @@ public class SustainApproach {
 	}
 
 	
-	private void train(Set<Integer> resourceSet, double r, double tau, double learningRate, double beta){
+	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta){
 		//LinkedList<Integer> topics = new LinkedList<Integer>();
 		ArrayList<GVector> clusterList = new ArrayList<GVector>();
 				
@@ -113,7 +133,7 @@ public class SustainApproach {
 		GVector lambda = new GVector(array);
 		//clusterList.add(c0);
 		
-		for (Integer resource : resourceSet){
+		for (Integer resource : list){
 			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
 				
 			// Vector, write 1 for every existing topic
@@ -168,8 +188,9 @@ public class SustainApproach {
 		    deltaBestCluster.scale(learningRate);
 		    bestCluster.add(deltaBestCluster);
 		}
-		this.userLambdaList.add(lambda);
-		this.userClusterList.add(clusterList);
+		
+		this.userLambdaList.put(userId, lambda);
+		this.userClusterList.put(userId, clusterList);
 	}
 	
 	private Pair<Double, GVector> calculateActivation(GVector input, GVector cluster, GVector lambda, double r){
@@ -194,36 +215,30 @@ public class SustainApproach {
 	}
 	
 	
-	private int[] predict(Set<Integer> resourceSet, int userId, double r, double tau, double learningRate, double beta, int sampleSize){
+	private int[] predict(int userId, double r, double tau, double learningRate, double beta, int candidateNumber, int sampleSize){
 		Map<Integer, Double> resourceActivationMap = new HashMap<Integer, Double>();
-		for (int resource = 0; resource < this.resTopicTrainList.size(); resource++){
-			
-			// If a resource is in the training set of a user do not predict it
-			if (resourceSet.contains(resource))
-				continue;
-			
-			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
-			
-			// Vector, write 1 for every existing topic
-			GVector currentResource = new GVector(this.numberOfTopics);
-			currentResource.zero();
-			for (Integer t : topics)
-				currentResource.setElement(t, 1);
-			
-			double maxActivation = 0.0;
-			double totalActivation = 0.0;
-			for (GVector c : this.userClusterList.get(userId)){
-				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, this.userLambdaList.get(userId), r);
-				if (activationPair.getLeft()>maxActivation){
-					maxActivation = activationPair.getLeft();
-				}
-				totalActivation+= activationPair.getLeft();
-			}
-			maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
-			resourceActivationMap.put(resource, maxActivation);
-		}
 		
-
+		if (candidateNumber>0){
+			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
+			int count = 0;
+			for (Integer resource : candidateSet.keySet()){
+				if (count == candidateNumber)
+					break;
+				Pair<Integer, Double> resourceActivation = this.calculateResourceActivations(userId, resource, beta, r);
+				resourceActivationMap.put(resourceActivation.getLeft(), resourceActivation.getRight());
+				count++;
+			}
+		}
+		else{
+			for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
+				if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
+					continue;
+				Pair<Integer, Double> resourceActivation = this.calculateResourceActivations(userId, resource, beta, r);
+				resourceActivationMap.put(resourceActivation.getLeft(), resourceActivation.getRight());
+			}
+		
+		}	
+			
 		TreeMap<Integer, Double> sortedResourceActivationMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resourceActivationMap));
 		sortedResourceActivationMap.putAll(resourceActivationMap);
 		int[] sortedResources = new int[sampleSize];
@@ -238,5 +253,32 @@ public class SustainApproach {
 			
 		  
 		return sortedResources; 
-	}	
+	}
+	
+	private Pair<Integer, Double> calculateResourceActivations(int userId, int resource, double beta, double r){
+	
+		Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
+		
+		// Vector, write 1 for every existing topic
+		GVector currentResource = new GVector(this.numberOfTopics);
+		currentResource.zero();
+		for (Integer t : topics)
+			currentResource.setElement(t, 1);
+		
+		double maxActivation = 0.0;
+		double totalActivation = 0.0;
+		
+		for (GVector c : this.userClusterList.get(userId)){
+			Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, this.userLambdaList.get(userId), r);
+			if (activationPair.getLeft()>maxActivation){
+				maxActivation = activationPair.getLeft();
+			}
+			totalActivation+= activationPair.getLeft();
+		}
+		
+		maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
+		return new ImmutablePair<Integer, Double>(resource, maxActivation);
+	}
 }
+
+
