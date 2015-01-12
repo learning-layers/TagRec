@@ -19,9 +19,7 @@
  */
 package processing;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +28,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Doubles;
@@ -39,23 +36,12 @@ import com.google.common.primitives.Ints;
 import common.DoubleMapComparator;
 import common.Bookmark;
 import common.Utilities;
-import cc.mallet.pipe.Array2FeatureVector;
-import cc.mallet.pipe.CharSequence2TokenSequence;
-import cc.mallet.pipe.CharSequenceArray2TokenSequence;
-import cc.mallet.pipe.CharSequenceLowercase;
-import cc.mallet.pipe.Pipe;
-import cc.mallet.pipe.PrintInputAndTarget;
-import cc.mallet.pipe.SerialPipes;
 import cc.mallet.pipe.StringList2FeatureSequence;
-import cc.mallet.pipe.TokenSequence2FeatureSequence;
-import cc.mallet.pipe.TokenSequenceLowercase;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Alphabet;
-import cc.mallet.types.FeatureSequence;
 import cc.mallet.types.IDSorter;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
-import cc.mallet.types.TokenSequence;
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
@@ -64,7 +50,7 @@ public class MalletCalculator {
 
 	private final static int MAX_RECOMMENDATIONS = 10;
 	private final static int MAX_TERMS = 100;
-	private final static int NUM_THREADS = 10;
+	//private final static int NUM_THREADS = 10;
 	private final static int NUM_ITERATIONS = 2000;
 	private final static double ALPHA = 0.01;
 	private final static double BETA = 0.01;
@@ -105,10 +91,10 @@ public class MalletCalculator {
         	double[] topicProbs = LDA.getTopicProbabilities(doc);
         	//double probSum = 0.0;
         	for (int topic = 0; topic < topicProbs.length && topic < maxTopicsPerDoc; topic++) {
-        		//if (topicProbs[topic] > 0.01) { // TODO
+        		if (topicProbs[topic] > TOPIC_THRESHOLD) { // TODO
         			topicList.put(topic, topicProbs[topic]);
         			//probSum += topicProbs[topic];
-        		//}
+        		}
         	}
 			//System.out.println("Topic Sum: " + probSum);
         	Map<Integer, Double> sortedTopicList = new TreeMap<Integer, Double>(new DoubleMapComparator(topicList));
@@ -151,7 +137,7 @@ public class MalletCalculator {
     	return topicList;
 	}
 	
-	public void predictValuesProbs() {
+	public void predictValuesProbs(boolean topicCreation) {
 		ParallelTopicModel LDA = new ParallelTopicModel(this.numTopics, ALPHA * this.numTopics, BETA); // TODO
 		LDA.addInstances(this.instances);
 		LDA.setNumThreads(1);
@@ -164,20 +150,25 @@ public class MalletCalculator {
 		}
 		this.docList = getMaxTopicsByDocs(LDA, this.numTopics);
 		System.out.println("Fetched Doc-List");
-		this.topicList = getMaxTermsByTopics(LDA, MAX_TERMS);
+		this.topicList = !topicCreation ? getMaxTermsByTopics(LDA, MAX_TERMS) : null;
 		System.out.println("Fetched Topic-List");
 	}
 	
 	public Map<Integer, Double> getValueProbsForID(int id, boolean topicCreation) {
 		Map<Integer, Double> terms = null;
 		if (id < this.docList.size()) {
-			terms = new LinkedHashMap<Integer, Double>();
 			Map<Integer, Double> docVals = this.docList.get(id);
+			if (this.topicList == null) {
+				return docVals;
+			}
+			terms = new LinkedHashMap<Integer, Double>();
+
 			for (Map.Entry<Integer, Double> topic : docVals.entrySet()) { // look at each assigned topic
 				Set<Entry<Integer, Double>> entrySet = this.topicList.get(topic.getKey()).entrySet();
 				double topicProb = topic.getValue();
 				for (Map.Entry<Integer, Double> entry : entrySet) { // and its terms
 					if (topicCreation) {
+						// DEPRECATED
 						if (topicProb > TOPIC_THRESHOLD) {
 							terms.put(entry.getKey(), topicProb);
 							break; // only use first tag as topic-name with the topic probability
@@ -301,7 +292,7 @@ public class MalletCalculator {
 		if (userBased) {
 			userMaps = Utilities.getUserMaps(reader.getBookmarks().subList(0, trainSize));
 			userCalc = new MalletCalculator(userMaps, numTopics);
-			userCalc.predictValuesProbs();
+			userCalc.predictValuesProbs(topicCreation);
 			//userDenoms = getDenoms(userPredictionValues);
 			System.out.println("User-Training finished");
 		}
@@ -311,7 +302,7 @@ public class MalletCalculator {
 		if (resBased) {
 			resMaps = Utilities.getResMaps(reader.getBookmarks().subList(0, trainSize));
 			resCalc = new MalletCalculator(resMaps, numTopics);
-			resCalc.predictValuesProbs();
+			resCalc.predictValuesProbs(topicCreation);
 			//resDenoms = getDenoms(resPredictionValues);
 			System.out.println("Res-Training finished");
 		}

@@ -65,9 +65,9 @@ public class Pipeline {
 	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
 	private final static Boolean DESCRIBER = null;
 	// placeholder for the topic posfix
-	private final static String TOPIC_NAME = null;
+	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "ml";
+	private final static String DATASET = "cul";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -90,10 +90,11 @@ public class Pipeline {
 		String path = dir + "/" + DATASET + "_sample";
 		//getStatistics(path);
 		//writeTensorFiles(path, false);
-		//evaluate(dir, path, "wrmf_mml", null, false, true);
-		//createLdaSamples(path, 1, 100, false);
+		//evaluate(dir, path, "wrmf_500_mml", TOPIC_NAME, false, true);
+		//createLdaSamples(path, 1, 500, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, true, false, Features.ENTITIES);
+		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
 		
@@ -253,6 +254,9 @@ public class Pipeline {
 		} else if (op.equals("item_cfb")) {
 			boolean userBased = true, resourceBased = false, allResources  = false;
 			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, userBased, resourceBased, allResources, false, Features.ENTITIES);
+		} else if (op.equals("item_cbt")) {
+			TOPIC_NAME = "lda_500";
+			startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		} else if (op.equals("item_zheng")) {
 			startZhengResourceCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("item_huang")) {
@@ -501,9 +505,9 @@ public class Pipeline {
 	
 	// passing the trainSize means that MyMediaLite files will be evaluated
 	private static void evaluate(String sampleDir, String sampleName, String prefix, String postfix, boolean calcTags, boolean mymedialite) {
-		getTrainTestSize(sampleName);
+		getTrainTestSize(sampleName + (postfix != null ? "_" + postfix : ""));
 		BookmarkReader reader = new BookmarkReader(TRAIN_SIZE, false);
-		reader.readFile(sampleName);
+		reader.readFile(sampleName + (postfix != null ? "_" + postfix : ""));
 		if (calcTags) {
 			writeMetrics(sampleDir, sampleName, prefix, 1, 10, postfix, reader);
 		} else {
