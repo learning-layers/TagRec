@@ -8,6 +8,6 @@
 	<classpathentry kind="lib" path="lib/mallet-deps.jar"/>
 	<classpathentry kind="lib" path="lib/mallet.jar"/>
 	<classpathentry kind="lib" path="lib/javaml-0.1.5.jar"/>
-	<classpathentry kind="lib" path="vecmath-1.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/vecmath-1.5.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
