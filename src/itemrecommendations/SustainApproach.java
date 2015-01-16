@@ -1,12 +1,18 @@
 package itemrecommendations;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -95,7 +101,7 @@ public class SustainApproach {
 	}
 	
 	
-	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, int trainingRecency, int candidateNumber, int sampleSize) {
+	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
 		
 		// for every user
 		for (Integer userId : this.uniqueUserList) {
@@ -107,13 +113,15 @@ public class SustainApproach {
 		    train(userId, resourceList, r, tau, learningRate, beta);
 		}
 		
-		LinkedList<int[]> sortedResourcesPerUser = new LinkedList<int[]>();
 		
+		this.writeUserLambdas(this.sampleName);
+		
+		
+		LinkedList<int[]> sortedResourcesPerUser = new LinkedList<int[]>();
 		for (Integer userId : this.uniqueUserList) {
 			if (userId%100 ==0)
 				System.out.println("user "+userId+" of "+this.uniqueUserList.size());
-			
-			sortedResourcesPerUser.add(predict(userId,  r, tau, learningRate, beta, candidateNumber, sampleSize));
+			sortedResourcesPerUser.add(predict(userId,  r, tau, learningRate, beta, candidateNumber, sampleSize, cfWeight));
 		}
 		
 		PredictionFileWriter writer = new PredictionFileWriter(reader, sortedResourcesPerUser);
@@ -124,6 +132,48 @@ public class SustainApproach {
 	}
 
 	
+	private boolean writeUserLambdas(String filename) {
+		
+			//List<String> resourceList = this.reader.getResources();
+			//Map<Integer, List<Integer>> resourcesOfTestUsers = this.reader.getResourcesOfTestUsers(trainSize);
+			
+			try {
+				FileWriter writer = new FileWriter(new File("./data/metrics/" + filename + "_lambdas.txt"));
+				BufferedWriter bw = new BufferedWriter(writer);
+				
+		
+				for (Entry<Integer, GVector> entry : this.userLambdaList.entrySet()) {
+					//String resultString = (this.reader.getUsers().get(userID) + "-XYZ|");
+					String resultString = entry.getKey() + "| ";
+					
+					String resultingLambdas = "";
+									
+					for (int c=0; c<entry.getValue().getSize(); c++) {
+						resultingLambdas += entry.getValue().getElement(c)+", ";
+					}
+					
+					if (resultingLambdas != "") {
+						resultingLambdas = resultingLambdas.substring(0, resultingLambdas.length() - 2);
+					}
+					
+					resultString += resultingLambdas+"\n";
+					bw.write(resultString);
+				
+				}
+				
+				bw.flush();
+				bw.close();
+				writer.close();
+							
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			return false;
+	}
+
+
 	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta){
 		//LinkedList<Integer> topics = new LinkedList<Integer>();
 		ArrayList<GVector> clusterList = new ArrayList<GVector>();
@@ -132,6 +182,7 @@ public class SustainApproach {
 		Arrays.fill(array,1);
 		GVector lambda = new GVector(array);
 		//clusterList.add(c0);
+		GVector bestCluster = new GVector(0);
 		
 		for (Integer resource : list){
 			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
@@ -149,7 +200,7 @@ public class SustainApproach {
 			}
 			
 			double maxActivation = 0;
-			GVector bestCluster = new GVector(0);
+			//GVector bestCluster = new GVector(0);
 			GVector minDistance = new GVector(this.numberOfTopics);
 			minDistance.zero();
 			Double totalActivation = 0.0;
@@ -179,6 +230,7 @@ public class SustainApproach {
 				double elementProduct = lambda.getElement(i)*minDistance.getElement(i);
 				deltaLambda.setElement(i, learningRate*Math.exp(-elementProduct)*(1-elementProduct));
 			}
+			//GVector.add = adds the two vectors elements
 			lambda.add(deltaLambda); 
 			
 			// equation 12
@@ -215,26 +267,42 @@ public class SustainApproach {
 	}
 	
 	
-	private int[] predict(int userId, double r, double tau, double learningRate, double beta, int candidateNumber, int sampleSize){
+	private int[] predict(int userId, double r, double tau, double learningRate, double beta, int candidateNumber, int sampleSize, double cfWeight){
 		Map<Integer, Double> resourceActivationMap = new HashMap<Integer, Double>();
 		
 		if (candidateNumber>0){
 			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
+			//TreeMap<Integer, Double> candidateSet = this.calculateCandidateSet(userId);
+			Map<Integer, Double> CFValues = new HashMap<Integer, Double>();
+			
 			int count = 0;
-			for (Integer resource : candidateSet.keySet()){
+			for (Map.Entry<Integer, Double> resource : candidateSet.entrySet()){
 				if (count == candidateNumber)
 					break;
-				Pair<Integer, Double> resourceActivation = this.calculateResourceActivations(userId, resource, beta, r);
-				resourceActivationMap.put(resourceActivation.getLeft(), resourceActivation.getRight());
+				double resourceActivation = this.calculateResourceActivations(userId, resource.getKey(), beta, r);
+				resourceActivationMap.put(resource.getKey(), resourceActivation);
+				CFValues.put(resource.getKey(), resource.getValue());
 				count++;
 			}
+			
+			resourceActivationMap = this.calculateNormalizedValues(resourceActivationMap);
+			CFValues = this.calculateNormalizedValues(CFValues);
+			for ( Entry<Integer, Double> entry : resourceActivationMap.entrySet()){
+				double activation = entry.getValue()*(1-cfWeight)+CFValues.get(entry.getKey())* cfWeight;	
+				resourceActivationMap.put(entry.getKey(), activation);
+			}
+					
 		}
 		else{
+			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
 			for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
 				if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
 					continue;
-				Pair<Integer, Double> resourceActivation = this.calculateResourceActivations(userId, resource, beta, r);
-				resourceActivationMap.put(resourceActivation.getLeft(), resourceActivation.getRight());
+				double resourceActivation = this.calculateResourceActivations(userId, resource, beta, r);
+				double activation = resourceActivation*(1-cfWeight);
+					if (candidateSet.containsKey(resource))
+						activation+=candidateSet.get(resource)*cfWeight;
+				resourceActivationMap.put(resource, activation);
 			}
 		
 		}	
@@ -250,12 +318,24 @@ public class SustainApproach {
 			if (index == sampleSize)
 				break;
 		}
-			
-		  
 		return sortedResources; 
 	}
 	
-	private Pair<Integer, Double> calculateResourceActivations(int userId, int resource, double beta, double r){
+	
+	
+	private Map<Integer, Double> calculateNormalizedValues(Map<Integer, Double> values) {
+		//normalize
+		double sum =0;
+		for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+			 sum += entry.getValue();
+		}
+		 for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+			entry.setValue(1000/sum *entry.getValue());
+		}
+		return values;
+	}
+
+	private double calculateResourceActivations(int userId, int resource, double beta, double r){
 	
 		Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
 		
@@ -277,7 +357,33 @@ public class SustainApproach {
 		}
 		
 		maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
-		return new ImmutablePair<Integer, Double>(resource, maxActivation);
+		return maxActivation;
+	}
+	
+	private TreeMap<Integer, Double> calculateCandidateSet(int userId){
+		GVector lastCluster = (this.userClusterList.get(userId)).get(this.userClusterList.get(userId).size()-1);
+		HashMap<Integer, Double> topicMap = new HashMap<Integer, Double>();
+		HashMap<Integer, Double> simMap = new HashMap<Integer, Double>();
+		for (int c=0; c<lastCluster.getSize(); c++){
+			if (lastCluster.getElement(c)>0)
+				topicMap.put(c, lastCluster.getElement(c));
+		}
+			
+		for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
+			if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
+				continue;
+		   /// are the topics sorted
+			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
+			HashMap<Integer, Double> resourceMap = new HashMap<Integer, Double>();
+			
+			for (Integer t : topics)
+				resourceMap.put(t, 1.0);
+			
+			simMap.put(resource, Utilities.getCosineFloatSim(topicMap, resourceMap));
+		}
+		TreeMap<Integer, Double> sortedSimMap = new TreeMap<Integer, Double>(new DoubleMapComparator(simMap));
+		sortedSimMap.putAll(simMap);
+		return sortedSimMap;
 	}
 }
 

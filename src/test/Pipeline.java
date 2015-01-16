@@ -30,6 +30,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import common.CalculationType;
 import common.Features;
 import processing.BLLCalculator;
@@ -66,7 +69,11 @@ public class Pipeline {
 	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
 	private final static Boolean DESCRIBER = null;
 
-	private final static String DATASET = "delicious"; // placeholder for the used dataset
+	//private final static String DATASET = "bib_core"; // placeholder for the used dataset
+	//private final static String DATASET = "cul_core";
+	//private final static String DATASET = "delicious";
+	//private final static String DATASET = "movieLens";
+//	private final static String DATASET = "lastFm";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -85,11 +92,22 @@ public class Pipeline {
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
 		// Resource-Recommender testing
-		String dir = DATASET;
-		List<String> files = new LinkedList<String>();
-		files.add(dir + "/" +"hetrec_sample_1_lda_24_res");
-		files.add(dir + "/" +"del_sample_lda_100");
-		files.add(dir + "/" +"del_sample_lda_500");
+	//	String dir = DATASET;
+		
+		List<Pair<String, String>> files = new LinkedList<Pair<String,String>>();
+		files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
+		files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500"));
+		files.add(new ImmutablePair<String,String>("delicious", "delicious" + "/" +"del_sample_lda_500"));
+	//	files.add(new ImmutablePair<String,String>("movieLens", "movieLens" + "/" +"ml_sample_lda_500"));
+	//	files.add(new ImmutablePair<String,String>("lastFm", "lastFm"+ "/" +"lastfm_sample_lda_500"));
+		
+		
+//		files.add(dir + "/" +"hetrec_sample_1_lda_24_res");
+//		files.add(dir + "/" +"del_sample_lda_100");
+//		files.add(dir + "/" +"del_sample_lda_500");
+//		files.add(dir+ "/" +"lastfm_sample_lda_100");
+		//files.add(dir+ "/" +"lastfm_sample_lda_500");
+//		files.add(dir+ "/" +"ml_sample_lda_500");
 		//String path = dir + "/" +"hetrec_sample";
 		//String path = dir + "/" +"hetrec_sample_1_lda_24_res";
 		//String path = dir + "/" +"del_sample_lda_100";
@@ -103,10 +121,17 @@ public class Pipeline {
 		//startBaselineCalculatorForResources(dir, path, 1, false);
 		
 		
-		double r=2;
+		
 		double beta =1;
+		double r = 2;
+		//double [] rs = {2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.5, 4};
+		
+		//double [] learning_rates={0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+		double [] rs = {2.0};
+		double [] learning_rates={0.5};
 		double learning_rate=0.7;
-		double tau_cluster=0.7;
+		
+		double tau_cluster=0.9985;
 		// number of resources predicted for a user
 		int sampleSize = 20;
 		// number of resources considered for prediction prefiltered with CF
@@ -114,13 +139,24 @@ public class Pipeline {
 		// number of recent resources considered for training
         int trainingRecency = 0;
         
-        int []candidateNumbers = {0, 10, 20, 30, 40, 50}; 
-        int []trainingRecencies = {0, 5, 10, 20};
-                
+        // E1: 0,10,20,30,40,50
+        // final = 100
+        int []candidateNumbers = {100}; 
+        // E1: 0,5,10,20
+        // E2: int []trainingRecencies = {0, 20, 25, 30};
+        int []trainingRecencies = {25};
+        double [] CFWeights = {0};
+        
         for (int cn =0; cn<candidateNumbers.length; cn++){
         	for (int tr=0; tr<trainingRecencies.length; tr++){
-        		for (String path : files)
-        			startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate, trainingRecencies[tr], candidateNumbers[cn], sampleSize);
+        		for (Pair<String, String> file : files){
+        			for (int rc =0; rc<rs.length; rc++){
+        				for (int lrc = 0; lrc<learning_rates.length; lrc++){
+        					for (int cfc = 0; cfc<CFWeights.length; cfc++)
+        						startSustainApproach(file.getLeft(), file.getRight(), rs[rc], tau_cluster, beta, learning_rates[lrc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, CFWeights[cfc]);
+        				}
+        			}
+        		}	
         	}	
         }
         //startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize);
@@ -292,7 +328,11 @@ public class Pipeline {
 		}else if (op.equals("sustain")) {
 			if (args.length>3)
 				trainingRecency = Integer.valueOf(args[3]);
-			startSustainApproach(sampleDir, samplePath, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize);
+			startSustainApproach(sampleDir, samplePath, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, 0.4);
+		}else if (op.equals("sustainCF")) {
+			if (args.length>3)
+				trainingRecency = Integer.valueOf(args[3]);
+			startSustainApproach(sampleDir, samplePath, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, 0.4);
 		}
 	}
 
@@ -621,12 +661,12 @@ public class Pipeline {
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
 	}
 	
-	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize) {
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
 		BookmarkReader reader = null;
 		getTrainTestSize(sampleName);
 		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
 		//for (int i = 1; i <= size; i++) {
-		reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize);
+		reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
 		//}
 		
 		// todo check whether size is needed as a parameter
@@ -642,6 +682,7 @@ public class Pipeline {
 			for (int j = 1; j <= sampleCount; j++) {
 				MetricsCalculator.calculateMetrics(sampleName + topicString + prefix, i, sampleDir + "/" + prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, false);
 			}
+			
 			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "metrics", i, (double)sampleCount, false, i == k, null);
 		}
 	}
