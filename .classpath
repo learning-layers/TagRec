@@ -8,7 +8,11 @@
 	<classpathentry kind="lib" path="lib/mallet-deps.jar"/>
 	<classpathentry kind="lib" path="lib/mallet.jar"/>
 	<classpathentry kind="lib" path="lib/javaml-0.1.5.jar"/>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="vecmath-1.5.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+=======
+	<classpathentry kind="lib" path="lib/vecmath-1.5.1.jar"/>
+>>>>>>> cc91dc1c29a448f34453c75243f431fd06cb5f03
 	<classpathentry kind="output" path="bin"/>
 </classpath>
