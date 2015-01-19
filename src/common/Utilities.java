@@ -424,6 +424,8 @@ public class Utilities {
 		Set<Integer> intersectSet = new HashSet<Integer>(targetMap);
 		unionSet.addAll(nMap);
 		intersectSet.retainAll(nMap);
+		if (intersectSet.size() == 0 || unionSet.size() == 0)
+			return 0.0;
 		return (double)intersectSet.size() / (double)unionSet.size();
 	}
 	
@@ -432,6 +434,8 @@ public class Utilities {
 		Set<Integer> intersectSet = new HashSet<Integer>(targetMap.keySet());
 		unionSet.addAll(nMap.keySet());
 		intersectSet.retainAll(nMap.keySet());
+		if (intersectSet.size() == 0 || unionSet.size() == 0)
+			return 0.0;
 		return (double)intersectSet.size() / (double)unionSet.size();
 	}
 	
@@ -442,6 +446,8 @@ public class Utilities {
         for (int k : both) scalar += (targetMap.get(k) * nMap.get(k));
         for (int k : targetMap.keySet()) norm1 += (targetMap.get(k) * targetMap.get(k));
         for (int k : nMap.keySet()) norm2 += (nMap.get(k) * nMap.get(k));
+        if (Math.sqrt(norm1 * norm2) == 0.0)
+        	return 0.0;
         return scalar / Math.sqrt(norm1 * norm2);
 	}
 	
@@ -454,6 +460,8 @@ public class Utilities {
         for (int k : both) scalar += (targetMap.get(k) * nMap.get(k));
         for (int k : targetMap.keySet()) norm1 += (targetMap.get(k) * targetMap.get(k));
         for (int k : nMap.keySet()) norm2 += (nMap.get(k) * nMap.get(k));
+        if (Math.sqrt(norm1 * norm2) == 0.0)
+        	return 0.0;
         return scalar / Math.sqrt(norm1 * norm2);
 	}
 	
@@ -464,6 +472,8 @@ public class Utilities {
         for (int k : both) scalar += (targetMap.get(k) * nMap.get(k));
         for (int k : targetMap.keySet()) norm1 += (targetMap.get(k) * targetMap.get(k));
         for (int k : nMap.keySet()) norm2 += (nMap.get(k) * nMap.get(k));
+        if (Math.sqrt(norm1 * norm2) == 0.0)
+        	return 0.0;
         return scalar / Math.sqrt(norm1 * norm2);
 	}
 	

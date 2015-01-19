@@ -113,6 +113,38 @@ public class Bookmark implements Comparable<Bookmark> {
 	
 	// Statics ----------------------------------------------------------------------------------
 	
+	public static double getAvgNumberOfTopics(List<Bookmark> lines) {
+		double sum = 0.0;
+		for (Bookmark line : lines) {
+			sum += line.getCategories().size();
+		}
+		return sum / lines.size();
+	}
+	
+	public static double getBookmarkDiversity(List<Bookmark> lines) {
+		if (lines.size() == 0) {
+			return 0.0;
+		}
+		if (lines.size() == 1) {
+			return 1.0;
+		}
+		
+		double diversity = 0.0;
+		int size = 0;
+		for (int i = 0; i < lines.size() - 1; i++) {
+			for (int j = i + 1; j < lines.size(); j++) {
+				Bookmark srcBookmark = lines.get(i);
+				Bookmark destBookmark = lines.get(j);
+				diversity += Utilities.getJaccardSimLists(srcBookmark.getCategories(), destBookmark.getCategories());
+				size++;
+			}
+		}
+		if (size == 0) {
+			return 0.0;
+		}
+		return diversity / size;
+	}
+	
 	public static Bookmark getUserData(List<Bookmark> lines, int userID, int resID) {
 		Bookmark returnData = null;
 		for (Bookmark data : lines) {

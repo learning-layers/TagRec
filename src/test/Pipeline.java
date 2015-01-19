@@ -24,12 +24,19 @@ import itemrecommendations.HuangCalculator;
 import itemrecommendations.Resource3LTCalculator;
 import itemrecommendations.ZhengCalculator;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import common.Bookmark;
 import common.CalculationType;
 import common.Features;
+import common.Utilities;
 import processing.BLLCalculator;
 import processing.BM25Calculator;
 import processing.BaselineCalculator;
@@ -65,9 +72,9 @@ public class Pipeline {
 	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
 	private final static Boolean DESCRIBER = null;
 	// placeholder for the topic posfix
-	private static String TOPIC_NAME = null;
+	private static String TOPIC_NAME = "lda_500";
 	// placeholder for the used dataset
-	private final static String DATASET = "cul";
+	private final static String DATASET = "lastfm";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -88,7 +95,7 @@ public class Pipeline {
 		// Resource-Recommender testing
 		String dir = DATASET + "_core";
 		String path = dir + "/" + DATASET + "_sample";
-		//getStatistics(path);
+		//try { getStatistics(path, true); } catch (IOException e) { e.printStackTrace(); }
 		//writeTensorFiles(path, false);
 		//evaluate(dir, path, "wrmf_500_mml", TOPIC_NAME, false, true);
 		//createLdaSamples(path, 1, 500, false);
@@ -477,11 +484,15 @@ public class Pipeline {
 		return betaValues;
 	}
 
-	private static void getStatistics(String dataset) {
+	private static void getStatistics(String dataset, boolean writeAll) throws IOException {
+		if (TOPIC_NAME != null) {
+			dataset += ("_" + TOPIC_NAME);
+		}
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(dataset);
+		
 		int bookmarks = reader.getBookmarks().size();
-		System.out.println("Bookmarks: " + bookmarks);
+		System.out.println("Posts: " + bookmarks);
 		int users = reader.getUsers().size();
 		System.out.println("Users: " + users);
 		int resources = reader.getResources().size();
@@ -489,7 +500,41 @@ public class Pipeline {
 		int tags = reader.getTags().size();
 		System.out.println("Tags: " + tags);
 		int tagAssignments = reader.getTagAssignmentsCount();
-		System.out.println("Tag-Assignments: " + tagAssignments);
+		System.out.println("Tag-Assignments: " + tagAssignments);		
+		int categories = reader.getCategories().size();
+		System.out.println("Topics: " + categories);
+		double avgBookmarksPerUser = (double)bookmarks / users;
+		System.out.println("Avg. resources/posts per user: " + avgBookmarksPerUser);
+		double avgBookmarksPerResource = (double)bookmarks / resources;
+		System.out.println("Avg. users/posts per resource: " + avgBookmarksPerResource);
+		
+		if (writeAll) {
+			getTrainTestSize(dataset);
+			FileWriter userWriter = new FileWriter(new File("./data/metrics/" + dataset + "_userStats.txt"));
+			BufferedWriter userBW = new BufferedWriter(userWriter);
+			userBW.write("UserID| NoOfResources| NoOfTopics| Topic-Similarity\n");
+			List<Bookmark> trainList = reader.getBookmarks().subList(0, TRAIN_SIZE);
+			List<Integer> testUsers = reader.getUniqueUserListFromTestSet(TRAIN_SIZE);
+			System.out.println();
+
+			double avgTopicsPerUser = 0.0;
+			double avgTopicDiversityPerUser = 0.0;
+			List<Map<Integer, Double>> userTopics = Utilities.getRelativeTopicMaps(trainList, false);
+			List<List<Bookmark>> userBookmarks = Utilities.getBookmarks(trainList, false);
+			for (int userID : testUsers) {
+				Map<Integer, Double> topicsOfUser = userTopics.get(userID);
+				double topicDiversityOfUser = Bookmark.getBookmarkDiversity(userBookmarks.get(userID));
+				userBW.write(userID + "| " + reader.getUserCounts().get(userID) + "| " + topicsOfUser.keySet().size() + "| " + topicDiversityOfUser + "\n");
+				avgTopicsPerUser += topicsOfUser.keySet().size();
+				avgTopicDiversityPerUser += topicDiversityOfUser;
+			}
+			System.out.println("Avg. topics per user: " + avgTopicsPerUser / testUsers.size());
+			System.out.println("Avg. topic-similarity per user: " + avgTopicDiversityPerUser / testUsers.size());
+			double avgTopicsPerResource = Bookmark.getAvgNumberOfTopics(trainList);
+			System.out.println("Avg. topics per resource: " + avgTopicsPerResource);
+			userBW.flush();
+			userBW.close();
+		}
 	}
 
 	private static void getTrainTestSize(String sample) {
