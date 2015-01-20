@@ -90,7 +90,7 @@ public class PredictionFileReader {
 					this.predictions.add(null);
 				}
 			}
-			if (k == 1) {
+			if (k == 20) {
 				System.out.println("Number of users to predict: " + this.predictions.size());
 			}
 			br.close();

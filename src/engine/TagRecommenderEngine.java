@@ -59,7 +59,7 @@ public class TagRecommenderEngine implements EngineInterface {
 	}
 
 	@Override
-	public Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
 		if (topics != null && topics.size() > 0 && this.threelEngine != null) {
 			return this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count);
 		} else if (this.bllEngine != null) {

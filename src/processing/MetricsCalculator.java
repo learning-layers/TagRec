@@ -70,14 +70,14 @@ public class MetricsCalculator {
 		BufferedWriter bw = null;
 		boolean recommTags = (reader == null);
 		// TODO: Enable if you need data for statistical tests
-		/*if (k == 5 || k == 10) {
+		if (k == 20) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
 				bw = new BufferedWriter(writer);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}*/
+		}
 		
 		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
 		double count = this.reader.getPredictionData().size();		 // all users
@@ -150,7 +150,7 @@ public class MetricsCalculator {
 		this.nDCG = nDCG / count;
 		
 		// TODO: enable in case statistics are needed
-		/*if (bw != null) {
+		if (bw != null) {
 			try {
 				//bw.write("\n");
 				bw.flush();
@@ -158,7 +158,7 @@ public class MetricsCalculator {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}*/
+		}
 	}
 	
 	public double getRecall() {

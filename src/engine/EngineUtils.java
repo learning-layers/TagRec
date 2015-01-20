@@ -30,6 +30,10 @@ import file.BookmarkReader;
 
 public class EngineUtils {
 
+	public static void logRecommendationCall() {
+		
+	}
+	
 	public static Map<String, Double> calcTopTags(BookmarkReader reader) {
 		Map<String, Double> tagMap = new LinkedHashMap<>();
 		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();

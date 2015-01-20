@@ -72,9 +72,9 @@ public class Pipeline {
 	// set for categorizer/describer split (true is describer, false is categorizer - null for nothing)
 	private final static Boolean DESCRIBER = null;
 	// placeholder for the topic posfix
-	private static String TOPIC_NAME = "lda_500";
+	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "lastfm";
+	private final static String DATASET = "del";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
