@@ -51,8 +51,8 @@ public class EngineUtils {
 		sortedCountMap.putAll(countMap);
 
 		for (Map.Entry<Integer, Integer> entry : sortedCountMap.entrySet()) {
-			tagMap.put(reader.getTags().get(entry.getKey()),
-					((double) entry.getValue()) / countSum);
+			double tagValue = countSum != 0 ? ((double) entry.getValue()) / countSum : 0.0;
+			tagMap.put(reader.getTags().get(entry.getKey()), tagValue);
 		}
 
 		return tagMap;

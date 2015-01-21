@@ -53,6 +53,7 @@ import engine.EngineInterface;
 import engine.LanguageModelEngine;
 import engine.ResourceEngineInterface;
 import engine.TagRecommenderEngine;
+import engine.TagRecommenderEvalEngine;
 import engine.ThreeLayersEngine;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
@@ -153,6 +154,14 @@ public class Pipeline {
 		
 		// Engine Testing
 		/*
+		final ResourceEngineInterface resrecEngine = new CFResourceRecommenderEngine();
+		try {
+			resrecEngine.loadFile(path);
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, true));
+		System.out.println("CF -Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, false));
 		EngineInterface engine = new ThreeLayersEngine();
 		try {
 			engine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
@@ -174,23 +183,17 @@ public class Pipeline {
 			e3.printStackTrace();
 		}
 		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10));		
-		EngineInterface tagrecEngine = new TagRecommenderEngine();
+		EngineInterface tagrecEngine = new TagRecommenderEvalEngine();
 		try {
-			tagrecEngine.loadFile("hugo2");
+			tagrecEngine.loadFile(path + "_lda_500");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("TagRec with Topics: " + tagrecEngine.getEntitiesWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
-		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("41", "545", null, 10));
-		final ResourceEngineInterface resrecEngine = new CFResourceRecommenderEngine();
-		try {
-			resrecEngine.loadFile(path);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, true));
-		System.out.println("CF -Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, false));
+		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
+		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
+		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
 		*/
+
 		
 		// Commandline Arguments
 		if (args.length < 3) {

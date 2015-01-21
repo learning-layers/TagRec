@@ -226,12 +226,12 @@ public class ThreeLayersCalculator {
 		// normalize and return
 		double denom = 0.0;
 		for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
-			Double val = Math.log(entry.getValue());
+			Double val = Math.log(entry.getValue() + 1.0);
 			denom += Math.exp(val);
 			entry.setValue(val);
 		}
 		for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
-			entry.setValue(Math.exp(entry.getValue()) / denom);
+			entry.setValue(denom != 0.0 ? Math.exp(entry.getValue()) / denom : 0.0);
 		}
 		return resultMap;
 	}
