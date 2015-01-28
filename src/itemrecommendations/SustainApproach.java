@@ -182,7 +182,7 @@ public class SustainApproach {
 		Arrays.fill(array,1);
 		GVector lambda = new GVector(array);
 		//clusterList.add(c0);
-		GVector bestCluster = new GVector(0);
+		//GVector bestCluster = new GVector(0);
 		
 		for (Integer resource : list){
 			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
@@ -200,28 +200,34 @@ public class SustainApproach {
 			}
 			
 			double maxActivation = 0;
-			//GVector bestCluster = new GVector(0);
+			GVector bestCluster = new GVector(0);
 			GVector minDistance = new GVector(this.numberOfTopics);
 			minDistance.zero();
 			Double totalActivation = 0.0;
-					
+			int index = 0;
+			int bestIndex=0;
 			for (GVector c : clusterList){
 				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, lambda, r);
 				if (activationPair.getLeft()>maxActivation){
 					bestCluster = c;							
 					minDistance= new GVector(activationPair.getRight());
 					maxActivation= activationPair.getLeft();
+					bestIndex = index;
 				}
-				totalActivation += activationPair.getLeft(); 
+				totalActivation += activationPair.getLeft();
+				index++;
 			}
 			
+	//		System.out.println("test");
 			// equation 6 Hemmung
 			maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation; 
 			
 			if (maxActivation<=tau){
 				// input forms a new cluster
 				bestCluster = currentResource;
-				clusterList.add(bestCluster);
+				//clusterList.add(bestCluster);
+				clusterList.add(index, bestCluster);
+				bestIndex = index;
 			}
 			
 			GVector deltaLambda = new GVector(lambda.getSize());
@@ -232,14 +238,19 @@ public class SustainApproach {
 			}
 			//GVector.add = adds the two vectors elements
 			lambda.add(deltaLambda); 
-			
+						
 			// equation 12
 			GVector deltaBestCluster = new GVector(bestCluster.getSize());
 			//  delta_winCluster <- n*(I-Cluster[WinCluster,]) # eq 12 
 			deltaBestCluster.sub(currentResource,deltaBestCluster);
 		    deltaBestCluster.scale(learningRate);
+		    
+		    //??? why adding the cluster? 
 		    bestCluster.add(deltaBestCluster);
+		    clusterList.set(bestIndex, deltaBestCluster);
 		}
+		if (clusterList.size()>3)
+			System.out.println(clusterList.size()+"cluster for user"+userId);
 		
 		this.userLambdaList.put(userId, lambda);
 		this.userClusterList.put(userId, clusterList);
@@ -251,7 +262,8 @@ public class SustainApproach {
 		distance.sub(input, cluster);
 		
 		for (int i =0; i<distance.getSize(); i++){
-			distance.setElement(i, Math.abs(distance.getElement(i))*0.5);
+			// * 0.5 is removed, since we do not map 2 values for each topic, but only one 
+			distance.setElement(i, Math.abs(distance.getElement(i)));
 		}
 		
 		double numerator=0;
@@ -285,8 +297,9 @@ public class SustainApproach {
 				count++;
 			}
 			
-			resourceActivationMap = this.calculateNormalizedValues(resourceActivationMap);
-			CFValues = this.calculateNormalizedValues(CFValues);
+			//resourceActivationMap = this.calculateNormalizedValues(resourceActivationMap);
+			//CFValues = this.calculateNormalizedValues(CFValues);
+			
 			for ( Entry<Integer, Double> entry : resourceActivationMap.entrySet()){
 				double activation = entry.getValue()*(1-cfWeight)+CFValues.get(entry.getKey())* cfWeight;	
 				resourceActivationMap.put(entry.getKey(), activation);

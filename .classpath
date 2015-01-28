@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="file/reporting/CfEvaluator.java|processing/CfCalculator.java|processing/CfTagCalculator.java|processing/LdaCalculator.java|file/filtering/ResourceFiltering.java|file/filtering/TagFiltering.java|processing/MahoutCalculator.java" kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/guava-14.0-rc1.jar"/>
+	<classpathentry kind="lib" path="lib/guava-14.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/javaml-0.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/mallet-deps.jar"/>
 	<classpathentry kind="lib" path="lib/mallet.jar"/>
-	<classpathentry kind="lib" path="lib/javaml-0.1.5.jar"/>
-<<<<<<< HEAD
-	<classpathentry kind="lib" path="vecmath-1.5.1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-=======
+	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/vecmath-1.5.1.jar"/>
->>>>>>> cc91dc1c29a448f34453c75243f431fd06cb5f03
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="output" path="build/classes"/>
 </classpath>

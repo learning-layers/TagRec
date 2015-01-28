@@ -80,7 +80,7 @@ public class Pipeline {
 				"A framework to implement and evaluate algorithms for the recommendation\n" +
 				"of tags." + 
 			   	"Copyright (C) 2013 Dominik Kowald\n\n" + 
-			   	"This program is free software: you can redistribute it and/or modify\n" + 
+			   	"https://www.youtube.com/watch?v=MwpMEbgC7DA&list=RDH2-1u8xvk54&index=27  	"+"This program is free software: you can redistribute it and/or modify\n" + 
 				" it under the terms of the GNU Affero General Public License as published by\n" +
 				"the Free Software Foundation, either version 3 of the License, or\n" +
 				"(at your option) any later version.\n\n" +							
@@ -122,16 +122,18 @@ public class Pipeline {
 		
 		
 		
-		double beta =1;
-		double r = 2;
+		// initially beta was set to 1
+		double beta = 6.396;
+		// initially r was set to 2
+		double r = 2.845; 
 		//double [] rs = {2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.5, 4};
 		
 		//double [] learning_rates={0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
-		double [] rs = {2.0};
-		double [] learning_rates={0.5};
-		double learning_rate=0.7;
-		
-		double tau_cluster=0.9985;
+		double [] rs = {9.998};
+		double [] learning_rates={0.096};
+		//double learning_rate=0.7;
+		double learning_rate=0.0936;
+		double tau_cluster=0.5;
 		// number of resources predicted for a user
 		int sampleSize = 20;
 		// number of resources considered for prediction prefiltered with CF
@@ -144,8 +146,8 @@ public class Pipeline {
         int []candidateNumbers = {100}; 
         // E1: 0,5,10,20
         // E2: int []trainingRecencies = {0, 20, 25, 30};
-        int []trainingRecencies = {25};
-        double [] CFWeights = {0};
+        int []trainingRecencies = {0};
+        double [] CFWeights = {0.5};
         
         for (int cn =0; cn<candidateNumbers.length; cn++){
         	for (int tr=0; tr<trainingRecencies.length; tr++){
