@@ -362,7 +362,8 @@ public class BM25Calculator {
 			Map<Integer, Double> map = null;
 			map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), true);
 			results.add(map);
-			System.out.println(data.getTags() + "|" + map.keySet());
+			// TODO: enable if you need continuous output
+			//System.out.println(data.getTags() + "|" + map.keySet());
 		}
 		timer.stop();
 		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);

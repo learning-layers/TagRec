@@ -164,7 +164,7 @@ public class FolkRankCalculator {
 		timeString += ("Total time: " + (trainingTime + testTime) + "\n");
 	}
 	
-	public static void predictSample(String filename, int trainSize, int sampleSize, boolean predictTags) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean predictTags) {
 		//filename += "_res";
 		
 		int size = 0;
@@ -195,6 +195,7 @@ public class FolkRankCalculator {
 			PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 			writer.writeResourcePredictionsToFile(filename + "_fr", trainSize, 0);
 		}
+		return reader;
 	}
 	
 	//-------------------------------------------------------------------------------------------------------------

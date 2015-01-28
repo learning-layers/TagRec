@@ -74,8 +74,7 @@ public class ContentBasedCalculator {
 		return results;
 	}
 	
-	public static void predictSample(String filename, int trainSize, int sampleSize) {
-
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize) {
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 
@@ -91,5 +90,7 @@ public class ContentBasedCalculator {
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		String outputFile = filename + suffix;
 		writer.writeFile(outputFile);
+		
+		return reader;
 	}
 }

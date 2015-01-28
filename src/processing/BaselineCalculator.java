@@ -149,7 +149,7 @@ public class BaselineCalculator {
 		return resources;
 	}
 	
-	public static void predictPopularTags(String filename, int trainSize, int sampleSize) {
+	public static BookmarkReader predictPopularTags(String filename, int trainSize, int sampleSize) {
 		//filename += "_res";
 		
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
@@ -162,6 +162,8 @@ public class BaselineCalculator {
 		PredictionFileWriter writer = new PredictionFileWriter(reader, values);
 		writer.writeFile(filename + "_mp");
 		Utilities.writeStringToFile("./data/metrics/" + filename + "_mp" + "_TIME.txt", timeString);
+		
+		return reader;
 	}
 	
 	public static BookmarkReader predictPopularResources(String filename, int trainSize) {

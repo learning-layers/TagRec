@@ -265,7 +265,8 @@ public class ThreeLayersCalculator {
 	private static String timeString = "";
 	
 	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int d, int beta, boolean userBased, boolean resBased, boolean tagBLL, boolean topicBLL) {
-		filename += "_res";
+		//filename += "_res";
+		
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 		

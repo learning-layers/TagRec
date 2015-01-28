@@ -46,6 +46,7 @@ import processing.LanguageModelCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.RecCalculator;
+import processing.ThreeLTCalculator;
 import processing.ThreeLayersCalculator;
 import engine.BaseLevelLearningEngine;
 import engine.CFResourceRecommenderEngine;
@@ -61,7 +62,7 @@ import file.postprocessing.CatDescFiltering;
 import file.preprocessing.TensorProcessor;
 
 public class Pipeline {
-
+	
 	// are set automatically in code
 	private static int TRAIN_SIZE;
 	private static int TEST_SIZE;
@@ -75,7 +76,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "del";
+	private final static String DATASET = "bib";
+	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -93,10 +95,48 @@ public class Pipeline {
 				"You should have received a copy of the GNU Affero General Public License\n" +
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
-		// Resource-Recommender testing
-		String dir = DATASET + "_core";
+		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
-		//try { getStatistics(path, true); } catch (IOException e) { e.printStackTrace(); }
+				
+		// Method Testing -> just uncomment the methods you want to test
+		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
+		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE);
+		
+		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
+		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE);
+		
+		// Test the GIRP and GIRPTM algorithms
+		//startRecCalculator(dir, path);
+		
+		// Test the MP_u, MP_r and MP_u_r algorithms
+		//startModelCalculator(dir, path, 1, -5);
+		
+		// Test the MP algorithm
+		//startBaselineCalculator(dir, path, 1);
+		
+		// Test the CF_u, CF_r and CF_u_r algorithms with 20 neighbors (change it if you want)
+		//startCfTagCalculator(dir, path, 1, 20, -5);
+		
+		// Test the PR and FR algorithms
+		//startFolkRankCalculator(dir, path, 1);
+		
+		// Test the LDA algorithm with 1000 topics (change it if you want)
+		//startLdaCalculator(dir, path, 1000, 1);
+		
+		// Test the 3L algorithm
+		//start3LayersJavaCalculator(dir, path, "lda_1000", 1, -5, -5, true, false, false);
+		
+		// Test the 3L_tag algorithm
+		//start3LayersJavaCalculator(dir, path, "lda_1000", 1, -5, -5, true, true, false);
+		
+		// Test the 3LT_topic algorithm
+		//start3LayersJavaCalculator(dir, path, "lda_1000", 1, -5, -5, true, false, true);
+		
+		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
+		//startContentBasedCalculator(dir, path);
+		
+		// Resource-Recommender testing
+		//try { getStatistics("ml_core/movielens", false); } catch (IOException e) { e.printStackTrace(); }
 		//writeTensorFiles(path, false);
 		//evaluate(dir, path, "wrmf_500_mml", TOPIC_NAME, false, true);
 		//createLdaSamples(path, 1, 500, false);
@@ -106,10 +146,6 @@ public class Pipeline {
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
 		
-		
-		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
-		//startContentBasedCalculator("bib_core", "bib_core/bib_sample");
-		
 		// Code example
 		// Data-preprocessing: create p-core of level 3:
 		//BookmarkSplitter.splitSample("bib_core/bib_dataset", "bib_core/bib_sample", 3);
@@ -117,40 +153,6 @@ public class Pipeline {
 		//BLLCalculator.predictSample("bib_core/bib_sample", TRAIN_SIZE, TEST_SIZE);
 		// Evaluation and Post-Processing: evaluate the results for users and resources with a minimum/maximum number of bookmarks:
 		//Pipeline.writeMetrics("bib_core", "bib_core/bib_sample", "bll_c", 10, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS);
-		
-		// Method Testing -> just uncomment the methods you want to test
-		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.NONE);
-		
-		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
-		//startActCalculator("bib_core", "bib_core/bib_sample", 1, -5, -5, true, CalculationType.USER_TO_RESOURCE);
-		
-		// Test the GIRP and GIRPTM algorithms
-		//startRecCalculator("bib_core", "bib_core/bib_sample");
-		
-		// Test the MP_u, MP_r and MP_u_r algorithms
-		//startModelCalculator("bib_core", "bib_core/bib_sample", 1, -5);
-		
-		// Test the MP algorithm
-		//startBaselineCalculator("bib_core", "bib_core/bib_sample", 1);
-		
-		// Test the CF_u, CF_r and CF_u_r algorithms with 20 neighbors (change it if you want)
-		//startCfTagCalculator("bib_core", "bib_core/bib_sample", 1, 20, -5);
-		
-		// Test the PR and FR algorithms
-		//startFolkRankCalculator("bib_core", "bib_core/bib_sample", 1);
-		
-		// Test the LDA algorithm with 100 topics (change it if you want)
-		//startLdaCalculator("bib_core", "bib_core/bib_sample", 100, 1);
-		
-		// Test the 3L algorithm
-		//start3LayersJavaCalculator("bib_core", "bib_core/bib_sample", "", 1, -5, -5, true, false, false);
-		
-		// Test the 3L_tag algorithm
-		//start3LayersJavaCalculator("bib_core", "bib_core/bib_sample", "", 1, -5, -5, true, false, false);
-		
-		// Test the 3LT_topic algorithm
-		//start3LayersJavaCalculator("bib_core", "bib_core/bib_sample", "", 1, -5, -5, true, false, false);
 		
 		// Engine Testing
 		/*
@@ -193,7 +195,6 @@ public class Pipeline {
 		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
 		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
 		*/
-
 		
 		// Commandline Arguments
 		if (args.length < 3) {
@@ -280,13 +281,11 @@ public class Pipeline {
 	// helper methods ---------------------------------------------------------------------------------------------------------------------------------------------
 	private static void startContentBasedCalculator(String sampleDir, String sampleName) {
 		getTrainTestSize(sampleName);
-		BookmarkReader reader = null;
-		ContentBasedCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
+		BookmarkReader reader = ContentBasedCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
 		writeMetrics(sampleDir, sampleName, "cb", 1, 10, null, reader);
 	}
 	
-	private static void startActCalculator(String sampleDir, String sampleName,
-			int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type) {
+	private static void startActCalculator(String sampleDir, String sampleName, int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type) {
 		getTrainTestSize(sampleName);
 		List<Integer> dValues = getBetaValues(dUpperBound);
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
@@ -295,20 +294,14 @@ public class Pipeline {
 		
 		for (int i = 1; i <= sampleCount; i++) {
 			for (int dVal : dValues) {
-				reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE,
-						TEST_SIZE, true, false, dVal, 5, type);
-				writeMetrics(sampleDir, sampleName,
-						"bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader);
+				reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, dVal, 5, type);
+				writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader);
 				if (all) {
 					for (int betaVal : betaValues) {
-						reader = BLLCalculator.predictSample(sampleName,
-								TRAIN_SIZE, TEST_SIZE, true, true, dVal,
-								betaVal, type);
-						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal
-								+ "_" + dVal, sampleCount, 10, null, reader);
+						reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal, type);
+						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, 10, null, reader);
 					}
-					reader = BLLCalculator.predictSample(sampleName,
-							TRAIN_SIZE, TEST_SIZE, false, true, dVal, 5, type);
+					reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, false, true, dVal, 5, type);
 					writeMetrics(sampleDir, sampleName, "bll_r" + ac + "_" + 5 + "_"
 							+ dVal, sampleCount, 10, null, reader);
 				}
@@ -319,32 +312,26 @@ public class Pipeline {
 	private static void startRecCalculator(String sampleDir, String sampleName) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
-		RecCalculator.predictSample(sampleName, TRAIN_SIZE,
-				TEST_SIZE, true, false);
+		reader = RecCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false);
 		writeMetrics(sampleDir, sampleName, "girp", 1, 10, null, reader);
-		RecCalculator.predictSample(sampleName, TRAIN_SIZE,
-				TEST_SIZE, true, true);
+		reader = RecCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true);
 		writeMetrics(sampleDir, sampleName, "girptm", 1, 10, null, reader);
 	}
 
-	private static void startModelCalculator(String sampleDir,
-			String sampleName, int sampleCount, int betaUpperBound) {
+	private static void startModelCalculator(String sampleDir, String sampleName, int sampleCount, int betaUpperBound) {
 		getTrainTestSize(sampleName);
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
 		BookmarkReader reader = null;
 		
 		for (int i = 1; i <= sampleCount; i++) {
-			LanguageModelCalculator.predictSample(sampleName,
-					TRAIN_SIZE, TEST_SIZE, true, false, 5);
-			LanguageModelCalculator.predictSample(sampleName,
-					TRAIN_SIZE, TEST_SIZE, false, true, 5);
+			reader = LanguageModelCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, 5);
+			reader = LanguageModelCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, false, true, 5);
 		}
 		writeMetrics(sampleDir, sampleName, "mp_u_" + 5, sampleCount, 10, null, reader);
 		writeMetrics(sampleDir, sampleName, "mp_r_" + 5, sampleCount, 10, null, reader);
 		for (int beta : betaValues) {
 			for (int i = 1; i <= sampleCount; i++) {
-				LanguageModelCalculator.predictSample(sampleName,
-						TRAIN_SIZE, TEST_SIZE, true, true, beta);
+				reader = LanguageModelCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, beta);
 			}
 			writeMetrics(sampleDir, sampleName, "mp_ur_" + beta, sampleCount, 10, null, reader);
 		}
@@ -355,41 +342,34 @@ public class Pipeline {
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
 		BookmarkReader reader = null;
 		for (int i = 1; i <= sampleCount; i++) {
-			reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE,
-					TEST_SIZE, neighbors, true, false, 5);
-			reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE,
-					TEST_SIZE, neighbors, false, true, 5);
+			reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, false, 5);
+			reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, false, true, 5);
 		}
 		writeMetrics(sampleDir, sampleName, "usercf_" + 5, sampleCount, 10, null, reader);
 		writeMetrics(sampleDir, sampleName, "rescf_" + 5, sampleCount, 10, null, reader);
 		for (int beta : betaValues) {
 			for (int i = 1; i <= sampleCount; i++) {
-				reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE,
-						TEST_SIZE, neighbors, true, true, beta);
+				reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, true, beta);
 			}
 			writeMetrics(sampleDir, sampleName, "cf_" + beta, sampleCount, 10, null, reader);
 		}
 	}
 
-	private static void startFolkRankCalculator(String sampleDir,
-			String sampleName, int size) {
+	private static void startFolkRankCalculator(String sampleDir, String sampleName, int size) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
 		for (int i = 1; i <= size; i++) {
-			FolkRankCalculator.predictSample(sampleName, TRAIN_SIZE,
-					TEST_SIZE, true);
+			reader = FolkRankCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true);
 		}
 		writeMetrics(sampleDir, sampleName, "fr", size, 10, null, reader);
 		writeMetrics(sampleDir, sampleName, "apr", size, 10, null, reader);
 	}
 
-	private static void startBaselineCalculator(String sampleDir,
-			String sampleName, int size) {
+	private static void startBaselineCalculator(String sampleDir, String sampleName, int size) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
 		for (int i = 1; i <= size; i++) {
-			BaselineCalculator.predictPopularTags(sampleName,
-					TRAIN_SIZE, TEST_SIZE);
+			reader = BaselineCalculator.predictPopularTags(sampleName, TRAIN_SIZE, TEST_SIZE);
 		}
 		writeMetrics(sampleDir, sampleName, "mp", size, 10, null, reader);
 	}
@@ -398,7 +378,7 @@ public class Pipeline {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
 		for (int i = 1; i <= sampleCount; i++) {
-			MalletCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, topics, true, true);
+			reader = MalletCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, topics, true, true);
 		}
 		writeMetrics(sampleDir, sampleName, "lda_" + topics, sampleCount, 10, null, reader);
 	}
@@ -433,17 +413,17 @@ public class Pipeline {
 		} else if (topicBLL) {
 			suffix += "topicbll";
 		}
-		BookmarkReader reader = null;
 		
+		BookmarkReader reader = null;		
 		for (int i = 1; i <= size; i++) {
 			for (int d : dValues) {
 				if (resBased) {
 					for (int b : betaValues) {
-						reader = ThreeLayersCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, d, b, true, true, tagBLL, topicBLL);
+						reader = ThreeLTCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, d, b, true, true, tagBLL, topicBLL, CalculationType.NONE, true);
 						writeMetrics(sampleDir, sampleName, suffix + "_" + b + "_" + d, size, 10, !topicString.isEmpty() ? topicString : null, reader);
 					}
 				}
-				reader = ThreeLayersCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, d, 5, true, false, tagBLL, topicBLL);
+				reader = ThreeLTCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, d, 5, true, false, tagBLL, topicBLL, CalculationType.NONE, true);
 				writeMetrics(sampleDir, sampleName, "user" + suffix + "_" + 5 + "_" + d, size, 10, !topicString.isEmpty() ? topicString : null, reader);
 			}
 		}

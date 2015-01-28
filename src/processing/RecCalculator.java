@@ -125,7 +125,7 @@ public class RecCalculator {
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------
-	public static void predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased) {
 		//filename += "_res";
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
@@ -147,5 +147,6 @@ public class RecCalculator {
 		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(filename + suffix);
+		return reader;
 	}
 }

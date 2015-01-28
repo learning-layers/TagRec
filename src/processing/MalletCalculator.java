@@ -360,7 +360,7 @@ public class MalletCalculator {
 	}
     
 	
-	public static void predictSample(String filename, int trainSize, int sampleSize, int numTopics, boolean userBased, boolean resBased) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int numTopics, boolean userBased, boolean resBased) {
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 
@@ -376,6 +376,7 @@ public class MalletCalculator {
 		writer.writeFile(filename + "_lda_" + numTopics);
 		
 		Utilities.writeStringToFile("./data/metrics/" + filename + "_lda_" + numTopics + "_TIME.txt", timeString);
+		return reader;
 	}
 	
 	public static void createSample(String filename, int sampleSize, short numTopics, boolean userBased, boolean resBased, boolean tagRec) {

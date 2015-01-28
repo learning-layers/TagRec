@@ -153,7 +153,7 @@ public class LanguageModelCalculator {
 		return results;
 	}
 	
-	public static void predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int beta) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int beta) {
 		//filename += "_res";
 
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
@@ -177,6 +177,7 @@ public class LanguageModelCalculator {
 		String outputFile = filename + suffix + beta;
 		writer.writeFile(outputFile);
 		
-		Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);
+		Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);		
+		return reader;
 	}
 }
