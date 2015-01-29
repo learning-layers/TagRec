@@ -98,7 +98,8 @@ public class CFResourceRecommender {
 			this.allResources = Utilities.getAllEntities(this.trainList, true);
 		}
 	}
-		
+	
+
 	public Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll, boolean filterOwnEntities) {
 		List<Integer> userResources = null;
 		Map<Integer, Double> userBllResources = null;

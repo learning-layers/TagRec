@@ -202,7 +202,6 @@ public class MetricsCalculator {
 	}
 	
 	// Statics ----------------------------------------------------------------------------------------------------------------------
-	
 	public static void calculateMetrics(String filename, int k, String outputFile, boolean endline, BookmarkReader bookmarkReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering describer, boolean calcTags, Integer trainSize) {
 		PredictionFileReader reader = new PredictionFileReader();
 		if (trainSize == null) {
