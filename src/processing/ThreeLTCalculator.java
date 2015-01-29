@@ -1,5 +1,7 @@
 package processing;
 
+import itemrecommendations.CFResourceRecommender;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,7 +20,6 @@ import common.Bookmark;
 import common.Features;
 import common.Similarity;
 import common.Utilities;
-
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
@@ -35,7 +36,7 @@ public class ThreeLTCalculator {
 	private List<List<Bookmark>> userBookmarks;
 	List<Map<Integer, Double>> resMaps;
 	
-	private BM25Calculator cfCalc;
+	private CFResourceRecommender cfCalc;
 	private CooccurenceMatrix rMatrix;
 	private CalculationType cType;
 	private List<Map<Integer, Double>> userCounts;
@@ -56,7 +57,7 @@ public class ThreeLTCalculator {
 		if (mp) {
 			this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true);
 		} else {
-			this.cfCalc = new BM25Calculator(this.reader, trainSize, true, true, false, 5, Similarity.JACCARD, Features.TAGS);
+			this.cfCalc = new CFResourceRecommender(this.reader, trainSize, true, true, false, 5, Similarity.JACCARD, Features.TAGS);
 		}
 		this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 		this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);

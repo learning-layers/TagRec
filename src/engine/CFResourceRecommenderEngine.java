@@ -20,8 +20,8 @@
 
 package engine;
 
-import processing.BM25Calculator;
 import file.BookmarkReader;
+import itemrecommendations.CFResourceRecommender;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -35,7 +35,7 @@ import common.Similarity;
 public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 
 	private BookmarkReader reader = null;
-	private BM25Calculator calculator = null;
+	private CFResourceRecommender calculator = null;
 	private final Map<String, Double> topResources;
 
 	public CFResourceRecommenderEngine() {
@@ -49,7 +49,7 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 
-		BM25Calculator calculator = new BM25Calculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
+		CFResourceRecommender calculator = new CFResourceRecommender(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		
 		resetStructure(reader, calculator);
 	}
@@ -100,7 +100,7 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 		return resourceMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, BM25Calculator calculator) {
+	public synchronized void resetStructure(BookmarkReader reader, CFResourceRecommender calculator) {
 		this.reader = reader;
 		this.calculator = calculator;
 		

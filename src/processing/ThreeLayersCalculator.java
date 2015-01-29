@@ -20,6 +20,8 @@
 
 package processing;
 
+import itemrecommendations.CFResourceRecommender;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -34,7 +36,6 @@ import com.google.common.primitives.Ints;
 import common.DoubleMapComparator;
 import common.Bookmark;
 import common.Utilities;
-
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
@@ -51,7 +52,7 @@ public class ThreeLayersCalculator {
 	private List<List<Bookmark>> userBookmarks;
 	List<Map<Integer, Double>> resMaps;
 	
-	private BM25Calculator cfCalc;
+	private CFResourceRecommender cfCalc;
 	
 	public ThreeLayersCalculator(BookmarkReader reader, int trainSize, int dValue, int beta, boolean userBased, boolean resBased, boolean bookmarkBLL) {
 		this.reader = reader;

@@ -20,6 +20,8 @@
 
 package processing;
 
+import itemrecommendations.CFResourceRecommender;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,7 +66,7 @@ public class BLLCalculator {
 		
 	private List<Bookmark> trainList;
 	
-	private BM25Calculator cfCalc;
+	private CFResourceRecommender cfCalc;
 	private CooccurenceMatrix rMatrix;
 		
 	public BLLCalculator(BookmarkReader reader, int trainSize, int dVal, int beta, boolean userBased, boolean resBased, CalculationType cType) {

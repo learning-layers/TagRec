@@ -18,7 +18,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package processing;
+package itemrecommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ import common.Utilities;
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
-public class BM25Calculator {
+public class CFResourceRecommender {
 	
 	public static int MAX_NEIGHBORS = 20;
 	private final static double K1 = 1.2;
@@ -64,7 +64,7 @@ public class BM25Calculator {
 	private List<Map<Integer, Double>> resMaps;
 	private Map<Integer, Double> allResources;
 	
-	public BM25Calculator(BookmarkReader reader, int trainSize, boolean predictTags, boolean userBased, boolean resBased, int beta, Similarity sim, Features features) {		
+	public CFResourceRecommender(BookmarkReader reader, int trainSize, boolean predictTags, boolean userBased, boolean resBased, int beta, Similarity sim, Features features) {		
 		this.reader = reader;
 		this.userBased = userBased;
 		this.resBased = resBased;
@@ -267,13 +267,13 @@ public class BM25Calculator {
 	// Statics -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	public static BookmarkReader predictResources(String filename, int trainSize, int sampleSize, int neighborSize, boolean userBased, boolean resourceBased, boolean allResources, boolean bll, Features features) {
 		MAX_NEIGHBORS = neighborSize;
-		return predictSample(filename, trainSize, sampleSize, false, userBased, resourceBased, allResources, 5, bll, features);
+		return predictSample(filename, trainSize, sampleSize, userBased, resourceBased, allResources, 5, bll, features);
 	}
 	
 	private static List<Map<Integer, Double>> startBM25CreationForResourcesPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
-		BM25Calculator calculator = new BM25Calculator(reader, trainSize, false, userBased, resBased, 5, Similarity.COSINE, features);
+		CFResourceRecommender calculator = new CFResourceRecommender(reader, trainSize, false, userBased, resBased, 5, Similarity.COSINE, features);
 		
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
 		for (Integer userID : reader.getUniqueUserListFromTestSet(trainSize)) {
@@ -285,28 +285,14 @@ public class BM25Calculator {
 		return results;
 	}
 	
-	// Tags -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-	public static BookmarkReader predictTags(String filename, int trainSize, int sampleSize, int neighbors, boolean userBased, boolean resBased, int beta) {
-		MAX_NEIGHBORS = neighbors;
-		return predictSample(filename, trainSize, sampleSize, true, userBased, resBased, false, beta, false, Features.TAGS);
-	}
-	
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean predictTags, boolean userBased, boolean resBased, boolean allResources, int beta, boolean bll, Features features) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, boolean allResources, int beta, boolean bll, Features features) {
 		//filename += "_res";
 		
-		//int size = 0;
-		//if (predictTags) {
-		//	size = trainSize;
-		//}
 		BookmarkReader reader = new BookmarkReader(trainSize, false); // TODO
 		reader.readFile(filename);
 		
 		List<Map<Integer, Double>> cfValues = null;	
-		if (predictTags) {
-			cfValues = startBM25CreationForTagPrediction(reader, sampleSize, userBased, resBased, beta);
-		} else {
-			cfValues = startBM25CreationForResourcesPrediction(reader, sampleSize, userBased, resBased, allResources, bll, features);
-		}
+		cfValues = startBM25CreationForResourcesPrediction(reader, sampleSize, userBased, resBased, allResources, bll, features);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
 		for (int i = 0; i < cfValues.size(); i++) {
@@ -322,56 +308,17 @@ public class BM25Calculator {
 			suffix = "_usercf_";
 		}
 		//suffix += features + "_"; 
-		if (predictTags) {
-			reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
-			PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
-			String outputFile = filename + suffix + beta;
-			writer.writeFile(outputFile);
-			
-			Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);
-		} else {
-			if (!userBased && !allResources) {
-				suffix += "mixed_";
-			}
-			if (bll) {
-				suffix += "bll_";
-			}
-			PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
-			writer.writeResourcePredictionsToFile(filename + suffix + beta, trainSize, MAX_NEIGHBORS);
+		if (!userBased && !allResources) {
+			suffix += "mixed_";
 		}
+		if (bll) {
+			suffix += "bll_";
+		}
+		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
+		writer.writeResourcePredictionsToFile(filename + suffix + beta, trainSize, MAX_NEIGHBORS);
+
 		return reader;
 	}
 	
 	private static String timeString;
-	
-	private static List<Map<Integer, Double>> startBM25CreationForTagPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, int beta) {
-		timeString = "";
-		int size = reader.getBookmarks().size();
-		int trainSize = size - sampleSize;
-		Stopwatch timer = new Stopwatch();
-		timer.start();
-		BM25Calculator calculator = new BM25Calculator(reader, trainSize, true, userBased, resBased, beta, Similarity.JACCARD, Features.TAGS);
-		timer.stop();
-		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
-		
-		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
-		timer = new Stopwatch();
-		timer.start();
-		for (int i = trainSize; i < size; i++) {
-			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = null;
-			map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), true);
-			results.add(map);
-			// TODO: enable if you need continuous output
-			//System.out.println(data.getTags() + "|" + map.keySet());
-		}
-		timer.stop();
-		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
-		timeString += ("Full training time: " + trainingTime + "\n");
-		timeString += ("Full test time: " + testTime + "\n");
-		timeString += ("Average test time: " + testTime / (double)sampleSize) + "\n";
-		timeString += ("Total time: " + (trainingTime + testTime) + "\n");
-	
-		return results;
-	}	
 }

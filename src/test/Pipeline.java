@@ -20,6 +20,7 @@
 
 package test;
 
+import itemrecommendations.CFResourceRecommender;
 import itemrecommendations.HuangCalculator;
 import itemrecommendations.Resource3LTCalculator;
 import itemrecommendations.ZhengCalculator;
@@ -38,7 +39,7 @@ import common.CalculationType;
 import common.Features;
 import common.Utilities;
 import processing.BLLCalculator;
-import processing.BM25Calculator;
+import processing.CFTagRecommender;
 import processing.BaselineCalculator;
 import processing.ContentBasedCalculator;
 import processing.FolkRankCalculator;
@@ -115,7 +116,7 @@ public class Pipeline {
 		//startBaselineCalculator(dir, path, 1);
 		
 		// Test the CF_u, CF_r and CF_u_r algorithms with 20 neighbors (change it if you want)
-		//startCfTagCalculator(dir, path, 1, 20, -5);
+		//startCfTagCalculator(dir, path, 1, 20, -5, false);
 		
 		// Test the PR and FR algorithms
 		//startFolkRankCalculator(dir, path, 1);
@@ -225,7 +226,9 @@ public class Pipeline {
 		}
 
 		if (op.equals("cf")) {
-			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5);
+			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
+		} else if (op.equals("cfr")) {
+			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, true);
 		} else if (op.equals("fr")) {
 			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("bll_c")) {
@@ -337,21 +340,24 @@ public class Pipeline {
 		}
 	}
 
-	private static void startCfTagCalculator(String sampleDir, String sampleName, int sampleCount, int neighbors, int betaUpperBound) {
+	private static void startCfTagCalculator(String sampleDir, String sampleName, int sampleCount, int neighbors, int betaUpperBound, boolean all) {
 		getTrainTestSize(sampleName);
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
 		BookmarkReader reader = null;
 		for (int i = 1; i <= sampleCount; i++) {
-			reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, false, 5);
-			reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, false, true, 5);
+			reader = CFTagRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, false, 5);
+			if (all) reader = CFTagRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, false, true, 5);
 		}
 		writeMetrics(sampleDir, sampleName, "usercf_" + 5, sampleCount, 10, null, reader);
-		writeMetrics(sampleDir, sampleName, "rescf_" + 5, sampleCount, 10, null, reader);
-		for (int beta : betaValues) {
-			for (int i = 1; i <= sampleCount; i++) {
-				reader = BM25Calculator.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, true, beta);
+		if (all) writeMetrics(sampleDir, sampleName, "rescf_" + 5, sampleCount, 10, null, reader);
+		
+		if (all) {
+			for (int beta : betaValues) {
+				for (int i = 1; i <= sampleCount; i++) {
+					reader = CFTagRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, true, beta);
+				}
+				writeMetrics(sampleDir, sampleName, "cf_" + beta, sampleCount, 10, null, reader);
 			}
-			writeMetrics(sampleDir, sampleName, "cf_" + beta, sampleCount, 10, null, reader);
 		}
 	}
 
@@ -632,7 +638,7 @@ public class Pipeline {
 		//suffix += features + "_"; 
 		for (int i = 1; i <= size; i++) {
 			getTrainTestSize(sampleName + posfix);
-			reader = BM25Calculator.predictResources(sampleName + posfix, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
+			reader = CFResourceRecommender.predictResources(sampleName + posfix, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
 		}
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, TOPIC_NAME, reader, null);
 	}
