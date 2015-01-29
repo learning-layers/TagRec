@@ -22,6 +22,7 @@ package test;
 
 import itemrecommendations.HuangCalculator;
 import itemrecommendations.Resource3LTCalculator;
+import itemrecommendations.SustainApproach;
 import itemrecommendations.ZhengCalculator;
 
 import java.io.BufferedWriter;
@@ -76,7 +77,7 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "bib";
+	private final static String DATASET = "delicious";
 	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
@@ -95,9 +96,23 @@ public class Pipeline {
 				"You should have received a copy of the GNU Affero General Public License\n" +
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
-		String dir = DATASET + "_core" + SUBDIR;
-		String path = dir + "/" + DATASET + "_sample";
-				
+		//String dir = DATASET + "_core" + SUBDIR;
+		//String path = dir + "/" + DATASET + "_sample";
+		String dir = DATASET;
+		String path = dir + "/" +"del_sample_lda_100";
+		
+		
+		double beta = 6.396;
+		double r = 2.845; 
+		double learning_rate=0.0936;
+		double tau_cluster=0.5;
+		int sampleSize = 20;
+        int candidateNumber = 0;
+        int trainingRecency = 0;
+		double cfWeight = 0.5;
+		
+		startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
+		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE);
@@ -636,6 +651,22 @@ public class Pipeline {
 		}
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, TOPIC_NAME, reader, null);
 	}
+	
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
+		BookmarkReader reader = null;
+		getTrainTestSize(sampleName);
+		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
+		//for (int i = 1; i <= size; i++) {
+		reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
+		//}
+		
+		// todo check whether size is needed as a parameter
+		//writeMetricsForResources(sampleDir, sampleName, "sustain", size, 20, null, reader);
+		String prefix = "sustain";
+		writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, null, reader, TRAIN_SIZE);
+	}
+	
+
 	
 	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader, Integer trainSize) {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix + "_");
