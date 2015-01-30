@@ -231,7 +231,7 @@ public class Pipeline {
 			startHuangResourceCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("item_cirtt")) {
 			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, false, true, false, true);
-		} else if (op.equals("sustain")) {
+		} else if (op.equals("item_sustain")) {
 			startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 		} else {
 			System.out.println("Unknown operation");
