@@ -159,6 +159,17 @@ public class Bookmark implements Comparable<Bookmark> {
 		return returnData;
 	}
 	
+	public static List<Integer> getTagsOfBookmark(List<Bookmark> lines, int userID, int resID) {
+		if (userID != -1 && resID != -1) {
+			for (Bookmark data : lines) {
+				if (data.userID == userID && data.resID == resID) {
+					return data.getTags();
+				}
+			}
+		}
+		return new ArrayList<Integer>();
+	}
+	
 	public static Bookmark getResData(List<Bookmark> lines, int userID, int resID) {
 		Bookmark returnData = null;
 		for (Bookmark data : lines) {
@@ -200,7 +211,6 @@ public class Bookmark implements Comparable<Bookmark> {
 		}		
 		return new ArrayList<Integer>(resourceList);
 	}
-	
 
 	public static Map<Integer, Double> getResourcesFromUserWithBLL(List<Bookmark> trainData, List<Bookmark> testData, int userID, List<Map<Integer, Double>> bllValues) {
 		Map<Integer, Double> resourceMap = new LinkedHashMap<Integer, Double>();

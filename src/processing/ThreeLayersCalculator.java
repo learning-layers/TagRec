@@ -113,7 +113,7 @@ public class ThreeLayersCalculator {
 		return usageMap;
 	}
 	
-	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL) {	
+	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL, boolean sorting) {	
 		Map<Integer, Double> userResultMap = null;
 		if (this.userBased) {
 			List<Bookmark> userB = null;
@@ -176,8 +176,13 @@ public class ThreeLayersCalculator {
 		
 		// sort and return
 		Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>();
-		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-		sortedResultMap.putAll(resultMap);
+		Map<Integer, Double> sortedResultMap = null;
+		if (sorting) {
+			sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
+			sortedResultMap.putAll(resultMap);
+		} else {
+			sortedResultMap = resultMap;
+		}
 		int count = 0;
 		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
 			if (count++ < limit) {
@@ -283,7 +288,7 @@ public class ThreeLayersCalculator {
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
 			double timestamp = Double.parseDouble((data.getTimestamp()));
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL);
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL, true);
 			predictionValues.add(Ints.toArray(map.keySet()));
 		}
 		timer.stop();

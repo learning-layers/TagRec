@@ -54,7 +54,6 @@ import engine.BaseLevelLearningEngine;
 import engine.CFResourceRecommenderEngine;
 import engine.EngineInterface;
 import engine.LanguageModelEngine;
-import engine.ResourceEngineInterface;
 import engine.TagRecommenderEngine;
 import engine.TagRecommenderEvalEngine;
 import engine.ThreeLayersEngine;
@@ -78,14 +77,14 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "delicious";
+	private final static String DATASET = "bib";
 	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
 				"A framework to implement and evaluate algorithms for the recommendation\n" +
 				"of tags." + 
-			   	"Copyright (C) 2013 Dominik Kowald\n\n" + 
+			   	"Copyright (C) 2013 - 2015 Dominik Kowald\n\n" + 
 			   	"This program is free software: you can redistribute it and/or modify\n" + 
 				" it under the terms of the GNU Affero General Public License as published by\n" +
 				"the Free Software Foundation, either version 3 of the License, or\n" +
@@ -97,23 +96,9 @@ public class Pipeline {
 				"You should have received a copy of the GNU Affero General Public License\n" +
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
-		//String dir = DATASET + "_core" + SUBDIR;
-		//String path = dir + "/" + DATASET + "_sample";
-		String dir = DATASET;
-		String path = dir + "/" +"del_sample_lda_100";
-		
-		
-		double beta = 6.396;
-		double r = 2.845; 
-		double learning_rate=0.0936;
-		double tau_cluster=0.5;
-		int sampleSize = 20;
-        int candidateNumber = 0;
-        int trainingRecency = 0;
-		double cfWeight = 0.5;
-		
-		startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
-		
+		String dir = DATASET + "_core" + SUBDIR;
+		String path = dir + "/" + DATASET + "_sample";
+					
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE);
@@ -161,56 +146,12 @@ public class Pipeline {
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
 		//startBaselineCalculatorForResources(dir, path, 1, false);
-		
-		// Code example
-		// Data-preprocessing: create p-core of level 3:
-		//BookmarkSplitter.splitSample("bib_core/bib_dataset", "bib_core/bib_sample", 3);
-		// Start algorithm: run BLL+C tag-recommender for the generated p-core sample:
-		//BLLCalculator.predictSample("bib_core/bib_sample", TRAIN_SIZE, TEST_SIZE);
-		// Evaluation and Post-Processing: evaluate the results for users and resources with a minimum/maximum number of bookmarks:
-		//Pipeline.writeMetrics("bib_core", "bib_core/bib_sample", "bll_c", 10, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS);
-		
+		//startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
+			
 		// Engine Testing
-		/*
-		final ResourceEngineInterface resrecEngine = new CFResourceRecommenderEngine();
-		try {
-			resrecEngine.loadFile(path);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, true));
-		System.out.println("CF -Filter: " + resrecEngine.getEntitiesWithLikelihood(null, null, null, 20, false));
-		EngineInterface engine = new ThreeLayersEngine();
-		try {
-			engine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		System.out.println("3LT: " + engine.getEntitiesWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10));
-		BaseLevelLearningEngine bllEngine = new BaseLevelLearningEngine();
-		try {
-			bllEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		System.out.println("BLL: " + bllEngine.getEntitiesWithLikelihood("41", "545", null, 10));
-		EngineInterface lmEngine = new LanguageModelEngine();
-		try {
-			lmEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
-		} catch (Exception e3) {
-			e3.printStackTrace();
-		}
-		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10));		
-		EngineInterface tagrecEngine = new TagRecommenderEvalEngine();
-		try {
-			tagrecEngine.loadFile(path + "_lda_500");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
-		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
-		System.out.println("TagRec without Topics: " + tagrecEngine.getEntitiesWithLikelihood("0", "13", Arrays.asList("t333"), 10));
-		*/
+		//startEngineTest(path);
+		// Code example
+		//startEasyCodeExample();	
 		
 		// Commandline Arguments
 		if (args.length < 3) {
@@ -278,11 +219,9 @@ public class Pipeline {
 		} else if (op.equals("item_mp")) {
 			startBaselineCalculatorForResources(sampleDir, samplePath, sampleCount, false);
 		} else if (op.equals("item_cft")) {
-			boolean userBased = true, resourceBased = false, allResources  = false;
-			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, userBased, resourceBased, allResources, false, Features.TAGS);
+			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, true, false, false, false, Features.TAGS);
 		} else if (op.equals("item_cfb")) {
-			boolean userBased = true, resourceBased = false, allResources  = false;
-			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, userBased, resourceBased, allResources, false, Features.ENTITIES);
+			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, true, false, false, false, Features.ENTITIES);
 		} else if (op.equals("item_cbt")) {
 			TOPIC_NAME = "lda_500";
 			startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
@@ -291,17 +230,15 @@ public class Pipeline {
 		} else if (op.equals("item_huang")) {
 			startHuangResourceCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("item_cirtt")) {
-			boolean calculateUserSim = false, calculateBLL = true, calculateOnTag = true, novelty = false;
-			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, calculateUserSim, calculateBLL, novelty, calculateOnTag);
+			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, false, true, false, true);
+		} else if (op.equals("sustain")) {
+			startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
+		} else {
+			System.out.println("Unknown operation");
 		}
 	}
 
-	// helper methods ---------------------------------------------------------------------------------------------------------------------------------------------
-	private static void startContentBasedCalculator(String sampleDir, String sampleName) {
-		getTrainTestSize(sampleName);
-		BookmarkReader reader = ContentBasedCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
-		writeMetrics(sampleDir, sampleName, "cb", 1, 10, null, reader);
-	}
+	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------
 	
 	private static void startActCalculator(String sampleDir, String sampleName, int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type) {
 		getTrainTestSize(sampleName);
@@ -403,24 +340,6 @@ public class Pipeline {
 		}
 		writeMetrics(sampleDir, sampleName, "lda_" + topics, sampleCount, 10, null, reader);
 	}
-	
-	private static void createLdaSamples(String sampleName, int size, int topics, boolean tagrec) {
-		getTrainTestSize(sampleName);
-		for (int i = 1; i <= size; i++) {
-			MalletCalculator.createSample(sampleName, TEST_SIZE, (short)topics, false, true, tagrec);			
-		}
-	}
-	
-	private static void writeTensorFiles(String sampleName, boolean tagRec) {
-		getTrainTestSize(sampleName);
-		CatDescFiltering filter = null;
-		if (DESCRIBER != null) {
-			filter = CatDescFiltering.instantiate(sampleName, TRAIN_SIZE);
-			filter.setDescriber(DESCRIBER.booleanValue());
-		}
-		
-		TensorProcessor.writeFiles(sampleName, TRAIN_SIZE, TEST_SIZE, tagRec, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, filter);
-	}
 		
 	private static void start3LayersJavaCalculator(String sampleDir, String sampleName, String topicString, int size, int dUpperBound, int betaUpperBound, boolean resBased, boolean tagBLL, boolean topicBLL) {
 		getTrainTestSize(sampleName);
@@ -450,8 +369,89 @@ public class Pipeline {
 		}
 	}
 	
+	private static void startContentBasedCalculator(String sampleDir, String sampleName) {
+		getTrainTestSize(sampleName);
+		BookmarkReader reader = ContentBasedCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
+		writeMetrics(sampleDir, sampleName, "cb", 1, 10, null, reader);
+	}
+	
+	// Engine testing
+	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	private static void startEngineTest(String path) {
+		/*
+		EngineInterface engine = new ThreeLayersEngine();
+		try {
+			engine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		System.out.println("3LT: " + engine.getEntitiesWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10, false, null));
+		BaseLevelLearningEngine bllEngine = new BaseLevelLearningEngine();
+		try {
+			bllEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		System.out.println("BLL: " + bllEngine.getEntitiesWithLikelihood("41", "545", null, 10, false, null));
+		EngineInterface lmEngine = new LanguageModelEngine();
+		try {
+			lmEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
+		} catch (Exception e3) {
+			e3.printStackTrace();
+		}
+		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10, false, null));		
+
+		
+		EngineInterface resrecEngine = new CFResourceRecommenderEngine();
+		try {
+			resrecEngine.loadFile(path);
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		System.out.println("CF NoFilter" + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, null));
+		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, null));
+		*/
+		EngineInterface tagrecEngine = new TagRecommenderEvalEngine();
+		try {
+			tagrecEngine.loadFile(path);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, true, "bll"));
+		System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, false, "bll"));
+		System.out.println("TagRec MP" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, true, "mp"));
+		System.out.println("TagRec MP" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, false, "mp"));
+	}
+	
+	private static void startEasyCodeExample() {
+		//Data-preprocessing: create p-core of level 3:
+		BookmarkSplitter.splitSample("bib_core/bib_dataset", "bib_core/bib_sample", 3);
+		// Start algorithm: run BLL+C tag-recommender for the generated p-core sample:
+		BLLCalculator.predictSample("bib_core/bib_sample", TRAIN_SIZE, TEST_SIZE);
+		// Evaluation and Post-Processing: evaluate the results for users and resources with a minimum/maximum number of bookmarks:
+		Pipeline.writeMetrics("bib_core", "bib_core/bib_sample", "bll_c", 10, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS);
+	}
+	
 	// Helpers
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------------
+	private static void createLdaSamples(String sampleName, int size, int topics, boolean tagrec) {
+		getTrainTestSize(sampleName);
+		for (int i = 1; i <= size; i++) {
+			MalletCalculator.createSample(sampleName, TEST_SIZE, (short)topics, false, true, tagrec);			
+		}
+	}
+	
+	private static void writeTensorFiles(String sampleName, boolean tagRec) {
+		getTrainTestSize(sampleName);
+		CatDescFiltering filter = null;
+		if (DESCRIBER != null) {
+			filter = CatDescFiltering.instantiate(sampleName, TRAIN_SIZE);
+			filter.setDescriber(DESCRIBER.booleanValue());
+		}
+		
+		TensorProcessor.writeFiles(sampleName, TRAIN_SIZE, TEST_SIZE, tagRec, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, filter);
+	}
+	
 	private static void writeMetrics(String sampleDir, String sampleName, String prefix, int k, Integer minUserBookmarks, Integer maxUserBookmarks, Integer minResourceBookmarks, Integer maxResourceBookmarks) {
 		writeMetrics(sampleDir, sampleName, prefix, 1, k, null, null);
 	}
@@ -616,7 +616,6 @@ public class Pipeline {
 			reader = ZhengCalculator.predictSample(sampleName + posfix, TRAIN_SIZE);
 		}
 		writeMetricsForResources(sampleDir, sampleName, "zheng_tagtime", size, 20, TOPIC_NAME, reader, null);
-
 	}
 	
 	private static void startHuangResourceCalculator(String sampleDir, String sampleName, int size) {
@@ -665,15 +664,10 @@ public class Pipeline {
 		//for (int i = 1; i <= size; i++) {
 		reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
 		//}
-		
-		// todo check whether size is needed as a parameter
-		//writeMetricsForResources(sampleDir, sampleName, "sustain", size, 20, null, reader);
 		String prefix = "sustain";
 		writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, null, reader, TRAIN_SIZE);
 	}
-	
-
-	
+		
 	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader, Integer trainSize) {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix + "_");
 		for (int i = 1; i <= k; i++) {

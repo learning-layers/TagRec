@@ -29,8 +29,6 @@ import javax.vecmath.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import processing.BM25Calculator;
-
 
 public class SustainApproach {
 	//Define parameters: potentiell veraenderbar
@@ -43,8 +41,8 @@ public class SustainApproach {
 	List<Integer> user;
 	private int numberOfTopics;
 	private List<Bookmark> trainList;
-	double lambda;
-	BM25Calculator rankedResourseCalculator;
+	private double lambda;
+	private CFResourceRecommender rankedResourseCalculator;
 	
 	//listId = userId, Set= resourceIds
 	//private List<Set<Integer>> userResourceTrainList;
@@ -70,7 +68,7 @@ public class SustainApproach {
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
 	//	this.testList = this.reader.getBookmarks().subList(trainSize, trainSize + testSize);
 	
-		rankedResourseCalculator = new BM25Calculator(this.reader, this.trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
+		rankedResourseCalculator = new CFResourceRecommender(this.reader, this.trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		
 		this.numberOfTopics = this.reader.getCategories().size();
 	

@@ -59,13 +59,18 @@ public class TagRecommenderEngine implements EngineInterface {
 	}
 
 	@Override
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
-		if (topics != null && topics.size() > 0 && this.threelEngine != null) {
-			return this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count);
-		} else if (this.bllEngine != null) {
-			return this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count);
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
+		if (algorithm == null || !algorithm.equals("mp")) {
+			if (topics != null && topics.size() > 0 && this.threelEngine != null) {
+				return this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
+			} else if (this.bllEngine != null) {
+				return this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
+			} else {
+				return this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
+			}
 		} else {
-			return this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count);
+			// creates only MP tags
+			return this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
 		}
 	}
 	

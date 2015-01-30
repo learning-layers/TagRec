@@ -37,7 +37,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 	private EngineInterface bllEngine;
 	private EngineInterface threelEngine;
 	
-	private Random random;
+	//private Random random;
 	private BufferedWriter bw;
 	
 	public TagRecommenderEvalEngine() {
@@ -45,7 +45,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 		this.bllEngine = null;
 		this.threelEngine = null;
 		this.bw = null;
-		this.random = new Random();
+		//this.random = new Random();
 		
 		try {
 			FileWriter writer = new FileWriter(new File("./data/tagrec_log.txt"), true);
@@ -76,28 +76,28 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 	}
 
 	@Override
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
 		Map<String, Double> returnMap = null;
-		String algorithm = null;
-		boolean useCognitiveAlgo = this.random.nextBoolean();
+		String algorithmString = null;
+		boolean useCognitiveAlgo = (algorithm == null || !algorithm.equals("mp"));//this.random.nextBoolean();
 		
 		if (useCognitiveAlgo) {
-			if (topics != null && topics.size() > 0 && this.threelEngine != null) {
-				algorithm = "3LT";
+			/*if (topics != null && topics.size() > 0 && this.threelEngine != null) {
+				algorithmString = "3LT";
 				returnMap = this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count);
-			} else if (this.bllEngine != null) {
-				algorithm = "BLL";
-				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count);
+			} else */if (this.bllEngine != null) {
+				algorithmString = "BLL";
+				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
 			}
 		}
 		if (!useCognitiveAlgo || returnMap == null) {
-			algorithm = "MP";
-			returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count);
+			algorithmString = "MP";
+			returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, "mp_u_r");
 		}
 
 		if (this.bw != null) {
 			try {
-				this.bw.write(user + "|" + resource + "|" + topics + "|" + count + "|" + System.currentTimeMillis() + "|" + useCognitiveAlgo + "|" + algorithm + "|" + returnMap.keySet() + "\n");
+				this.bw.write(user + "|" + resource + "|" + topics + "|" + count + "|" + filterOwnEntities + "|" + System.currentTimeMillis() + "|" + useCognitiveAlgo + "|" + algorithmString + "|" + returnMap.keySet() + "\n");
 				this.bw.flush();
 			} catch (IOException e) {
 				e.printStackTrace();

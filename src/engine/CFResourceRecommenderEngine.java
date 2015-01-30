@@ -27,34 +27,34 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import common.Bookmark;
+import common.DoubleMapComparator;
 import common.Features;
 import common.Similarity;
 
-public class CFResourceRecommenderEngine implements ResourceEngineInterface {
+public class CFResourceRecommenderEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
 	private CFResourceRecommender calculator = null;
-	private final Map<String, Double> topResources;
+	private final Map<Integer, Double> topResources;
 
 	public CFResourceRecommenderEngine() {
-		this.topResources = new LinkedHashMap<>();		
+		this.topResources = new LinkedHashMap<Integer, Double>();		
 		this.reader = new BookmarkReader(0, false);
 	}
 	
 	public void loadFile(String filename) throws Exception {
-
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 
-		CFResourceRecommender calculator = new CFResourceRecommender(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
-		
+		CFResourceRecommender calculator = new CFResourceRecommender(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);		
 		resetStructure(reader, calculator);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
@@ -62,6 +62,7 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 			filterOwnEntities = true;
 		}
 		
+		Map<Integer, Double> resourceIDs = new LinkedHashMap<>();
 		Map<String, Double> resourceMap = new LinkedHashMap<>();
 		if (this.reader == null || this.calculator == null) {
 			System.out.println("No data has been loaded");
@@ -77,19 +78,17 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 			userResources = Bookmark.getResourcesFromUser(this.reader.getBookmarks(), userID);
 		}
 
-		Map<Integer, Double> resourceIDs = this.calculator.getRankedResourcesList(userID, true, false, false, filterOwnEntities.booleanValue());
-		for (Map.Entry<Integer, Double> tEntry : resourceIDs.entrySet()) {
-			if (resourceMap.size() < count) {
-				resourceMap.put(this.reader.getResources().get(tEntry.getKey()), tEntry.getValue());
-			}
+		// first call CF if wished
+		if (algorithm == null || !algorithm.equals("mp")) {
+			resourceIDs = this.calculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue()); // not sorted!
 		}
-		
-		if (resourceMap.size() < count) {
-			for (Map.Entry<String, Double> t : this.topResources.entrySet()) {
-				if (resourceMap.size() < count) {
+		// then call MP if necessary
+		if (resourceIDs.size() < count) {
+			for (Map.Entry<Integer, Double> t : this.topResources.entrySet()) {
+				if (resourceIDs.size() < count) {
 					// add MP resources if they are not already in the recommeded list or already known by this user
-					if (!resourceMap.containsKey(t.getKey()) && (userResources == null || userResources.contains(t.getKey()))) {
-						resourceMap.put(t.getKey(), t.getValue());
+					if (!resourceIDs.containsKey(t.getKey()) && (userResources == null || !userResources.contains(t.getKey()))) {
+						resourceIDs.put(t.getKey(), t.getValue());
 					}
 				} else {
 					break;
@@ -97,6 +96,19 @@ public class CFResourceRecommenderEngine implements ResourceEngineInterface {
 			}
 		}
 
+		// sort
+		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resourceIDs));
+		sortedResultMap.putAll(resourceIDs);
+		
+		// last map IDs back to strings
+		for (Map.Entry<Integer, Double> tEntry : sortedResultMap.entrySet()) {
+			if (resourceMap.size() < count) {
+				resourceMap.put(this.reader.getResources().get(tEntry.getKey()), tEntry.getValue());
+			} else {
+				break;
+			}
+		}
+		
 		return resourceMap;
 	}
 
