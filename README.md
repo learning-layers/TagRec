@@ -152,7 +152,7 @@ Tag and Time Information](http://www.christophtrattner.info/pubs/sp2014.pdf). In
 ## Main contributor
 * Dominik Kowald, Know-Center, Graz University of Technology, dkowald@know-center.at
 
-## Contacts and Contributors (in alphabetically order)
+## Contacts and contributors (in alphabetically order)
 * Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone.kopeinik@tugraz.at (sustain resource recommender algorithm)
 * Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (huang, zheng and CIRTT resource recommender algorithms)
 * Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contact)
