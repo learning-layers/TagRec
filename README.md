@@ -8,7 +8,7 @@ TagRec won the best poster award @ Hypertext 2014 (HT'14) conference: [http://ht
 ## Description
 The aim of this [work](http://www.christophtrattner.info/pubs/ht241-kowald.pdf) (please [cite](https://github.com/learning-layers/TagRec/#citation)) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
 
-Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting and LDA topic creation).
+Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting, LDA topic creation and create input files for other recommender frameworks).
 
 The software already contains four novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) (Seitlinger et al, 2013) uses topic information and is based on the ALCOVE/MINERVA2 theories (Krutschke, 1992; Hintzman, 1984). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) (Kowald et al., 2014b) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) (Kowald et al., 2014a) is a combination of the former two approaches and integrates the time component on the level of tags and topics. Finally, the fourth one (BLLac+C) extends the BLL+C algorithm with semantic correlations (Trattner et al., 2014).
 
@@ -63,6 +63,8 @@ Data-Processing:
 * split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
 * split_8020 for splitting a dataset into training and test-sets using 80/20 split
 * lda_samples for creating LDA topics for the resources in a dataset
+* tensor_samples for creating samples for the FM and PITF methods implemented in [PITF and FM algorithms](http://www.informatik.uni-konstanz.de/rendle/software/tag-recommender/)
+* mymedialite_samples for creating samples for the WRMF method implemented in [MyMediaLite](http://www.mymedialite.net/)
 
 , second the dataset(-directory):
 * bib for BibSonomy
@@ -70,6 +72,7 @@ Data-Processing:
 * del for Delicious
 * flickr for Flickr
 * ml for MovieLens
+* lastfm for LastFM
 * wiki for Wikipedia (based on bookmarks from Delicious)
 
 and third the filename (without file extension)
@@ -153,4 +156,4 @@ Tag and Time Information](http://www.christophtrattner.info/pubs/sp2014.pdf). In
 * Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone.kopeinik@tugraz.at (sustain resource recommender algorithm)
 * Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (huang, zheng and CIRTT resource recommender algorithms)
 * Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contact)
-* Christoph Trattner, Norwegian University of Science and Technology Trondheim, ctrattner@know-center.at (general contact)
+* Christoph Trattner, Norwegian University of Science and Technology Trondheim, chritrat@idi.ntnu.no (general contact)
