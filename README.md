@@ -12,7 +12,7 @@ Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, l
 
 The software already contains four novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) (Seitlinger et al, 2013) uses topic information and is based on the ALCOVE/MINERVA2 theories (Krutschke, 1992; Hintzman, 1984). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) (Kowald et al., 2014b) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://arxiv.org/pdf/1402.0728v1.pdf)) (Kowald et al., 2014a) is a combination of the former two approaches and integrates the time component on the level of tags and topics. Finally, the fourth one (BLLac+C) extends the BLL+C algorithm with semantic correlations (Trattner et al., 2014).
 
-Based on our latest strand of research, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://arxiv.org/pdf/1406.7727v1.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004)
+Based on our latest strand of research, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://arxiv.org/pdf/1406.7727v1.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004). Furthermore, it contains another novel item-recommender called SUSTAIN+CFu that improves user-based CF via integrating the addentional focus of users via the SUSTAIN model.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
@@ -27,6 +27,7 @@ The source-code can be directly checked-out through this repository. It contains
 * del_core for Delicious
 * flickr_core for Flickr
 * ml_core for MovieLens
+* lastfm_core for LastFM
 * wiki_core for Wikipedia (based on bookmarks from Delicious)
 
 ## How-to-use
@@ -40,15 +41,18 @@ Tag-Recommender:
 * bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
 * bll_c_ac for BLL and BLL+MPr together with semantic correlations (Trattner et al., 2014)
 * lda for Latent Dirichlet Allocation (Krestel et al., 2009)
-* cf for Collaborative Filtering (Jäschke et al., 2007)
+* cf for (user-based) Collaborative Filtering (Jäschke et al., 2007)
+* cfr for (resource-based and mixed) Collaborative Filtering (Jäschke et al., 2007)
 * fr for Adapted PageRank and FolkRank (Hotho et al., 2006)
 * girptm for GIRP and GIRPTM (Zhang et al., 2012)
 * mp for MostPopular tags (Jäschke et al., 2007)
 * mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
 
 Resource-Recommender:
+* item_sustain for the improved CF approach based on the SUSTAIN model
 * item_cirtt for the tag- and time-based approach based on BLL (Lacic et al., 2014)
 * item_mp for MostPopular items
+* item_cbt for the content-based Filtering approach using Topics
 * item_cft for user-based Collaborative Filtering based on tag-profiles
 * item_cfb for user-based Collaborative Filtering based on user-item matrix
 * item_zheng for the tag- and time-based approach by Zheng et al. (2011)
@@ -104,7 +108,7 @@ The output-file is generated in the corresponding subdirectory and is in csv-for
 * Diversity (in case of resource recommendations)
 * Serendipity (in case of resource recommendations)
 
-for _k_ = 1 to 10 (each line is one _k_)
+for _k_ = 1 to 10 (or 20) - each line is one _k_
 
 **Example:**
 0,5212146123336273;0,16408544726301685;0,22663857529082376 ...
@@ -142,7 +146,11 @@ Tag and Time Information](http://www.christophtrattner.info/pubs/sp2014.pdf). In
 * N. Zheng and Q. Li. A recommender system based on tag and time information for social tagging systems. Expert Syst. Appl., 2011.
 * C.-L. Huang, P.-H. Yeh, C.-W. Lin, and D.-C. Wu. Utilizing user tag-based interests in recommender systems for social resource sharing websites. Knowledge-Based Systems, 2014.
 
-## Contact
+## Main contributor
 * Dominik Kowald, Know-Center, Graz University of Technology, dkowald@know-center.at
-* Christoph Trattner, Know-Center, Graz University of Technology, ctrattner@know-center.at
-* Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (for resource recommender algorithms)
+
+## Contacts and Contributors (in alphabetically order)
+* Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone.kopeinik@tugraz.at (sustain resource recommender algorithm)
+* Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (huang, zheng and CIRTT resource recommender algorithms)
+* Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contact)
+* Christoph Trattner, Norwegian University of Science and Technology Trondheim, ctrattner@know-center.at (general contact)
