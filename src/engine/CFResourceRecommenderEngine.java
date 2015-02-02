@@ -34,6 +34,7 @@ import common.DoubleMapComparator;
 import common.Features;
 import common.Similarity;
 
+// TODO: cache values
 public class CFResourceRecommenderEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
@@ -50,11 +51,13 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 
-		CFResourceRecommender calculator = new CFResourceRecommender(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);		
-		resetStructure(reader, calculator);
+		CFResourceRecommender calculator = new CFResourceRecommender(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
+
+		Map<Integer, Double> topResources = EngineUtils.calcTopResources(reader);
+		resetStructure(reader, calculator, topResources);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
@@ -79,7 +82,7 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		}
 
 		// first call CF if wished
-		if (algorithm == null || !algorithm.equals("mp")) {
+		if (algorithm == null || algorithm != Algorithm.RESOURCEMP) {
 			resourceIDs = this.calculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue()); // not sorted!
 		}
 		// then call MP if necessary
@@ -112,11 +115,11 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		return resourceMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, CFResourceRecommender calculator) {
+	public synchronized void resetStructure(BookmarkReader reader, CFResourceRecommender calculator, Map<Integer, Double> topResources) {
 		this.reader = reader;
 		this.calculator = calculator;
 		
 		this.topResources.clear();
-		this.topResources.putAll(EngineUtils.calcTopResources(this.reader));
+		this.topResources.putAll(topResources);
 	}
 }

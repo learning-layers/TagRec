@@ -114,14 +114,19 @@ public class CooccurenceMatrix {
 	}
 	
 	public Map<Integer, Double> calculateAssociativeComponentsWithTagAssosiation(Map<Integer, Double> sourceTags, Map<Integer, Double> destinationTags, boolean srcCount, boolean destCount) {
-		Map<Integer, Double> associativeComponents = new LinkedHashMap<Integer, Double>();				
-		for (Map.Entry<Integer, Double> tag : sourceTags.entrySet()){
-			associativeComponents.put(tag.getKey(), (srcCount ? tag.getValue() : 1.0) * this.calculateAssociativeComponent(tag.getKey(), destinationTags, destCount));
-		}		
+		Map<Integer, Double> associativeComponents = new LinkedHashMap<Integer, Double>();		
+		if (sourceTags != null) {
+			for (Map.Entry<Integer, Double> tag : sourceTags.entrySet()){
+				associativeComponents.put(tag.getKey(), (srcCount ? tag.getValue() : 1.0) * this.calculateAssociativeComponent(tag.getKey(), destinationTags, destCount));
+			}	
+		}
 		return associativeComponents;
 	}
 
 	private Double calculateAssociativeComponent(int tag, Map<Integer, Double> destinationTags, boolean destCount) {
+		if (destinationTags == null) {
+			return 0.0;
+		}
 		SparseVector vec = this.coocurenceMatrix.get(tag);
 		double associativeValue = 0.0;
 		int numbAssociatedNodes = 0;

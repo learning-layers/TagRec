@@ -22,7 +22,9 @@ package engine;
 
 import processing.BLLCalculator;
 import common.Bookmark;
+import common.CooccurenceMatrix;
 import common.DoubleMapComparator;
+import common.Utilities;
 import file.BookmarkReader;
 
 import java.util.ArrayList;
@@ -37,44 +39,66 @@ public class BaseLevelLearningEngine implements EngineInterface {
 
 	private BookmarkReader reader;
 	private final Map<String, Map<Integer, Double>> userMaps;
+	private final Map<String, Map<Integer, Double>> userCounts;
 	private final Map<String, Map<Integer, Double>> resMaps;
+	private final Map<String, Map<Integer, Double>> resCounts;
 	private final Map<Integer, Double> topTags;
+	private CooccurenceMatrix rMatrix;
 
 	public BaseLevelLearningEngine() {
 		userMaps = new HashMap<>();
+		userCounts = new HashMap<>();
 		resMaps = new HashMap<>();
+		resCounts = new HashMap<>();
 		topTags = new LinkedHashMap<>();
-
-		reader = new BookmarkReader(0, false);
+		
+		reader = null;
 	}
 
 	public void loadFile(String filename) throws Exception {
 		Map<String, Map<Integer, Double>> userMaps = new HashMap<>();
+		Map<String, Map<Integer, Double>> userCounts = new HashMap<>();
 		Map<String, Map<Integer, Double>> resMaps = new HashMap<>();
+		Map<String, Map<Integer, Double>> resCounts = new HashMap<>();
 		BookmarkReader reader = new BookmarkReader(0, false);
 
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 		//System.out.println("read in and sorted file");
 		List<Map<Integer, Double>> userRecencies = BLLCalculator.getArtifactMaps(reader, reader.getBookmarks(), null, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
+		List<Map<Integer, Double>> userFrequencies = Utilities.getRelativeTagMaps(reader.getBookmarks(), false);
 		int i = 0;
 		for (Map<Integer, Double> map : userRecencies) {
 			userMaps.put(reader.getUsers().get(i++), map);
 		}
+		i = 0;
+		for (Map<Integer, Double> map : userFrequencies) {
+			userCounts.put(reader.getUsers().get(i++), map);
+		}
 		List<Map<Integer, Double>> resRecencies = BLLCalculator.getArtifactMaps(reader, reader.getBookmarks(), null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0.0, true);
+		List<Map<Integer, Double>> resFrequencies = Utilities.getRelativeTagMaps(reader.getBookmarks(), true);
 		i = 0;
 		for (Map<Integer, Double> map : resRecencies) {
 			resMaps.put(reader.getResources().get(i++), map);
 		}
-
-		resetStructures(userMaps, resMaps, reader);
+		i = 0;
+		for (Map<Integer, Double> map : resFrequencies) {
+			resCounts.put(reader.getResources().get(i++), map);
+		}
+		Map<Integer, Double> topTags = EngineUtils.calcTopTags(reader);
+		
+		// calculate associative component
+		CooccurenceMatrix matrix = new CooccurenceMatrix(reader.getBookmarks(), reader.getTagCounts());
+		
+		resetStructures(userMaps, resMaps, reader, topTags, matrix, userCounts, resCounts);
 	}
 	
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
 		Map<Integer, Double> userMap = this.userMaps.get(user);
+		Map<Integer, Double> userCountMap = this.userCounts.get(user);
 		if (filterOwnEntities == null) {
 			filterOwnEntities = true;
 		}
@@ -82,8 +106,9 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		
 		// get personalized tag recommendations
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
-		if (algorithm == null || !algorithm.equals("mp")) {
+		if (algorithm == null || algorithm != Algorithm.MP) {
 			Map<Integer, Double> resMap = this.resMaps.get(resource);
+			Map<Integer, Double> resCountMap = this.resCounts.get(resource);
 			// user-based and resource-based
 			if (userMap != null) {
 				for (Map.Entry<Integer, Double> entry : userMap.entrySet()) {
@@ -91,8 +116,26 @@ public class BaseLevelLearningEngine implements EngineInterface {
 						resultMap.put(entry.getKey(), entry.getValue().doubleValue());
 					}
 				}
+				if (algorithm == null || algorithm == Algorithm.BLLac || algorithm == Algorithm.BLLacMPr) {
+					Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCountMap, resCountMap, false, true);
+					for (Map.Entry<Integer, Double> entry : associativeValues.entrySet()) {
+						Double val = resultMap.get(entry.getKey());
+						if (!filterTags.contains(entry.getKey())) {
+							resultMap.put(entry.getKey(), val == null ? entry.getValue().doubleValue() : val.doubleValue() + entry.getValue().doubleValue());
+						}
+					}
+					double denom = 0.0;
+					for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
+						double val = Math.log(entry.getValue());
+						denom += Math.exp(val);
+					}
+					for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
+						entry.setValue(Math.exp(Math.log(entry.getValue())) / denom);
+					}
+				}
 			}
-			if (resMap != null) {
+			
+			if ((algorithm == null || algorithm == Algorithm.BLLacMPr) && resMap != null) {
 				for (Map.Entry<Integer, Double> entry : resMap.entrySet()) {
 					if (!filterTags.contains(entry.getKey())) {
 						double resVal = entry.getValue().doubleValue();
@@ -132,16 +175,22 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		return tagMap;
 	}
 
-	private synchronized void resetStructures(Map<String, Map<Integer, Double>> userMaps, Map<String, Map<Integer, Double>> resMaps, BookmarkReader reader) {
+	private synchronized void resetStructures(Map<String, Map<Integer, Double>> userMaps, Map<String, Map<Integer, Double>> resMaps, BookmarkReader reader, Map<Integer, Double> topTags, CooccurenceMatrix matrix, Map<String, Map<Integer, Double>> userCounts, Map<String, Map<Integer, Double>> resCounts) {
 		this.reader = reader;
 
 		this.userMaps.clear();
 		this.userMaps.putAll(userMaps);
+		this.userCounts.clear();
+		this.userCounts.putAll(userCounts);
 
 		this.resMaps.clear();
 		this.resMaps.putAll(resMaps);
+		this.resCounts.clear();
+		this.resCounts.putAll(resCounts);
 
 		this.topTags.clear();
-		this.topTags.putAll(EngineUtils.calcTopTags(this.reader));
+		this.topTags.putAll(topTags);
+		
+		this.rMatrix = matrix;
 	}
 }

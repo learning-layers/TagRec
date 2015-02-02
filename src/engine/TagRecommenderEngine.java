@@ -59,8 +59,8 @@ public class TagRecommenderEngine implements EngineInterface {
 	}
 
 	@Override
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
-		if (algorithm == null || !algorithm.equals("mp")) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
+		if (algorithm == null || algorithm != Algorithm.MP) {
 			if (topics != null && topics.size() > 0 && this.threelEngine != null) {
 				return this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
 			} else if (this.bllEngine != null) {

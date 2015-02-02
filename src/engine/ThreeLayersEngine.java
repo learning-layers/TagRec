@@ -33,6 +33,7 @@ import java.util.TreeMap;
 import common.DoubleMapComparator;
 
 // TODO: integrate Tag-Filtering!
+// TODO: make it work in online setting! (caching + LDA topic calculation)
 public class ThreeLayersEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
@@ -40,21 +41,21 @@ public class ThreeLayersEngine implements EngineInterface {
 	private final Map<Integer, Double> topTags;
 
 	public ThreeLayersEngine() {
-		topTags = new LinkedHashMap<>();		
-		reader = new BookmarkReader(0, false);
+		this.topTags = new LinkedHashMap<>();		
+		this.reader = null;
 	}
 	
 	public void loadFile(String filename) throws Exception {
-
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 
 		ThreeLayersCalculator calculator = new ThreeLayersCalculator(reader, reader.getBookmarks().size(), 5, 5, true, true, false);
-		resetStructure(reader, calculator);
+		Map<Integer, Double> topTags = EngineUtils.calcTopTags(reader);
+		resetStructure(reader, calculator, topTags);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
@@ -67,7 +68,7 @@ public class ThreeLayersEngine implements EngineInterface {
 		if (this.reader == null || this.calculator == null) {
 			return tagMap;
 		}
-		if (algorithm == null || !algorithm.equals("mp")) {			
+		if (algorithm == null || algorithm != Algorithm.MP) {			
 			int userID = -1;
 			if (user != null) {
 				userID = this.reader.getUsers().indexOf(user);
@@ -85,7 +86,13 @@ public class ThreeLayersEngine implements EngineInterface {
 					}
 				}
 			}
-			tagIDs = this.calculator.getRankedTagList(userID, resID, topicIDs, System.currentTimeMillis() / 1000.0, count, this.reader.hasTimestamp(), false, false); // not sorted
+			if (algorithm == null || algorithm == Algorithm.THREELTMPr) {
+				tagIDs = this.calculator.getRankedTagList(userID, resID, topicIDs, System.currentTimeMillis() / 1000.0, count, this.reader.hasTimestamp(), false, false); // not sorted
+			} else if (algorithm == Algorithm.THREELT) {
+				tagIDs = this.calculator.getRankedTagList(userID, -1, topicIDs, System.currentTimeMillis() / 1000.0, count, this.reader.hasTimestamp(), false, false); // not sorted
+			} else if (algorithm == Algorithm.THREEL) {
+				tagIDs = this.calculator.getRankedTagList(userID, -1, topicIDs, System.currentTimeMillis() / 1000.0, count, false, false, false); // not sorted
+			}
 		}
 		
 		// fill up with MP tags
@@ -113,11 +120,11 @@ public class ThreeLayersEngine implements EngineInterface {
 		return tagMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, ThreeLayersCalculator calculator) {
+	public synchronized void resetStructure(BookmarkReader reader, ThreeLayersCalculator calculator, Map<Integer, Double> topTags) {
 		this.reader = reader;
 		this.calculator = calculator;
 		
 		this.topTags.clear();
-		this.topTags.putAll(EngineUtils.calcTopTags(this.reader));
+		this.topTags.putAll(topTags);
 	}
 }

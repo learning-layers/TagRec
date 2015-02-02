@@ -66,7 +66,6 @@ public class BLLCalculator {
 		
 	private List<Bookmark> trainList;
 	
-	private CFResourceRecommender cfCalc;
 	private CooccurenceMatrix rMatrix;
 		
 	public BLLCalculator(BookmarkReader reader, int trainSize, int dVal, int beta, boolean userBased, boolean resBased, CalculationType cType) {

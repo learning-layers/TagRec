@@ -35,7 +35,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 
 	private EngineInterface lmEngine;
 	private EngineInterface bllEngine;
-	private EngineInterface threelEngine;
+	//private EngineInterface threelEngine;
 	
 	//private Random random;
 	private BufferedWriter bw;
@@ -43,7 +43,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 	public TagRecommenderEvalEngine() {
 		this.lmEngine = null;
 		this.bllEngine = null;
-		this.threelEngine = null;
+		//this.threelEngine = null;
 		this.bw = null;
 		//this.random = new Random();
 		
@@ -59,14 +59,14 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 	public void loadFile(String filename) throws Exception {
 		this.lmEngine = null;
 		this.bllEngine = null;
-		this.threelEngine = null;
+		//this.threelEngine = null;
 		
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
-		if (reader.getCategories().size() > 0) {
-			this.threelEngine = new ThreeLayersEngine();
-			this.threelEngine.loadFile(filename);
-		}
+		//if (reader.getCategories().size() > 0) {
+		//	this.threelEngine = new ThreeLayersEngine();
+		//	this.threelEngine.loadFile(filename);
+		//}
 		if (reader.hasTimestamp()) {
 			this.bllEngine = new BaseLevelLearningEngine();
 			this.bllEngine.loadFile(filename);
@@ -76,28 +76,31 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 	}
 
 	@Override
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
 		Map<String, Double> returnMap = null;
 		String algorithmString = null;
-		boolean useCognitiveAlgo = (algorithm == null || !algorithm.equals("mp"));//this.random.nextBoolean();
 		
-		if (useCognitiveAlgo) {
-			/*if (topics != null && topics.size() > 0 && this.threelEngine != null) {
-				algorithmString = "3LT";
-				returnMap = this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count);
-			} else */if (this.bllEngine != null) {
+		if (this.bllEngine != null) {
+			if (algorithm == null || algorithm == Algorithm.BLLacMPr) {
+				algorithmString = "BLLacMPr";
+			} else if (algorithm == Algorithm.BLLac) {
+				algorithmString = "BLLac";
+			} else if (algorithm == Algorithm.BLL) {
 				algorithmString = "BLL";
+			}
+			if (algorithmString != null) {
 				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
 			}
 		}
-		if (!useCognitiveAlgo || returnMap == null) {
-			algorithmString = "MP";
-			returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, "mp_u_r");
+		
+		if (algorithmString == null) {
+			algorithmString = "MPur";
+			returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
 		}
 
 		if (this.bw != null) {
 			try {
-				this.bw.write(user + "|" + resource + "|" + topics + "|" + count + "|" + filterOwnEntities + "|" + System.currentTimeMillis() + "|" + useCognitiveAlgo + "|" + algorithmString + "|" + returnMap.keySet() + "\n");
+				this.bw.write(user + "|" + resource + "|" + topics + "|" + count + "|" + filterOwnEntities + "|" + System.currentTimeMillis() + "|" + algorithmString + "|" + returnMap.keySet() + "\n");
 				this.bw.flush();
 			} catch (IOException e) {
 				e.printStackTrace();

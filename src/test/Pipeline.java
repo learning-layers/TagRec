@@ -50,6 +50,7 @@ import processing.MetricsCalculator;
 import processing.RecCalculator;
 import processing.ThreeLTCalculator;
 import processing.ThreeLayersCalculator;
+import engine.Algorithm;
 import engine.BaseLevelLearningEngine;
 import engine.CFResourceRecommenderEngine;
 import engine.EngineInterface;
@@ -417,10 +418,10 @@ public class Pipeline {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, true, "bll"));
-		System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, false, "bll"));
-		System.out.println("TagRec MP" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, true, "mp"));
-		System.out.println("TagRec MP" + tagrecEngine.getEntitiesWithLikelihood("0", null, null, 10, false, "mp"));
+		System.out.println("TagRec BLLac+MPr" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLLacMPr));
+		System.out.println("TagRec BLLac" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLLac));
+		System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLL));
+		System.out.println("TagRec MPur" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.MPur));
 	}
 	
 	private static void startEasyCodeExample() {

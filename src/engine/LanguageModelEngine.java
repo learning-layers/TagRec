@@ -42,7 +42,7 @@ public class LanguageModelEngine implements EngineInterface {
 		this.resMaps = new HashMap<>();
 		topTags = new LinkedHashMap<>();
 
-		reader = new BookmarkReader(0, false);
+		reader = null;
 	}
 
 	public void loadFile(String filename) throws Exception {
@@ -70,10 +70,11 @@ public class LanguageModelEngine implements EngineInterface {
 			resMaps.put(reader.getResources().get(i++), map);
 		}
 
-		resetStructures(userMaps, resMaps, reader);
+		Map<Integer, Double> topTags = EngineUtils.calcTopTags(reader);
+		resetStructures(userMaps, resMaps, reader, topTags);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, String algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
@@ -84,17 +85,16 @@ public class LanguageModelEngine implements EngineInterface {
 		List<Integer> filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource, userMap);
 		
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
-		if (algorithm == null || !algorithm.equals("mp")) {
+		if (algorithm == null || algorithm != Algorithm.MP) {
 			Map<Integer, Double> resMap = this.resMaps.get(resource);
-			// user-based and resource-based
-			if (userMap != null) {
+			if ((algorithm == null || algorithm == Algorithm.MPu || algorithm == Algorithm.MPur) && userMap != null) {
 				for (Map.Entry<Integer, Double> entry : userMap.entrySet()) {
 					if (!filterTags.contains(entry.getKey())) {
 						resultMap.put(entry.getKey(), entry.getValue().doubleValue());
 					}
 				}
 			}
-			if (resMap != null) {
+			if ((algorithm == null || algorithm == Algorithm.MPr || algorithm == Algorithm.MPur) && resMap != null) {
 				for (Map.Entry<Integer, Double> entry : resMap.entrySet()) {
 					if (!filterTags.contains(entry.getKey())) {
 						double resVal = entry.getValue().doubleValue();
@@ -135,7 +135,7 @@ public class LanguageModelEngine implements EngineInterface {
 		return tagMap;
 	}
 
-	private synchronized void resetStructures(Map<String, Map<Integer, Double>> userMaps, Map<String, Map<Integer, Double>> resMaps, BookmarkReader reader) {
+	private synchronized void resetStructures(Map<String, Map<Integer, Double>> userMaps, Map<String, Map<Integer, Double>> resMaps, BookmarkReader reader, Map<Integer, Double> topTags) {
 
 		this.reader = reader;
 		
@@ -146,6 +146,6 @@ public class LanguageModelEngine implements EngineInterface {
 		this.resMaps.putAll(resMaps);
 
 		this.topTags.clear();
-		this.topTags.putAll(EngineUtils.calcTopTags(this.reader));
+		this.topTags.putAll(topTags);
 	}
 }
