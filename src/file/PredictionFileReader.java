@@ -28,9 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Functions;
-import com.google.common.collect.Lists;
-
 import common.PredictionData;
 import common.Utilities;
 import file.postprocessing.CatDescFiltering;
@@ -171,8 +168,7 @@ public class PredictionFileReader {
 		return false;
 	}
 	
-	// Getter ------------------------------------------------------------------------------------------------
-	
+	// Getter ------------------------------------------------------------------------------------------------	
 	public List<PredictionData> getPredictionData() {
 		return this.predictions;
 	}

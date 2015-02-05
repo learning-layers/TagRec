@@ -149,7 +149,6 @@ public class BookmarkReader {
 			}
 			
 			boolean doCount = (this.countLimit == 0 || this.userLines.size() < this.countLimit);
-			//int userIndex = this.users.indexOf(userID);
 			Integer userIndex = this.userMap.get(userID);
 			if (userIndex == null) {
 				this.users.add(userID);
@@ -164,7 +163,6 @@ public class BookmarkReader {
 				this.userCounts.set(userIndex, this.userCounts.get(userIndex) + 1);
 			}
 			userData.setUserID(userIndex);
-			//int resIndex = this.resources.indexOf(wikiID);
 			Integer resIndex = this.resourceMap.get(wikiID);
 			if (resIndex == null) {
 				this.resources.add(wikiID);

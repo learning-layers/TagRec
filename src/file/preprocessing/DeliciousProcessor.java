@@ -14,8 +14,8 @@ public class DeliciousProcessor {
 
 	public static boolean processFile(String inputFile, String outputFile) {
 		try {
-			FileReader reader = new FileReader(new File("./data/csv/" + inputFile));
-			FileWriter writer = new FileWriter(new File("./data/csv/" + outputFile));
+			FileReader reader = new FileReader(new File("./data/csv/del_core/" + inputFile));
+			FileWriter writer = new FileWriter(new File("./data/csv/del_core/" + outputFile + ".txt"));
 			BufferedReader br = new BufferedReader(reader);
 			BufferedWriter bw = new BufferedWriter(writer);
 			String line = null;
@@ -26,7 +26,7 @@ public class DeliciousProcessor {
 				String[] lineParts = line.split("\t");
 				if (lineParts.length >= 4) {
 					String tag = lineParts[3].toLowerCase();
-					if (!tag.isEmpty() && !tag.equals("no-tag") && !tag.contains("-import") && !tag.equals("imported")) {
+					if (!tag.isEmpty() && !tag.equals("no-tag") && !tag.contains("-import") && !tag.contains("-export") && !tag.contains("sys:") && !tag.contains("system:") && !tag.contains("imported")) {
 						if (!resID.isEmpty() && !userHash.isEmpty() && (!resID.equals(lineParts[2]) || !userHash.equals(lineParts[1]))) {
 							writeLine(bw, resID, userHash, timestamp, tags);
 							tags.clear();

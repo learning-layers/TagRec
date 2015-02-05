@@ -23,8 +23,8 @@ public class FlickrProcessor {
 		List<String> timestamps = new ArrayList<String>();
 		
 		try {
-			FileReader reader = new FileReader(new File("./data/csv/" + inputFile));
-			FileWriter writer = new FileWriter(new File("./data/csv/" + outputFile));
+			FileReader reader = new FileReader(new File("./data/csv/flickr_core/" + inputFile));
+			FileWriter writer = new FileWriter(new File("./data/csv/flickr_core/" + outputFile + ".txt"));
 			BufferedReader br = new BufferedReader(reader);
 			BufferedWriter bw = new BufferedWriter(writer);
 			String line = null;
@@ -39,7 +39,7 @@ public class FlickrProcessor {
 				userHash = lineParts[1];
 				resID = lineParts[2];
 				tag = lineParts[3].toLowerCase();
-				if (tag.isEmpty() || tag.equals("no-tag") || tag.contains(".import") || tag.equals("imported")) {
+				if (!(!tag.isEmpty() && !tag.equals("no-tag") && !tag.contains("-import") && !tag.contains("-export") && !tag.contains("sys:") && !tag.contains("system:") && !tag.contains("imported"))) {
 					continue;
 				}
 				Set<String> tags = tagMap.get(userHash + "_" + resID);

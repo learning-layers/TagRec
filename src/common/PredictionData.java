@@ -62,7 +62,8 @@ public class PredictionData {
 	
 	public double getPrecision(boolean recommTags) {
 		if (this.predictionData.size() != 0) {
-			return this.numFoundRelevantDocs / (recommTags ? this.predictionData.size() : this.k);
+			//return this.numFoundRelevantDocs / (recommTags ? this.predictionData.size() : this.k);
+			return this.numFoundRelevantDocs / this.k;
 		}
 		return 0.0;
 	}
@@ -124,8 +125,7 @@ public class PredictionData {
 		this.numFoundRelevantDocs = foundRelevantDocs.size();
 	}
 	
-	// Resource-rec metrics
-	
+	// Resource-rec metrics	
 	private double getNovelty(int targetRes, List<Integer> resources, List<Map<Integer, Double>> resourceTopics) {
 		double novelty = 0.0;
 		

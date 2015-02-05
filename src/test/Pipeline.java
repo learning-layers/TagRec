@@ -61,6 +61,12 @@ import engine.ThreeLayersEngine;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
 import file.postprocessing.CatDescFiltering;
+import file.preprocessing.BibsonomyProcessor;
+import file.preprocessing.CiteULikeProcessor;
+import file.preprocessing.DeliciousProcessor;
+import file.preprocessing.FlickrProcessor;
+import file.preprocessing.LastFMProcessor;
+import file.preprocessing.MovielensProcessor;
 import file.preprocessing.TensorProcessor;
 
 public class Pipeline {
@@ -78,7 +84,7 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "bib";
+	private final static String DATASET = "flickr";
 	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
@@ -99,7 +105,10 @@ public class Pipeline {
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
-					
+
+		//getTrainTestStatistics(path);
+		//BookmarkSplitter.splitSample("flickr_core/flickr_core1_lda_1000", "flickr_core/flickr_sample", 1, 20, true);
+		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE);
@@ -129,7 +138,7 @@ public class Pipeline {
 		//start3LayersJavaCalculator(dir, path, "lda_1000", 1, -5, -5, true, false, false);
 		
 		// Test the 3L_tag algorithm
-		//start3LayersJavaCalculator(dir, path, "lda_1000", 1, -5, -5, true, true, false);
+		//start3LayersJavaCalculator(dir, path, "", 1, -5, -5, true, true, false);
 		
 		// Test the 3LT_topic algorithm
 		//start3LayersJavaCalculator(dir, path, "lda_1000", 1, -5, -5, true, false, true);
@@ -151,8 +160,6 @@ public class Pipeline {
 			
 		// Engine Testing
 		//startEngineTest(path);
-		// Code example
-		//startEasyCodeExample();	
 		
 		// Commandline Arguments
 		if (args.length < 3) {
@@ -177,6 +184,12 @@ public class Pipeline {
 		} else if (args[1].equals("ml")) {
 			samplePath = "ml_core/" + args[2];
 			sampleDir = "ml_core";
+		} else if (args[1].equals("lastfm")) {
+			samplePath = "lastfm_core/" + args[2];
+			sampleDir = "lastfm_core";
+		} else if (args[1].equals("del")) {
+			samplePath = "del_core/" + args[2];
+			sampleDir = "del_core";
 		} else {
 			System.out.println("Dataset not available");
 			return;
@@ -212,11 +225,25 @@ public class Pipeline {
 		} else if (op.equals("mymedialite_samples")) {
 			writeTensorFiles(samplePath, false);
 		} else if (op.equals("core")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 3, 3, 3, false);
+			BookmarkSplitter.calculateCore(samplePath, samplePath, 3, 3, 3);
 		} else if (op.equals("split_l1o")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, 0, 0, false);
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, true);
 		} else if (op.equals("split_8020")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, 0, 0, true);		
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false);
+		} else if (op.equals("percentage_sample")) {
+			BookmarkSplitter.drawUserPercentageSample(samplePath, 3);
+		} else if (op.equals("process_bibsonomy")) {
+			BibsonomyProcessor.processUnsortedFile("tas", args[2]);
+		} else if (op.equals("process_citeulike")) {	
+			CiteULikeProcessor.processFile("current", args[2]);
+		} else if (op.equals("process_lastfm")) {	
+			LastFMProcessor.processFile("user_taggedartists-timestamps.dat", args[2]);
+		} else if (op.equals("process_ml")) {
+			MovielensProcessor.processFile("tags.dat", args[2]);	
+		} else if (op.equals("process_del")) {
+			DeliciousProcessor.processFile("delicious", args[2]);	
+		} else if (op.equals("process_flickr")) {
+			FlickrProcessor.processFile("flickr", args[2]);	
 		} else if (op.equals("item_mp")) {
 			startBaselineCalculatorForResources(sampleDir, samplePath, sampleCount, false);
 		} else if (op.equals("item_cft")) {
@@ -419,26 +446,16 @@ public class Pipeline {
 			e.printStackTrace();
 		}
 		System.out.println("TagRec BLLac+MPr" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLLacMPr));
-		System.out.println("TagRec BLLac" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLLac));
-		System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLL));
-		System.out.println("TagRec MPur" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.MPur));
-	}
-	
-	private static void startEasyCodeExample() {
-		//Data-preprocessing: create p-core of level 3:
-		BookmarkSplitter.splitSample("bib_core/bib_dataset", "bib_core/bib_sample", 3);
-		// Start algorithm: run BLL+C tag-recommender for the generated p-core sample:
-		BLLCalculator.predictSample("bib_core/bib_sample", TRAIN_SIZE, TEST_SIZE);
-		// Evaluation and Post-Processing: evaluate the results for users and resources with a minimum/maximum number of bookmarks:
-		Pipeline.writeMetrics("bib_core", "bib_core/bib_sample", "bll_c", 10, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS);
+		System.out.println("TagRec BLLac" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, null));
+		//System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLL));
+		//System.out.println("TagRec MPur" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.MPur));
 	}
 	
 	// Helpers
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	private static void createLdaSamples(String sampleName, int size, int topics, boolean tagrec) {
-		getTrainTestSize(sampleName);
 		for (int i = 1; i <= size; i++) {
-			MalletCalculator.createSample(sampleName, TEST_SIZE, (short)topics, false, true, tagrec);			
+			MalletCalculator.createSample(sampleName, (short)topics, tagrec);			
 		}
 	}
 	
@@ -489,7 +506,16 @@ public class Pipeline {
 		return betaValues;
 	}
 
-	private static void getStatistics(String dataset, boolean writeAll) throws IOException {
+	private static void getTrainTestStatistics(String dataset) {
+		System.out.println("FULL SET -----");
+		getStatistics(dataset, false);
+		System.out.println("TRAIN SET -----");
+		getStatistics(dataset + "_train", false);
+		System.out.println("TEST SET -----");
+		getStatistics(dataset + "_test", false);
+	}
+	
+	private static void getStatistics(String dataset, boolean writeAll) {
 		if (TOPIC_NAME != null) {
 			dataset += ("_" + TOPIC_NAME);
 		}
@@ -514,35 +540,44 @@ public class Pipeline {
 		System.out.println("Avg. users/posts per resource: " + avgBookmarksPerResource);
 		
 		if (writeAll) {
-			getTrainTestSize(dataset);
-			FileWriter userWriter = new FileWriter(new File("./data/metrics/" + dataset + "_userStats.txt"));
-			BufferedWriter userBW = new BufferedWriter(userWriter);
-			userBW.write("UserID| NoOfResources| NoOfTopics| Topic-Similarity\n");
-			List<Bookmark> trainList = reader.getBookmarks().subList(0, TRAIN_SIZE);
-			List<Integer> testUsers = reader.getUniqueUserListFromTestSet(TRAIN_SIZE);
-			System.out.println();
-
-			double avgTopicsPerUser = 0.0;
-			double avgTopicDiversityPerUser = 0.0;
-			List<Map<Integer, Double>> userTopics = Utilities.getRelativeTopicMaps(trainList, false);
-			List<List<Bookmark>> userBookmarks = Utilities.getBookmarks(trainList, false);
-			for (int userID : testUsers) {
-				Map<Integer, Double> topicsOfUser = userTopics.get(userID);
-				double topicDiversityOfUser = Bookmark.getBookmarkDiversity(userBookmarks.get(userID));
-				userBW.write(userID + "| " + reader.getUserCounts().get(userID) + "| " + topicsOfUser.keySet().size() + "| " + topicDiversityOfUser + "\n");
-				avgTopicsPerUser += topicsOfUser.keySet().size();
-				avgTopicDiversityPerUser += topicDiversityOfUser;
+			try {
+				getTrainTestSize(dataset);
+				FileWriter userWriter = new FileWriter(new File("./data/metrics/" + dataset + "_userStats.txt"));
+				BufferedWriter userBW = new BufferedWriter(userWriter);
+				userBW.write("UserID| NoOfResources| NoOfTopics| Topic-Similarity\n");
+				List<Bookmark> trainList = reader.getBookmarks().subList(0, TRAIN_SIZE);
+				List<Integer> testUsers = reader.getUniqueUserListFromTestSet(TRAIN_SIZE);
+				System.out.println();
+	
+				double avgTopicsPerUser = 0.0;
+				double avgTopicDiversityPerUser = 0.0;
+				List<Map<Integer, Double>> userTopics = Utilities.getRelativeTopicMaps(trainList, false);
+				List<List<Bookmark>> userBookmarks = Utilities.getBookmarks(trainList, false);
+				for (int userID : testUsers) {
+					Map<Integer, Double> topicsOfUser = userTopics.get(userID);
+					double topicDiversityOfUser = Bookmark.getBookmarkDiversity(userBookmarks.get(userID));
+					userBW.write(userID + "| " + reader.getUserCounts().get(userID) + "| " + topicsOfUser.keySet().size() + "| " + topicDiversityOfUser + "\n");
+					avgTopicsPerUser += topicsOfUser.keySet().size();
+					avgTopicDiversityPerUser += topicDiversityOfUser;
+				}
+				System.out.println("Avg. topics per user: " + avgTopicsPerUser / testUsers.size());
+				System.out.println("Avg. topic-similarity per user: " + avgTopicDiversityPerUser / testUsers.size());
+				double avgTopicsPerResource = Bookmark.getAvgNumberOfTopics(trainList);
+				System.out.println("Avg. topics per resource: " + avgTopicsPerResource);
+				userBW.flush();
+				userBW.close();
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
 			}
-			System.out.println("Avg. topics per user: " + avgTopicsPerUser / testUsers.size());
-			System.out.println("Avg. topic-similarity per user: " + avgTopicDiversityPerUser / testUsers.size());
-			double avgTopicsPerResource = Bookmark.getAvgNumberOfTopics(trainList);
-			System.out.println("Avg. topics per resource: " + avgTopicsPerResource);
-			userBW.flush();
-			userBW.close();
 		}
+		
+		System.out.println();
 	}
 
 	private static void getTrainTestSize(String sample) {
+		if (TOPIC_NAME != null) {
+			sample += ("_" + TOPIC_NAME);
+		}
 		BookmarkReader trainReader = new BookmarkReader(-1, false);
 		trainReader.readFile(sample + "_train");
 		TRAIN_SIZE = trainReader.getBookmarks().size();

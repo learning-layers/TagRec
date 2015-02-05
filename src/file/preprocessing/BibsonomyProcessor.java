@@ -26,8 +26,8 @@ public class BibsonomyProcessor {
 			readBibtexFile();
 			readBookmarkFile();
 			
-			FileReader reader = new FileReader(new File("./data/csv/" + inputFile));
-			FileWriter writer = new FileWriter(new File("./data/csv/" + outputFile));
+			FileReader reader = new FileReader(new File("./data/csv/bib_core/" + inputFile));
+			FileWriter writer = new FileWriter(new File("./data/csv/bib_core/" + outputFile));
 			BufferedReader br = new BufferedReader(reader);
 			BufferedWriter bw = new BufferedWriter(writer);
 			String line = null;
@@ -67,8 +67,8 @@ public class BibsonomyProcessor {
 	}
 	
 	public static boolean processUnsortedFile(String inputFile, String outputFile) {
-		readBibtexFile();
 		readBookmarkFile();
+		readBibtexFile();
 		int lineCount = 0;
 		
 		Map<String, Integer> resources = new LinkedHashMap<String, Integer>();
@@ -77,10 +77,10 @@ public class BibsonomyProcessor {
 		List<BibBookmark> bookmarks = new ArrayList<BibBookmark>();
 		
 		try {			
-			FileInputStream reader = new FileInputStream(new File("./data/csv/" + inputFile));
+			FileInputStream reader = new FileInputStream(new File("./data/csv/bib_core/" + inputFile));
 			BufferedReader br = new BufferedReader(new InputStreamReader(reader));
 			
-			FileOutputStream writer = new FileOutputStream(new File("./data/csv/" + outputFile + ".txt"));
+			FileOutputStream writer = new FileOutputStream(new File("./data/csv/bib_core/" + outputFile + ".txt"));
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(writer));
 			
 			String line = null;
@@ -90,9 +90,9 @@ public class BibsonomyProcessor {
 			while ((line = br.readLine()) != null) {
 				String[] lineParts = line.split("\t");
 				type = lineParts[3];
-				if (!type.equals("2")) { // skip bookmark or bibtex!
-					continue;
-				}
+				//if (!type.equals("2")) { // skip bookmark or bibtex!
+				//	continue;
+				//}
 				lineCount++;
 				
 				timestamp = lineParts[4];
@@ -150,7 +150,7 @@ public class BibsonomyProcessor {
 					timestamp = timestamps.get(i);
 					bookmark = bookmarks.get(i);
 					i++;
-					writeLine(bw, resID, userHash, timestamp, tags, bookmark);
+					writeLine(bw, resID, userHash, timestamp, tags, null/*bookmark*/); // do not use content here!
 				}
 			}
 			
@@ -196,7 +196,7 @@ public class BibsonomyProcessor {
 		bookmarkFile = new LinkedHashMap<String, BibBookmark>();
 		String line = null;
 		try {
-			FileReader bookmarkReader = new FileReader(new File("./data/csv/bookmark"));
+			FileReader bookmarkReader = new FileReader(new File("./data/csv/bib_core/bookmark"));
 			BufferedReader bookmarkBr = new BufferedReader(bookmarkReader);
 			while ((line = bookmarkBr.readLine()) != null) {
 				String[] lineParts = line.split("\t");
@@ -228,7 +228,7 @@ public class BibsonomyProcessor {
 		String line = null;
 		int lineCount = 0;
 		try {
-			FileReader bookmarkReader = new FileReader(new File("./data/csv/bibtex"));
+			FileReader bookmarkReader = new FileReader(new File("./data/csv/bib_core/bibtex"));
 			BufferedReader bookmarkBr = new BufferedReader(bookmarkReader);
 			while ((line = bookmarkBr.readLine()) != null) {
 				lineCount++;

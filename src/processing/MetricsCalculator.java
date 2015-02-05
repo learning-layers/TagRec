@@ -71,7 +71,7 @@ public class MetricsCalculator {
 		boolean recommTags = (wikiReader == null);
 		// TODO: Enable if you need data for statistical tests
 		/*
-		if (k == 20) {
+		if (k == 5 || k == 10) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
 				bw = new BufferedWriter(writer);

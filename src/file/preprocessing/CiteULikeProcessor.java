@@ -12,10 +12,10 @@ import java.util.List;
 
 public class CiteULikeProcessor {
 
-	public static boolean processFile(String inputFile, String outputFile, boolean filter) {
+	public static boolean processFile(String inputFile, String outputFile) {
 		try {
-			FileReader reader = new FileReader(new File("./data/csv/" + inputFile));
-			FileWriter writer = new FileWriter(new File("./data/csv/" + outputFile));
+			FileReader reader = new FileReader(new File("./data/csv/cul_core/" + inputFile));
+			FileWriter writer = new FileWriter(new File("./data/csv/cul_core/" + outputFile + ".txt"));
 			BufferedReader br = new BufferedReader(reader);
 			BufferedWriter bw = new BufferedWriter(writer);
 			String line = null;
@@ -25,7 +25,7 @@ public class CiteULikeProcessor {
 			while ((line = br.readLine()) != null) {
 				String[] lineParts = line.split("\\|");
 				String tag = lineParts[3];
-				if (!filter || (!tag.contains("no-tag") && !tag.contains("-import"))) {
+				if (!tag.isEmpty() && !tag.equals("no-tag") && !tag.contains("-import") && !tag.contains("-export") && !tag.contains("sys:") && !tag.contains("system:") && !tag.contains("imported")) {
 					if (!resID.isEmpty() && !userHash.isEmpty() && (!resID.equals(lineParts[0]) || !userHash.equals(lineParts[1]))) {
 						writeLine(bw, resID, userHash, timestamp, tags);
 						tags.clear();

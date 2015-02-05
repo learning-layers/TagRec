@@ -24,13 +24,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 
 import common.Bookmark;
 
@@ -47,9 +42,7 @@ public class PredictionFileWriter {
 		this.results = results;
 	}
 	
-	public boolean writeFile(String filename) {
-		List<String> categories = this.reader.getTags();
-		
+	public boolean writeFile(String filename) {		
 		try {
 			FileWriter writer = new FileWriter(new File("./data/results/" + filename + ".txt"));
 			BufferedWriter bw = new BufferedWriter(writer);
@@ -78,7 +71,6 @@ public class PredictionFileWriter {
 				j = 0;
 				for (int c : userResults) {
 					if (j++ < OUTPUT_LIMIT) {
-						//resultString += (categories.get(c) + ", ");
 						resultString += (c + ", ");
 					} else {
 						break;
@@ -112,22 +104,17 @@ public class PredictionFileWriter {
 			
 			int i=0;
 			for (Integer userID : reader.getUniqueUserListFromTestSet(trainSize)) {
-				//String resultString = (this.reader.getUsers().get(userID) + "-XYZ|");
-				String resultString = userID + "|";
-				
+				String resultString = userID + "|";				
 				String givenResourcesOfUser = "";
 								
 				for (Integer resourceID : resourcesOfTestUsers.get(userID)) {
 					givenResourcesOfUser += resourceList.get(resourceID) + ", ";
-				}
-				
+				}				
 				if (givenResourcesOfUser != "") {
 					givenResourcesOfUser = givenResourcesOfUser.substring(0, givenResourcesOfUser.length() - 2);
-				}
-				
+				}				
 				resultString += givenResourcesOfUser + "|";
-				
-				
+								
 				int[] recommendedResources = this.results.get(i);
 				String recString = "";
 				int cnt=0;
@@ -139,12 +126,10 @@ public class PredictionFileWriter {
 					} else {
 						break;
 					}
-				}
-				
+				}				
 				if (!recString.equals("")) {
 					recString = recString.substring(0, recString.length() - 2);
-				}
-				
+				}				
 				resultString += recString + "\n";
 				bw.write(resultString);
 				i++;
