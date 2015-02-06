@@ -21,7 +21,7 @@
 package engine;
 
 import file.BookmarkReader;
-import itemrecommendations.CFResourceRecommender;
+import itemrecommendations.CFResourceCalculator;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -38,7 +38,7 @@ import common.Similarity;
 public class CFResourceRecommenderEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
-	private CFResourceRecommender calculator = null;
+	private CFResourceCalculator calculator = null;
 	private final Map<Integer, Double> topResources;
 
 	public CFResourceRecommenderEngine() {
@@ -51,7 +51,7 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 
-		CFResourceRecommender calculator = new CFResourceRecommender(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
+		CFResourceCalculator calculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 
 		Map<Integer, Double> topResources = EngineUtils.calcTopResources(reader);
 		resetStructure(reader, calculator, topResources);
@@ -115,7 +115,7 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		return resourceMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, CFResourceRecommender calculator, Map<Integer, Double> topResources) {
+	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, Map<Integer, Double> topResources) {
 		this.reader = reader;
 		this.calculator = calculator;
 		

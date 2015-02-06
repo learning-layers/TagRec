@@ -32,6 +32,7 @@ import java.util.TreeMap;
 
 import common.DoubleMapComparator;
 
+// TODO: delete ThreeLayersCalculator and only use ThreeLTCalculator
 // TODO: integrate Tag-Filtering!
 // TODO: make it work in online setting! (caching + LDA topic calculation)
 public class ThreeLayersEngine implements EngineInterface {

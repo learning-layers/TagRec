@@ -52,7 +52,7 @@ public class ZhengCalculator {
 	private Similarity similarity;
 
 	private List<Bookmark> trainList;
-	private ZhengTagTime zhengApproach;
+	private ZhengApproach zhengApproach;
 
 	private Map<Integer, Double> allUsersSimilarities;
 	private List<Map<Integer, Double>> userResourcesTagWeight;
@@ -71,7 +71,7 @@ public class ZhengCalculator {
 		
 		trainList = bookmarks.subList(0, trainSize);
 		
-		zhengApproach = new ZhengTagTime(trainList);
+		zhengApproach = new ZhengApproach(trainList);
 		System.out.println("Constructed Zheng approach class");
 		
 		allUsersSimilarities = Utilities.getAllEntities(trainList, false);
@@ -86,7 +86,7 @@ public class ZhengCalculator {
 	
 	public static List<Map<Integer, Double>> createTagTimeMapping(List<Bookmark> trainList){
 		List<Map<Integer, Double>> userResourcesTagTimeWeight = new ArrayList<Map<Integer, Double>>();
-		ZhengTagTime zhengApproach = new ZhengTagTime(trainList);
+		ZhengApproach zhengApproach = new ZhengApproach(trainList);
 		for (Bookmark data : trainList) {
 			int user = data.getUserID();
 			int resource = data.getWikiID();
@@ -110,7 +110,7 @@ public class ZhengCalculator {
 	
 	public static Map<Integer, Double> createUserTagTimeMapping(int userID, List<Bookmark> trainList){
 		Map<Integer, Double> userResourcesTagTimeWeight = new LinkedHashMap<Integer, Double>();
-		ZhengTagTime zhengApproach = new ZhengTagTime(trainList);
+		ZhengApproach zhengApproach = new ZhengApproach(trainList);
 		for (Bookmark data : trainList) {
 			int user = data.getUserID();
 			int resource = data.getWikiID();

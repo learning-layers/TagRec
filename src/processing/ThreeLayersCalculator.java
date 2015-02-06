@@ -1,5 +1,6 @@
 /*
- TagRecommender:
+
+TagRecommender:
  A framework to implement and evaluate algorithms for the recommendation
  of tags.
  Copyright (C) 2013 Dominik Kowald
@@ -20,7 +21,7 @@
 
 package processing;
 
-import itemrecommendations.CFResourceRecommender;
+import itemrecommendations.CFResourceCalculator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,7 @@ public class ThreeLayersCalculator {
 	private List<List<Bookmark>> userBookmarks;
 	List<Map<Integer, Double>> resMaps;
 	
-	private CFResourceRecommender cfCalc;
+	private CFResourceCalculator cfCalc;
 	
 	public ThreeLayersCalculator(BookmarkReader reader, int trainSize, int dValue, int beta, boolean userBased, boolean resBased, boolean bookmarkBLL) {
 		this.reader = reader;

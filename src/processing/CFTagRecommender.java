@@ -1,27 +1,21 @@
 package processing;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Timer;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 
 import common.DoubleMapComparator;
 import common.Bookmark;
-import common.IntMapComparator;
+import common.MemoryThread;
+import common.PerformanceMeasurement;
 import common.Utilities;
-
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
@@ -179,8 +173,7 @@ public class CFTagRecommender {
 			for (Map.Entry<Integer, Double> entry : resources.entrySet()) {
 				double bm25Value = Utilities.getJaccardSim(targetMap, this.resMaps.get(entry.getKey()));
 				entry.setValue(bm25Value);
-			}
-			
+			}			
 			// return the sorted neighbors
 			Map<Integer, Double> sortedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(resources));
 			sortedResources.putAll(resources);
@@ -236,7 +229,35 @@ public class CFTagRecommender {
 		return sum / (double)neighborMaps.size();
 	}
 	
-	// --------------------------------------------------------------------------------------------------------
+	// Statics --------------------------------------------------------------------------------------------------------
+	
+	private static String timeString;
+	
+	private static List<Map<Integer, Double>> startBM25CreationForTagPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, int beta) {
+		int size = reader.getBookmarks().size();
+		int trainSize = size - sampleSize;
+		Stopwatch timer = new Stopwatch();
+		timer.start();
+		CFTagRecommender calculator = new CFTagRecommender(reader, trainSize, userBased, resBased, beta);
+		timer.stop();
+		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
+		
+		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
+		timer.reset();
+		timer.start();
+		for (int i = trainSize; i < size; i++) {
+			Bookmark data = reader.getBookmarks().get(i);
+			Map<Integer, Double> map = null;
+			map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), true);
+			results.add(map);
+			//System.out.println(data.getTags() + "|" + map.keySet());
+		}
+		timer.stop();
+		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
+		
+		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, sampleSize);
+		return results;
+	}	
 	
 	public static BookmarkReader predictTags(String filename, int trainSize, int sampleSize, int neighbors, boolean userBased, boolean resBased, int beta) {
 		MAX_NEIGHBORS = neighbors;
@@ -244,7 +265,9 @@ public class CFTagRecommender {
 	}
 	
 	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int beta) {
-		//filename += "_res";
+		Timer timerThread = new Timer();
+		MemoryThread memoryThread = new MemoryThread();
+		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
 		
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
@@ -268,39 +291,9 @@ public class CFTagRecommender {
 		String outputFile = filename + suffix + beta;
 		writer.writeFile(outputFile);
 
+		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
+		timerThread.cancel();
 		Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);
 		return reader;
 	}
-	
-	private static String timeString;
-	
-	private static List<Map<Integer, Double>> startBM25CreationForTagPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, int beta) {
-		timeString = "";
-		int size = reader.getBookmarks().size();
-		int trainSize = size - sampleSize;
-		Stopwatch timer = new Stopwatch();
-		timer.start();
-		CFTagRecommender calculator = new CFTagRecommender(reader, trainSize, userBased, resBased, beta);
-		timer.stop();
-		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
-		
-		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
-		timer = new Stopwatch();
-		timer.start();
-		for (int i = trainSize; i < size; i++) {
-			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = null;
-			map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), true);
-			results.add(map);
-			//System.out.println(data.getTags() + "|" + map.keySet());
-		}
-		timer.stop();
-		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
-		timeString += ("Full training time: " + trainingTime + "\n");
-		timeString += ("Full test time: " + testTime + "\n");
-		timeString += ("Average test time: " + testTime / (double)sampleSize) + "\n";
-		timeString += ("Total time: " + (trainingTime + testTime) + "\n");
-	
-		return results;
-	}	
 }
