@@ -96,7 +96,7 @@ public class CFResourceCalculator {
 	}
 	
 
-	public Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll, 
+	public Map<Integer, Double> getRankedResourcesList(int userID, int resID, boolean sorting, boolean allResources, boolean bll, 
 			boolean filterOwnEntities, boolean recommUsers) {
 		
 		List<Integer> userResources = null;
@@ -127,12 +127,12 @@ public class CFResourceCalculator {
 				//denom += bm25;
 				if (bm25 != 0.0) {
 					List<Integer> resources = Bookmark.getResourcesFromUser(this.trainList, neighbor.getKey());				
-					for (Integer resID : resources) {
-						if (!filterOwnEntities || !userResources.contains(resID)) {
-							double bllVal = (bll ? userBllResources.get(resID) : 1.0);
-							Double val = rankedResources.get(resID);
+					for (Integer res : resources) {
+						if (!filterOwnEntities || !userResources.contains(res)) {
+							double bllVal = (bll ? userBllResources.get(res) : 1.0);
+							Double val = rankedResources.get(res);
 							double entryVal = bllVal * bm25;
-							rankedResources.put(resID, (val != null ? val + entryVal : entryVal));		
+							rankedResources.put(res, (val != null ? val + entryVal : entryVal));		
 							//System.out.println("add resource to list - " + resID + " " + (val != null ? val + bm25 : bm25));
 						}
 					}
@@ -145,14 +145,14 @@ public class CFResourceCalculator {
 			if (allResources) {
 				sortedResources = new LinkedHashMap<Integer, Double>();
 				int resCount = 0;
-				for (Map.Entry<Integer, Double> res : userBllResources.entrySet()) {
+				for (Map.Entry<Integer, Double> resEntry : userBllResources.entrySet()) {
 					if (resCount++ > MAX_NEIGHBORS) {
 						break;
 					}
-					int resID = res.getKey();
+					int res = resEntry.getKey();
 					i = 0;
-					Double bllVal = (bll && userBllResources != null ? res.getValue() : 1.0);
-					Map<Integer, Double> resources = Utilities.getSimResources(-1, resID, userResources, this.allResources, this.resMaps, this.trainList, this.sim);
+					Double bllVal = (bll && userBllResources != null ? resEntry.getValue() : 1.0);
+					Map<Integer, Double> resources = Utilities.getSimResources(-1, res, userResources, this.allResources, this.resMaps, this.trainList, this.sim);
 					for (Map.Entry<Integer, Double> entry : resources.entrySet()) {
 						if (i++ > MAX_NEIGHBORS) {
 							break;
@@ -163,7 +163,18 @@ public class CFResourceCalculator {
 					}
 				}
 			} else {
-				sortedResources = Utilities.getSimResourcesForUser(userID, this.allResources, this.userMaps, this.resMaps, this.trainList, userResources, this.sim);
+				if (recommUsers) {
+					List<Integer> resourceUsers = null;
+					if (filterOwnEntities) {
+						resourceUsers = Bookmark.getUsersFromResource(this.trainList, resID);
+					} else {
+						resourceUsers = new ArrayList<Integer>();
+					}
+					return Utilities.getSimUsersForResource(resID, this.allUsers, this.userMaps, this.resMaps, resourceUsers, this.sim, sorting);
+				} else {
+					sortedResources = Utilities.getSimResourcesForUser(userID, this.allResources, this.userMaps, this.resMaps,
+							filterOwnEntities ? userResources : new ArrayList<Integer>(), this.sim, sorting);
+				}
 			}
 			for (Map.Entry<Integer, Double> sortedRes : sortedResources.entrySet()) {
 				Double val = rankedResources.get(sortedRes.getKey());
@@ -212,7 +223,7 @@ public class CFResourceCalculator {
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
 		for (Integer userID : reader.getUniqueUserListFromTestSet(trainSize)) {
 			Map<Integer, Double> map = null;
-			map = calculator.getRankedResourcesList(userID, true, allResources, bll, true, false); // TODO
+			map = calculator.getRankedResourcesList(userID, -1, true, allResources, bll, true, false); // TODO
 			results.add(map);
 		}
 		timer.stop();

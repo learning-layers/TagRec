@@ -305,7 +305,7 @@ public class SustainCalculator {
 		Map<Integer, Double> resourceActivationMap = new HashMap<Integer, Double>();
 		
 		if (candidateNumber>0){
-			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false, true, false);
+			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, -1, true, false, false, true, false);
 			//TreeMap<Integer, Double> candidateSet = this.calculateCandidateSet(userId);
 			Map<Integer, Double> CFValues = new HashMap<Integer, Double>();
 			
@@ -329,7 +329,7 @@ public class SustainCalculator {
 					
 		}
 		else{
-			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false, true, false);
+			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, -1, true, false, false, true, false);
 			for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
 				if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
 					continue;

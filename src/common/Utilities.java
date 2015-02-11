@@ -634,7 +634,7 @@ public class Utilities {
 	}
 	
 	public static Map<Integer, Double> getSimResourcesForUser(int userID, Map<Integer, Double> allResources, List<Map<Integer, Double>> userMaps, List<Map<Integer, Double>> resMaps, 
-			List<Bookmark> trainList, List<Integer> userResources, Similarity sim) {
+			List<Integer> userResources, Similarity sim, boolean sorting) {
 		Map<Integer, Double> resources = new LinkedHashMap<Integer, Double>();
 		Map<Integer, Double> targetMap = null;	
 		if (userID < userMaps.size()) {
@@ -655,8 +655,43 @@ public class Utilities {
 		}
 		
 		// return the sorted resources
-		Map<Integer, Double> sortedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(resources));
-		sortedResources.putAll(resources);
-		return sortedResources;
+		if (sorting) {
+			Map<Integer, Double> sortedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(resources));
+			sortedResources.putAll(resources);
+			return sortedResources;
+		} else {
+			return resources;
+		}
+	}
+
+	public static Map<Integer, Double> getSimUsersForResource(int resID, Map<Integer, Double> allUsers, List<Map<Integer, Double>> userMaps,
+			List<Map<Integer, Double>> resMaps, List<Integer> resourceUsers, Similarity sim, boolean sorting) {
+		Map<Integer, Double> users = new LinkedHashMap<Integer, Double>();
+		Map<Integer, Double> targetMap = null;	
+		if (resID < resMaps.size()) {
+			targetMap = resMaps.get(resID);
+		}
+		if (targetMap == null || targetMap.isEmpty()) {
+			return users;
+		}
+		users.putAll(allUsers);
+		
+		for (Map.Entry<Integer, Double> entry : users.entrySet()) {
+			Map<Integer, Double> uMap = userMaps.get(entry.getKey());
+			if (!uMap.isEmpty() && !resourceUsers.contains(entry.getKey())) {
+				double simValue = (sim == Similarity.JACCARD ? Utilities.getJaccardFloatSim(targetMap, uMap) :
+					Utilities.getCosineFloatSim(targetMap, uMap));
+				entry.setValue(simValue);
+			}
+		}
+		
+		// return the sorted users
+		if (sorting) {
+			Map<Integer, Double> sortedUsers = new TreeMap<Integer, Double>(new DoubleMapComparator(users));
+			sortedUsers.putAll(users);
+			return sortedUsers;
+		} else {
+			return users;
+		}
 	}
 }

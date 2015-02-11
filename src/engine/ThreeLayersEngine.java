@@ -47,9 +47,7 @@ public class ThreeLayersEngine implements EngineInterface {
 	}
 	
 	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
-		Collections.sort(reader.getBookmarks());
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
 
 		ThreeLTCalculator calculator = new ThreeLTCalculator(reader, reader.getBookmarks().size(), 5, 5, true, true, false, CalculationType.NONE);
 		Map<Integer, Double> topTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);

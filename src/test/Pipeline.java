@@ -52,8 +52,8 @@ import processing.GIRPTMCalculator;
 import processing.ThreeLTCalculator;
 import engine.Algorithm;
 import engine.BaseLevelLearningEngine;
-import engine.CFResourceRecommenderEngine;
-import engine.CFUserRecommenderEngine;
+import engine.ResourceRecommenderEngine;
+import engine.UserRecommenderEngine;
 import engine.EngineInterface;
 import engine.LanguageModelEngine;
 import engine.TagRecommenderEngine;
@@ -440,7 +440,7 @@ public class Pipeline {
 		//System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLL));
 		//System.out.println("TagRec MPur" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.MPur));
 		*/		
-		EngineInterface resrecEngine = new CFResourceRecommenderEngine();
+		EngineInterface resrecEngine = new ResourceRecommenderEngine();
 		try {
 			resrecEngine.loadFile(path);
 		} catch (Exception e2) {
@@ -449,9 +449,10 @@ public class Pipeline {
 		System.out.println("Res MP" + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCEMP));
 		System.out.println("Res CF " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCECF));
 		System.out.println("Res TAG_CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCF));
+		System.out.println("Res TAG_CB: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCB));
 		System.out.println();
 		
-		EngineInterface userrecEngine = new CFUserRecommenderEngine();
+		EngineInterface userrecEngine = new UserRecommenderEngine();
 		try {
 			userrecEngine.loadFile(path);
 		} catch (Exception e2) {
@@ -460,6 +461,7 @@ public class Pipeline {
 		System.out.println("User MP" + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERMP));
 		System.out.println("User CF " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERCF));
 		System.out.println("User TAG_CF: " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.USERTAGCF));
+		System.out.println("User TAG_CB: " + userrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.USERTAGCB));
 		System.out.println();
 	}
 	

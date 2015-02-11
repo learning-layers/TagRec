@@ -35,28 +35,28 @@ import common.Features;
 import common.Similarity;
 
 // TODO: cache values
-public class CFResourceRecommenderEngine implements EngineInterface {
+public class ResourceRecommenderEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
 	private CFResourceCalculator calculator = null;
 	private CFResourceCalculator tagCalculator = null;
+	private CFResourceCalculator cbCalculator = null;
 	private final Map<Integer, Double> topResources;
 
-	public CFResourceRecommenderEngine() {
+	public ResourceRecommenderEngine() {
 		this.topResources = new LinkedHashMap<Integer, Double>();		
 		this.reader = new BookmarkReader(0, false);
 	}
 	
 	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
-		Collections.sort(reader.getBookmarks());
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
 
 		CFResourceCalculator calculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		CFResourceCalculator tagCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.TAGS);
+		CFResourceCalculator cbCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, false, true, 5, Similarity.COSINE, Features.TAGS);
 		
 		Map<Integer, Double> topResources = EngineUtils.calcTopEntities(reader, EntityType.RESOURCE);
-		resetStructure(reader, calculator, tagCalculator, topResources);
+		resetStructure(reader, calculator, tagCalculator, cbCalculator, topResources);
 	}
 
 	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
@@ -86,9 +86,11 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		// first call CF if wished
 		if (algorithm == null || algorithm != Algorithm.RESOURCEMP) {
 			if (algorithm == Algorithm.RESOURCETAGCF) {
-				resourceIDs = this.tagCalculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+				resourceIDs = this.tagCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+			} else if (algorithm == Algorithm.RESOURCETAGCB)  {
+				resourceIDs = this.cbCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
 			} else {
-				resourceIDs = this.calculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+				resourceIDs = this.calculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
 			}
 		}
 		// then call MP if necessary
@@ -121,10 +123,11 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		return resourceMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, CFResourceCalculator tagCalculator, Map<Integer, Double> topResources) {
+	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, CFResourceCalculator tagCalculator, CFResourceCalculator cbCalculator, Map<Integer, Double> topResources) {
 		this.reader = reader;
 		this.calculator = calculator;
 		this.tagCalculator = tagCalculator;
+		this.cbCalculator = cbCalculator;
 		
 		this.topResources.clear();
 		this.topResources.putAll(topResources);

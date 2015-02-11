@@ -21,6 +21,7 @@
 package engine;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +30,22 @@ import java.util.TreeMap;
 import common.Bookmark;
 import common.IntMapComparator;
 import file.BookmarkReader;
+import file.BookmarkSplitter;
 
 public class EngineUtils {
 
+	public static BookmarkReader getSortedBookmarkReader(String filename) {
+		BookmarkReader reader = new BookmarkReader(0, false);
+		reader.readFile(filename);
+		Collections.sort(reader.getBookmarks());
+		
+		String sortedFile = filename + "_sorted";
+		BookmarkSplitter.writeSample(reader, reader.getBookmarks(), sortedFile, null);
+		reader = new BookmarkReader(0, false);
+		reader.readFile(sortedFile);
+		return reader;
+	}
+	
 	public static List<Integer> getFilterTags(boolean filterOwnEntities, BookmarkReader reader, String user, String resource, Map<Integer, Double> userMap) {
 		List<Integer> filterTags = null;
 		if (filterOwnEntities && user != null) {

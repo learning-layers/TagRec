@@ -25,6 +25,7 @@ import common.CooccurenceMatrix;
 import common.DoubleMapComparator;
 import common.Utilities;
 import file.BookmarkReader;
+import file.BookmarkSplitter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,15 +56,13 @@ public class BaseLevelLearningEngine implements EngineInterface {
 	}
 
 	public void loadFile(String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+
 		Map<String, Map<Integer, Double>> userMaps = new HashMap<>();
 		Map<String, Map<Integer, Double>> userCounts = new HashMap<>();
 		Map<String, Map<Integer, Double>> resMaps = new HashMap<>();
 		Map<String, Map<Integer, Double>> resCounts = new HashMap<>();
-		BookmarkReader reader = new BookmarkReader(0, false);
 
-		reader.readFile(filename);
-		Collections.sort(reader.getBookmarks());
-		//System.out.println("read in and sorted file");
 		List<Map<Integer, Double>> userRecencies = BLLCalculator.getArtifactMaps(reader, reader.getBookmarks(), null, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
 		List<Map<Integer, Double>> userFrequencies = Utilities.getRelativeTagMaps(reader.getBookmarks(), false);
 		int i = 0;

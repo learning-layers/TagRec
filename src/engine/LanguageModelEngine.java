@@ -24,6 +24,7 @@ import common.DoubleMapComparator;
 import common.Utilities;
 import file.BookmarkReader;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,10 +47,10 @@ public class LanguageModelEngine implements EngineInterface {
 	}
 
 	public void loadFile(String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+		
 		Map<String, Map<Integer, Double>> userMaps = new HashMap<>();
 		Map<String, Map<Integer, Double>> resMaps = new HashMap<>();
-		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
 
 		List<Map<Integer, Double>> userStats = Utilities.getNormalizedMaps(reader.getBookmarks(), false);
 		int i = 0;

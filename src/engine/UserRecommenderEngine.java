@@ -35,28 +35,28 @@ import common.Features;
 import common.Similarity;
 
 // TODO: cache values
-public class CFUserRecommenderEngine implements EngineInterface {
+public class UserRecommenderEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
 	private CFResourceCalculator calculator = null;
 	private CFResourceCalculator tagCalculator = null;
+	private CFResourceCalculator cbCalculator = null;
 	private final Map<Integer, Double> topUsers;
 
-	public CFUserRecommenderEngine() {
+	public UserRecommenderEngine() {
 		this.topUsers = new LinkedHashMap<Integer, Double>();		
 		this.reader = new BookmarkReader(0, false);
 	}
 	
 	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
-		Collections.sort(reader.getBookmarks());
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
 
 		CFResourceCalculator calculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		CFResourceCalculator tagCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.TAGS);
-		
+		CFResourceCalculator cbCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, false, true, 5, Similarity.COSINE, Features.TAGS);
+
 		Map<Integer, Double> topUsers = EngineUtils.calcTopEntities(reader, EntityType.USER);
-		resetStructure(reader, calculator, tagCalculator, topUsers);
+		resetStructure(reader, calculator, tagCalculator, cbCalculator, topUsers);
 	}
 
 	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count,
@@ -64,6 +64,9 @@ public class CFUserRecommenderEngine implements EngineInterface {
 		
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
+		}
+		if (filterOwnEntities == null) {
+			filterOwnEntities = true;
 		}
 		
 		Map<Integer, Double> userIDs = new LinkedHashMap<>();
@@ -73,16 +76,25 @@ public class CFUserRecommenderEngine implements EngineInterface {
 			return userMap;
 		}
 		int userID = -1;
+		int resID = -1;
 		if (user != null) {
 			userID = this.reader.getUsers().indexOf(user);
 		}
+		if (resource != null) {
+			resID = this.reader.getResources().indexOf(resource);
+		}
 
-		// first call CF if wished
-		if (algorithm == null || algorithm != Algorithm.USERMP) {
-			if (algorithm == Algorithm.USERTAGCF) {
-				userIDs = this.tagCalculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
-			} else {
-				userIDs = this.calculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
+		if (userID != -1) {
+			if (algorithm == null || algorithm != Algorithm.USERMP) {
+				if (algorithm == Algorithm.USERTAGCF) {
+					userIDs = this.tagCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
+				} else {
+					userIDs = this.calculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
+				}
+			}
+		} else if (resID != -1) {
+			if (algorithm == null || algorithm != Algorithm.USERMP) {
+				userIDs = this.cbCalculator.getRankedResourcesList(-1, resID, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted
 			}
 		}
 		// then call MP if necessary
@@ -115,10 +127,11 @@ public class CFUserRecommenderEngine implements EngineInterface {
 		return userMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, CFResourceCalculator tagCalculator, Map<Integer, Double> topUsers) {
+	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, CFResourceCalculator tagCalculator, CFResourceCalculator cbCalculator, Map<Integer, Double> topUsers) {
 		this.reader = reader;
 		this.calculator = calculator;
 		this.tagCalculator = tagCalculator;
+		this.cbCalculator = cbCalculator;
 		
 		this.topUsers.clear();
 		this.topUsers.putAll(topUsers);
