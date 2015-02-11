@@ -531,7 +531,9 @@ public class Utilities {
 		return allEntities;
 	}
 	
-	public static Map<Integer, Double> getNeighbors(int userID, int resID, Map<Integer, Double> allNeighbors, List<Map<Integer, Double>> userMaps, List<Bookmark> trainList, Similarity sim) {
+	public static Map<Integer, Double> getNeighbors(int userID, int resID, Map<Integer, Double> allNeighbors, List<Map<Integer, Double>> userMaps, List<Bookmark> trainList,
+			Similarity sim, boolean sorting) {
+		
 		Map<Integer, Double> neighbors = new LinkedHashMap<Integer, Double>();
 		//List<Map<Integer, Integer>> neighborMaps = new ArrayList<Map<Integer, Integer>>();
 		Map<Integer, Double> targetMap = null;	
@@ -567,7 +569,7 @@ public class Utilities {
 		// double lAverage = getLAverage(neighborMaps);
 		for (Map.Entry<Integer, Double> entry : neighbors.entrySet()) {
 			Map<Integer, Double> nMap = userMaps.get(entry.getKey());
-			//if (userID != entry.getKey() && !nMap.isEmpty()) {
+			if (userID != entry.getKey()/* && !nMap.isEmpty()*/) {
 				Double bm25Value = (sim == Similarity.JACCARD ? Utilities.getJaccardFloatSim(targetMap, nMap) : Utilities.getCosineFloatSim(targetMap, nMap));
 				//if (resID == -1) {
 				//	bm25Value = Math.pow(bm25Value.doubleValue(), 3);
@@ -577,13 +579,17 @@ public class Utilities {
 				if (!bm25Value.isInfinite() && !bm25Value.isNaN()) {
 					entry.setValue(bm25Value);
 				}
-			//}
+			}
 		}
 
-		// return the sorted neighbors
-		Map<Integer, Double> sortedNeighbors = new TreeMap<Integer, Double>(new DoubleMapComparator(neighbors));
-		sortedNeighbors.putAll(neighbors);
-		return sortedNeighbors;
+		if (sorting) {
+			// return the sorted neighbors
+			Map<Integer, Double> sortedNeighbors = new TreeMap<Integer, Double>(new DoubleMapComparator(neighbors));
+			sortedNeighbors.putAll(neighbors);
+			return sortedNeighbors;
+		} else {
+			return neighbors;
+		}
 	}
 	
 	public static Map<Integer, Double> getSimResources(int userID, int resID, List<Integer> userResources, Map<Integer, Double> allResources, List<Map<Integer, Double>> resMaps, List<Bookmark> trainList, Similarity sim) {

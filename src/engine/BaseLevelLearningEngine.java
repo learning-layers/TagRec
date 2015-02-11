@@ -21,7 +21,6 @@
 package engine;
 
 import processing.BLLCalculator;
-import common.Bookmark;
 import common.CooccurenceMatrix;
 import common.DoubleMapComparator;
 import common.Utilities;
@@ -85,7 +84,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		for (Map<Integer, Double> map : resFrequencies) {
 			resCounts.put(reader.getResources().get(i++), map);
 		}
-		Map<Integer, Double> topTags = EngineUtils.calcTopTags(reader);
+		Map<Integer, Double> topTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);
 		
 		// calculate associative component
 		CooccurenceMatrix matrix = new CooccurenceMatrix(reader.getBookmarks(), reader.getTagCounts());

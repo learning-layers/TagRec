@@ -12,13 +12,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.Set;
 import java.util.TreeMap;
 
 import common.Bookmark;
 import common.DoubleMapComparator;
 import common.Features;
+import common.MemoryThread;
+import common.PerformanceMeasurement;
 import common.Similarity;
 import common.Utilities;
 import file.BookmarkReader;
@@ -29,7 +33,9 @@ import javax.vecmath.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.base.Stopwatch;
 
+// TODO: integrate time and memory consumption test
 public class SustainCalculator {
 	//Define parameters: potentiell veraenderbar
 	//r=2 #2
@@ -43,6 +49,11 @@ public class SustainCalculator {
 	private List<Bookmark> trainList;
 	private double lambda;
 	private CFResourceCalculator rankedResourseCalculator;
+	
+	private Stopwatch timer;
+	private Timer timerThread;
+	private MemoryThread memoryThread;
+	private String timeString;
 	
 	//listId = userId, Set= resourceIds
 	//private List<Set<Integer>> userResourceTrainList;
@@ -59,7 +70,9 @@ public class SustainCalculator {
 	private Map<Integer, List<Integer>> resourceListPerUser;
 	
 	public SustainCalculator(String sampleName, int trainSize){
-		
+		this.timerThread = new Timer();
+		this.memoryThread = new MemoryThread();
+		this.timerThread.schedule(this.memoryThread, 0, MemoryThread.TIME_SPAN);
 		
 		this.trainSize = trainSize;
 		this.sampleName = sampleName;
@@ -68,6 +81,8 @@ public class SustainCalculator {
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
 	//	this.testList = this.reader.getBookmarks().subList(trainSize, trainSize + testSize);
 	
+		this.timer = new Stopwatch();
+		this.timer.start();	
 		rankedResourseCalculator = new CFResourceCalculator(this.reader, this.trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		
 		this.numberOfTopics = this.reader.getCategories().size();
@@ -113,19 +128,28 @@ public class SustainCalculator {
 		
 		
 		this.writeUserLambdas(this.sampleName);
+		timer.stop();
+		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
 		
-		
+		timer.reset();
+		timer.start();
 		LinkedList<int[]> sortedResourcesPerUser = new LinkedList<int[]>();
 		for (Integer userId : this.uniqueUserList) {
 			if (userId%100 ==0)
 				System.out.println("user "+userId+" of "+this.uniqueUserList.size());
 			sortedResourcesPerUser.add(predict(userId,  r, tau, learningRate, beta, candidateNumber, sampleSize, cfWeight));
 		}
+		timer.stop();
+		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
+		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, sampleSize);
 		
 		PredictionFileWriter writer = new PredictionFileWriter(reader, sortedResourcesPerUser);
 		String outputFile = this.sampleName;
 		writer.writeResourcePredictionsToFile(outputFile + "_sustain", this.trainSize, 0);
 	 
+		this.timeString = PerformanceMeasurement.addMemoryMeasurement(this.timeString, false, this.memoryThread.getMaxMemory());
+		this.timerThread.cancel();
+		Utilities.writeStringToFile("./data/metrics/" + outputFile + "_sustain_TIME.txt", this.timeString);
 	   return this.reader;
 	}
 
@@ -281,7 +305,7 @@ public class SustainCalculator {
 		Map<Integer, Double> resourceActivationMap = new HashMap<Integer, Double>();
 		
 		if (candidateNumber>0){
-			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false, true);
+			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false, true, false);
 			//TreeMap<Integer, Double> candidateSet = this.calculateCandidateSet(userId);
 			Map<Integer, Double> CFValues = new HashMap<Integer, Double>();
 			
@@ -305,7 +329,7 @@ public class SustainCalculator {
 					
 		}
 		else{
-			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false, true);
+			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false, true, false);
 			for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
 				if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
 					continue;

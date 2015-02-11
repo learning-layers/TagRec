@@ -83,7 +83,7 @@ public class ThreeLTCalculator {
 		return usageMap;
 	}
 	
-	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL) {	
+	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL, boolean sorting) {	
 		Map<Integer, Double> userResultMap = null;
 		if (this.userBased) {
 			List<Bookmark> userB = null;
@@ -155,8 +155,13 @@ public class ThreeLTCalculator {
 		
 		// sort and return
 		Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>();
-		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-		sortedResultMap.putAll(resultMap);
+		Map<Integer, Double> sortedResultMap = null;
+		if (sorting) {
+			sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
+			sortedResultMap.putAll(resultMap);
+		} else {
+			sortedResultMap = resultMap;
+		}
 		int count = 0;
 		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
 			if (count++ < limit) {
@@ -268,7 +273,9 @@ public class ThreeLTCalculator {
 	// Statics -----------------------------------------------------------------------------------------------------------------------		
 	private static String timeString;
 	
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int d, int beta, boolean userBased, boolean resBased, boolean tagBLL, boolean topicBLL, CalculationType cType) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int d, int beta, boolean userBased, boolean resBased,
+			boolean tagBLL, boolean topicBLL, CalculationType cType) {
+		
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
 		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
@@ -288,7 +295,7 @@ public class ThreeLTCalculator {
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
 			long timestamp = Long.parseLong((data.getTimestamp()));
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL);
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL, true);
 			predictionValues.add(Ints.toArray(map.keySet()));
 		}
 		timer.stop();

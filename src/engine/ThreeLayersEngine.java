@@ -20,7 +20,7 @@
 
 package engine;
 
-import processing.ThreeLayersCalculator;
+import processing.ThreeLTCalculator;
 import file.BookmarkReader;
 
 import java.util.ArrayList;
@@ -30,15 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import common.CalculationType;
 import common.DoubleMapComparator;
 
-// TODO: delete ThreeLayersCalculator and only use ThreeLTCalculator
 // TODO: integrate Tag-Filtering!
 // TODO: make it work in online setting! (caching + LDA topic calculation)
 public class ThreeLayersEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
-	private ThreeLayersCalculator calculator = null;
+	private ThreeLTCalculator calculator = null;
 	private final Map<Integer, Double> topTags;
 
 	public ThreeLayersEngine() {
@@ -51,8 +51,8 @@ public class ThreeLayersEngine implements EngineInterface {
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 
-		ThreeLayersCalculator calculator = new ThreeLayersCalculator(reader, reader.getBookmarks().size(), 5, 5, true, true, false);
-		Map<Integer, Double> topTags = EngineUtils.calcTopTags(reader);
+		ThreeLTCalculator calculator = new ThreeLTCalculator(reader, reader.getBookmarks().size(), 5, 5, true, true, false, CalculationType.NONE);
+		Map<Integer, Double> topTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);
 		resetStructure(reader, calculator, topTags);
 	}
 
@@ -121,7 +121,7 @@ public class ThreeLayersEngine implements EngineInterface {
 		return tagMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, ThreeLayersCalculator calculator, Map<Integer, Double> topTags) {
+	public synchronized void resetStructure(BookmarkReader reader, ThreeLTCalculator calculator, Map<Integer, Double> topTags) {
 		this.reader = reader;
 		this.calculator = calculator;
 		

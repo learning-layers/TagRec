@@ -132,7 +132,7 @@ public class CIRTTCalculator {
 		
 		// get candidates
 		int i = 0;
-		Map<Integer, Double> sortedNeighbors = Utilities.getNeighbors(userID, -1, this.allUsers, this.userMaps, this.trainList, this.sim);
+		Map<Integer, Double> sortedNeighbors = Utilities.getNeighbors(userID, -1, this.allUsers, this.userMaps, this.trainList, this.sim, true);
 		for (Map.Entry<Integer, Double> neighbor : sortedNeighbors.entrySet()) {
 			if (i++ > MAX_NEIGHBORS) {
 				break;

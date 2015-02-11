@@ -70,7 +70,7 @@ public class LanguageModelEngine implements EngineInterface {
 			resMaps.put(reader.getResources().get(i++), map);
 		}
 
-		Map<Integer, Double> topTags = EngineUtils.calcTopTags(reader);
+		Map<Integer, Double> topTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);
 		resetStructures(userMaps, resMaps, reader, topTags);
 	}
 

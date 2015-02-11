@@ -35,15 +35,15 @@ import common.Features;
 import common.Similarity;
 
 // TODO: cache values
-public class CFResourceRecommenderEngine implements EngineInterface {
+public class CFUserRecommenderEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
 	private CFResourceCalculator calculator = null;
 	private CFResourceCalculator tagCalculator = null;
-	private final Map<Integer, Double> topResources;
+	private final Map<Integer, Double> topUsers;
 
-	public CFResourceRecommenderEngine() {
-		this.topResources = new LinkedHashMap<Integer, Double>();		
+	public CFUserRecommenderEngine() {
+		this.topUsers = new LinkedHashMap<Integer, Double>();		
 		this.reader = new BookmarkReader(0, false);
 	}
 	
@@ -55,49 +55,43 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		CFResourceCalculator calculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		CFResourceCalculator tagCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.TAGS);
 		
-		Map<Integer, Double> topResources = EngineUtils.calcTopEntities(reader, EntityType.RESOURCE);
-		resetStructure(reader, calculator, tagCalculator, topResources);
+		Map<Integer, Double> topUsers = EngineUtils.calcTopEntities(reader, EntityType.USER);
+		resetStructure(reader, calculator, tagCalculator, topUsers);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count,
+			Boolean filterOwnEntities, Algorithm algorithm) { 
+		
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
-		if (filterOwnEntities == null) {
-			filterOwnEntities = true;
-		}
 		
-		Map<Integer, Double> resourceIDs = new LinkedHashMap<>();
-		Map<String, Double> resourceMap = new LinkedHashMap<>();
+		Map<Integer, Double> userIDs = new LinkedHashMap<>();
+		Map<String, Double> userMap = new LinkedHashMap<>();
 		if (this.reader == null || this.calculator == null) {
 			System.out.println("No data has been loaded");
-			return resourceMap;
+			return userMap;
 		}
 		int userID = -1;
 		if (user != null) {
 			userID = this.reader.getUsers().indexOf(user);
 		}
-		// used to filter own resources if necessary
-		List<Integer> userResources = null;
-		if (filterOwnEntities.booleanValue()) {
-			userResources = Bookmark.getResourcesFromUser(this.reader.getBookmarks(), userID);
-		}
 
 		// first call CF if wished
-		if (algorithm == null || algorithm != Algorithm.RESOURCEMP) {
-			if (algorithm == Algorithm.RESOURCETAGCF) {
-				resourceIDs = this.tagCalculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+		if (algorithm == null || algorithm != Algorithm.USERMP) {
+			if (algorithm == Algorithm.USERTAGCF) {
+				userIDs = this.tagCalculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
 			} else {
-				resourceIDs = this.calculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+				userIDs = this.calculator.getRankedResourcesList(userID, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
 			}
 		}
 		// then call MP if necessary
-		if (resourceIDs.size() < count) {
-			for (Map.Entry<Integer, Double> t : this.topResources.entrySet()) {
-				if (resourceIDs.size() < count) {
-					// add MP resources if they are not already in the recommeded list or already known by this user
-					if (!resourceIDs.containsKey(t.getKey()) && (userResources == null || !userResources.contains(t.getKey()))) {
-						resourceIDs.put(t.getKey(), t.getValue());
+		if (userIDs.size() < count) {
+			for (Map.Entry<Integer, Double> t : this.topUsers.entrySet()) {
+				if (userIDs.size() < count) {
+					// add MP users if they are not already in the recommeded list
+					if (!userIDs.containsKey(t.getKey())) {
+						userIDs.put(t.getKey(), t.getValue());
 					}
 				} else {
 					break;
@@ -106,27 +100,27 @@ public class CFResourceRecommenderEngine implements EngineInterface {
 		}
 
 		// sort
-		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resourceIDs));
-		sortedResultMap.putAll(resourceIDs);
+		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(userIDs));
+		sortedResultMap.putAll(userIDs);
 		
 		// last map IDs back to strings
 		for (Map.Entry<Integer, Double> tEntry : sortedResultMap.entrySet()) {
-			if (resourceMap.size() < count) {
-				resourceMap.put(this.reader.getResources().get(tEntry.getKey()), tEntry.getValue());
+			if (userMap.size() < count) {
+				userMap.put(this.reader.getUsers().get(tEntry.getKey()), tEntry.getValue());
 			} else {
 				break;
 			}
 		}
 		
-		return resourceMap;
+		return userMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, CFResourceCalculator tagCalculator, Map<Integer, Double> topResources) {
+	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, CFResourceCalculator tagCalculator, Map<Integer, Double> topUsers) {
 		this.reader = reader;
 		this.calculator = calculator;
 		this.tagCalculator = tagCalculator;
 		
-		this.topResources.clear();
-		this.topResources.putAll(topResources);
+		this.topUsers.clear();
+		this.topUsers.putAll(topUsers);
 	}
 }

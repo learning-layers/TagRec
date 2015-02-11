@@ -209,7 +209,7 @@ public class ZhengCalculator {
 		// get candidates
 		int i = 0;
 		Map<Integer, Double> sortedNeighbors = 
-				Utilities.getNeighbors(userID, -1, allUsersSimilarities, userResourcesWeights, trainList, similarity);
+				Utilities.getNeighbors(userID, -1, allUsersSimilarities, userResourcesWeights, trainList, similarity, true);
 		
 		Double userSimiliaritySum = 0.0;
 		

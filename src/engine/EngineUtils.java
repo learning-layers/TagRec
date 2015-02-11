@@ -57,42 +57,29 @@ public class EngineUtils {
 		return filterTags;
 	}
 	
-	public static Map<Integer, Double> calcTopTags(BookmarkReader reader) {
-		Map<Integer, Double> tagMap = new LinkedHashMap<>();
+	public static Map<Integer, Double> calcTopEntities(BookmarkReader reader, EntityType type) {
+		Map<Integer, Double> map = new LinkedHashMap<>();
 		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
-
-		Integer countSum = 0;
-		for (int i = 0; i < reader.getTagCounts().size(); i++) {
-			countMap.put(i, reader.getTagCounts().get(i));
-			countSum += reader.getTagCounts().get(i);
-		}
-
-		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(new IntMapComparator(countMap));
-		sortedCountMap.putAll(countMap);
-		for (Map.Entry<Integer, Integer> entry : sortedCountMap.entrySet()) {
-			double tagValue = countSum != 0 ? ((double) entry.getValue()) / countSum : 0.0;
-			tagMap.put(entry.getKey(), tagValue);
+		List<Integer> entityCounts = null;
+		if (type == EntityType.TAG) {
+			entityCounts = reader.getTagCounts();
+		} else if (type == EntityType.RESOURCE) {
+			entityCounts = reader.getResourceCounts();
+		} else {
+			entityCounts = reader.getUserCounts();
 		}
 		
-		return tagMap;
-	}
-	
-	public static Map<Integer, Double> calcTopResources(BookmarkReader reader) {
-		Map<Integer, Double> resourceMap = new LinkedHashMap<>();
-		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
-
 		Integer countSum = 0;
-		for (int i = 0; i < reader.getResourceCounts().size(); i++) {
-			countMap.put(i, reader.getResourceCounts().get(i));
-			countSum += reader.getResourceCounts().get(i);
+		for (int i = 0; i < entityCounts.size(); i++) {
+			countMap.put(i, entityCounts.get(i));
+			countSum += entityCounts.get(i);
 		}
 
 		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(new IntMapComparator(countMap));
 		sortedCountMap.putAll(countMap);
 		for (Map.Entry<Integer, Integer> entry : sortedCountMap.entrySet()) {
-			resourceMap.put(entry.getKey(), ((double) entry.getValue()) / countSum);
+			map.put(entry.getKey(), ((double) entry.getValue()) / countSum);
 		}
-
-		return resourceMap;
+		return map;
 	}
 }

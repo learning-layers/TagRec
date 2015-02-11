@@ -21,41 +21,37 @@
 package itemrecommendations;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Timer;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 
 import common.DoubleMapComparator;
 import common.Features;
+import common.MemoryThread;
+import common.PerformanceMeasurement;
 import common.Similarity;
 import common.Bookmark;
 import common.Utilities;
-
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
 public class CFResourceCalculator {
 	
 	public static int MAX_NEIGHBORS = 20;
-	private final static double K1 = 1.2;
-	private final static double K3 = 1.2;
-	private final static double B = 0.8;
+	//private final static double K1 = 1.2;
+	//private final static double K3 = 1.2;
+	//private final static double B = 0.8;
 	
 	private BookmarkReader reader;
 	private boolean userBased;
 	private boolean resBased;
-	private double beta;
+	//private double beta;
 	Similarity sim;
 	private List<Bookmark> trainList;
 	private List<Bookmark> testList;
@@ -68,7 +64,7 @@ public class CFResourceCalculator {
 		this.reader = reader;
 		this.userBased = userBased;
 		this.resBased = resBased;
-		this.beta = (double)beta / 10.0;
+		//this.beta = (double)beta / 10.0;
 		this.sim = sim;
 		//this.trainList = this.reader.getUserLines().subList(0, predictTags ? trainSize : reader.getUserLines().size()); // TODO
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
@@ -100,7 +96,9 @@ public class CFResourceCalculator {
 	}
 	
 
-	public Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll, boolean filterOwnEntities) {
+	public Map<Integer, Double> getRankedResourcesList(int userID, boolean sorting, boolean allResources, boolean bll, 
+			boolean filterOwnEntities, boolean recommUsers) {
+		
 		List<Integer> userResources = null;
 		Map<Integer, Double> userBllResources = null;
 		if (this.resBased) {
@@ -112,9 +110,12 @@ public class CFResourceCalculator {
 		Map<Integer, Double> rankedResources = new LinkedHashMap<Integer, Double>();
 		
 		int i = 0;
-		double denom = 0.0;
+		//double denom = 0.0;
 		if (this.userBased && userID != -1) {
-			Map<Integer, Double> sortedNeighbors = Utilities.getNeighbors(userID, -1, this.allUsers, this.userMaps, this.trainList, this.sim);
+			Map<Integer, Double> sortedNeighbors = Utilities.getNeighbors(userID, -1, this.allUsers, this.userMaps, this.trainList, this.sim, !recommUsers);
+			if (recommUsers) {
+				return sortedNeighbors;
+			}
 			for (Map.Entry<Integer, Double> neighbor : sortedNeighbors.entrySet()) {		
 				if (i++ > MAX_NEIGHBORS) {
 					break;
@@ -123,7 +124,7 @@ public class CFResourceCalculator {
 					userBllResources = Bookmark.getResourcesFromUserWithRec(this.trainList, this.testList, neighbor.getKey(), 0.5, false);
 				}
 				double bm25 = neighbor.getValue();
-				denom += bm25;
+				//denom += bm25;
 				if (bm25 != 0.0) {
 					List<Integer> resources = Bookmark.getResourcesFromUser(this.trainList, neighbor.getKey());				
 					for (Integer resID : resources) {
@@ -139,8 +140,7 @@ public class CFResourceCalculator {
 			}
 		}
 		if (this.resBased) {
-			denom = 0.0;
-
+			//denom = 0.0;
 			Map<Integer, Double> sortedResources = null;
 			if (allResources) {
 				sortedResources = new LinkedHashMap<Integer, Double>();
@@ -183,89 +183,15 @@ public class CFResourceCalculator {
 			// return the sorted resources
 			Map<Integer, Double> sortedRankedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(rankedResources));
 			sortedRankedResources.putAll(rankedResources);
-			int size = sortedRankedResources.size();
 			return sortedRankedResources;
 		} else {
 			return rankedResources;
 		}
 	}
 	
-	// Tags -------------------------------------------------------------------------------------------------------------------------------------
-	// TODO: check results with no-core
-	public Map<Integer, Double> getRankedTagList(int userID, int resID, boolean sorting) {
-		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
-		int i = 0;		
-		if (this.userBased) {
-			Map<Integer, Double> neighbors = Utilities.getNeighbors(userID, resID, this.allUsers, this.userMaps, this.trainList, this.sim);
-			for (Map.Entry<Integer, Double> entry : neighbors.entrySet()) {
-				if (i++ < MAX_NEIGHBORS && entry.getKey() != userID) {
-					//neighborMaps.add(this.userMaps.get(entry.getKey()));
-					Bookmark nBookmark = Bookmark.getUserData(this.trainList, entry.getKey(), resID);
-					List<Integer> tags = null;
-					if (nBookmark != null) {
-						tags = nBookmark.getTags();
-					} else {
-						if (entry.getKey() < this.userMaps.size()) {
-							tags = new ArrayList<Integer>(this.userMaps.get(entry.getKey()).keySet());
-						} else {
-							tags = new ArrayList<Integer>();
-						}
-					}
-					double bm25 = /*this.beta * */entry.getValue();
-					//if (bm25 != 0.0) {
-						for (int tag : tags) {
-							Double val = resultMap.get(tag);
-							resultMap.put(tag, (val != null ? val + bm25 : bm25));
-						}
-					//}
-				} else {
-					break;
-				}
-			}		
-			// Neighbor-weighted CF
-			//for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
-			//	entry.setValue(Math.log10(1 + (double)getTagFrequency(entry.getKey(), neighborMaps)) * entry.getValue());
-			//}
-		}
-		i = 0;
-		if (this.resBased) {
-			List<Integer> userResources = new ArrayList<Integer>();
-			userResources.add(resID);
-			Map<Integer, Double> resources = Utilities.getSimResources(userID, resID, userResources, this.allResources, this.resMaps, this.trainList, this.sim);
-			for (Map.Entry<Integer, Double> entry : resources.entrySet()) {
-				if (i++ < MAX_NEIGHBORS) {
-					List<Integer> tags = Bookmark.getResData(this.trainList, userID, entry.getKey()).getTags();
-					double bm25 = /*(1.0 - this.beta) * */entry.getValue();
-					//if (bm25 != 0.0) {
-						for (int tag : tags) {
-							Double val = resultMap.get(tag);
-							resultMap.put(tag, (val != null ? val + bm25 : bm25));
-						}
-					//}
-				} else {
-					break;
-				}
-			}	
-		}
-		
-		if (sorting) {
-			Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-			sortedResultMap.putAll(resultMap);			
-			Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>(20);
-			int index = 0;
-			for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
-				if (index++ < 20) {
-					returnMap.put(entry.getKey(), entry.getValue());
-				} else {
-					break;
-				}
-			}
-			return returnMap;
-		}
-		return resultMap;
-	}
-	
 	// Statics -----------------------------------------------------------------------------------------------------------------------------------------------------------
+	private static String timeString;
+	
 	public static BookmarkReader predictResources(String filename, int trainSize, int sampleSize, int neighborSize, boolean userBased, boolean resourceBased, boolean allResources, boolean bll, Features features) {
 		MAX_NEIGHBORS = neighborSize;
 		return predictSample(filename, trainSize, sampleSize, userBased, resourceBased, allResources, 5, bll, features);
@@ -274,22 +200,36 @@ public class CFResourceCalculator {
 	private static List<Map<Integer, Double>> startBM25CreationForResourcesPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
-		CFResourceCalculator calculator = new CFResourceCalculator(reader, trainSize, false, userBased, resBased, 5, Similarity.COSINE, features);
 		
+		Stopwatch timer = new Stopwatch();
+		timer.start();		
+		CFResourceCalculator calculator = new CFResourceCalculator(reader, trainSize, false, userBased, resBased, 5, Similarity.COSINE, features);
+		timer.stop();
+		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
+		
+		timer.reset();
+		timer.start();
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
 		for (Integer userID : reader.getUniqueUserListFromTestSet(trainSize)) {
 			Map<Integer, Double> map = null;
-			map = calculator.getRankedResourcesList(userID, true, allResources, bll, true); // TODO
+			map = calculator.getRankedResourcesList(userID, true, allResources, bll, true, false); // TODO
 			results.add(map);
 		}
-	
+		timer.stop();
+		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
+		
+		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, sampleSize);
 		return results;
 	}
 	
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, boolean allResources, int beta, boolean bll, Features features) {
-		//filename += "_res";
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, boolean allResources,
+			int beta, boolean bll, Features features) {
 		
-		BookmarkReader reader = new BookmarkReader(trainSize, false); // TODO
+		Timer timerThread = new Timer();
+		MemoryThread memoryThread = new MemoryThread();
+		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
+		
+		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 		
 		List<Map<Integer, Double>> cfValues = null;	
@@ -318,8 +258,9 @@ public class CFResourceCalculator {
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeResourcePredictionsToFile(filename + suffix + beta, trainSize, MAX_NEIGHBORS);
 
+		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
+		timerThread.cancel();
+		Utilities.writeStringToFile("./data/metrics/" + filename + suffix + beta + "_TIME.txt", timeString);
 		return reader;
 	}
-	
-	private static String timeString;
 }

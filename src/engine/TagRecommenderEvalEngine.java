@@ -24,10 +24,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import file.BookmarkReader;
 

@@ -53,6 +53,7 @@ import processing.ThreeLTCalculator;
 import engine.Algorithm;
 import engine.BaseLevelLearningEngine;
 import engine.CFResourceRecommenderEngine;
+import engine.CFUserRecommenderEngine;
 import engine.EngineInterface;
 import engine.LanguageModelEngine;
 import engine.TagRecommenderEngine;
@@ -84,8 +85,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "lastfm";
-	private final static String SUBDIR = "/core1";
+	private final static String DATASET = "bib";
+	private final static String SUBDIR = "/resource";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -428,17 +429,6 @@ public class Pipeline {
 			e3.printStackTrace();
 		}
 		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10, false, null));		
-
-		
-		EngineInterface resrecEngine = new CFResourceRecommenderEngine();
-		try {
-			resrecEngine.loadFile(path);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		System.out.println("CF NoFilter" + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, null));
-		System.out.println("CF Filter: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, null));
-		*/
 		EngineInterface tagrecEngine = new TagRecommenderEvalEngine();
 		try {
 			tagrecEngine.loadFile(path);
@@ -449,6 +439,28 @@ public class Pipeline {
 		System.out.println("TagRec BLLac" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, null));
 		//System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLL));
 		//System.out.println("TagRec MPur" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.MPur));
+		*/		
+		EngineInterface resrecEngine = new CFResourceRecommenderEngine();
+		try {
+			resrecEngine.loadFile(path);
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		System.out.println("Res MP" + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCEMP));
+		System.out.println("Res CF " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCECF));
+		System.out.println("Res TAG_CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCF));
+		System.out.println();
+		
+		EngineInterface userrecEngine = new CFUserRecommenderEngine();
+		try {
+			userrecEngine.loadFile(path);
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		System.out.println("User MP" + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERMP));
+		System.out.println("User CF " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERCF));
+		System.out.println("User TAG_CF: " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.USERTAGCF));
+		System.out.println();
 	}
 	
 	// Helpers
