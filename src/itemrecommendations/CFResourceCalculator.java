@@ -152,7 +152,7 @@ public class CFResourceCalculator {
 					int res = resEntry.getKey();
 					i = 0;
 					Double bllVal = (bll && userBllResources != null ? resEntry.getValue() : 1.0);
-					Map<Integer, Double> resources = Utilities.getSimResources(-1, res, userResources, this.allResources, this.resMaps, this.trainList, this.sim);
+					Map<Integer, Double> resources = Utilities.getSimResources(-1, res, userResources, this.allResources, this.resMaps, this.trainList, this.sim, sorting);
 					for (Map.Entry<Integer, Double> entry : resources.entrySet()) {
 						if (i++ > MAX_NEIGHBORS) {
 							break;
@@ -172,8 +172,12 @@ public class CFResourceCalculator {
 					}
 					return Utilities.getSimUsersForResource(resID, this.allUsers, this.userMaps, this.resMaps, resourceUsers, this.sim, sorting);
 				} else {
-					sortedResources = Utilities.getSimResourcesForUser(userID, this.allResources, this.userMaps, this.resMaps,
-							filterOwnEntities ? userResources : new ArrayList<Integer>(), this.sim, sorting);
+					if (userID != -1) {
+						sortedResources = Utilities.getSimResourcesForUser(userID, this.allResources, this.userMaps, this.resMaps, 
+								filterOwnEntities ? userResources : new ArrayList<Integer>(), this.sim, sorting);
+					} else if (resID != -1) {
+						sortedResources = Utilities.getSimResources(-1, resID, null, this.allResources, this.resMaps, this.trainList, this.sim, sorting);
+					}
 				}
 			}
 			for (Map.Entry<Integer, Double> sortedRes : sortedResources.entrySet()) {

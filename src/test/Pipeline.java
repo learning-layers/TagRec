@@ -446,10 +446,12 @@ public class Pipeline {
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
-		System.out.println("Res MP" + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCEMP));
-		System.out.println("Res CF " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCECF));
-		System.out.println("Res TAG_CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCF));
-		System.out.println("Res TAG_CB: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCB));
+		System.out.println("Res2User MP" + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCEMP));
+		System.out.println("Res2User CF " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCECF));
+		System.out.println("Res2User TAG_CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCF));
+		System.out.println("Res2User TAG_CB: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCB));
+		System.out.println("Res2Res CF: " + resrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.RESOURCECF));
+		System.out.println("Res2Res TAG_CF: " + resrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.RESOURCETAGCF));
 		System.out.println();
 		
 		EngineInterface userrecEngine = new UserRecommenderEngine();
@@ -458,10 +460,10 @@ public class Pipeline {
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
-		System.out.println("User MP" + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERMP));
-		System.out.println("User CF " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERCF));
-		System.out.println("User TAG_CF: " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.USERTAGCF));
-		System.out.println("User TAG_CB: " + userrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.USERTAGCB));
+		System.out.println("User2User MP" + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERMP));
+		System.out.println("User2User CF " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERCF));
+		System.out.println("User2User TAG_CF: " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.USERTAGCF));
+		System.out.println("User2Res TAG_CB: " + userrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.USERTAGCB));
 		System.out.println();
 	}
 	

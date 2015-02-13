@@ -41,6 +41,7 @@ public class ResourceRecommenderEngine implements EngineInterface {
 	private CFResourceCalculator calculator = null;
 	private CFResourceCalculator tagCalculator = null;
 	private CFResourceCalculator cbCalculator = null;
+	private CFResourceCalculator resCFCalculator = null;
 	private final Map<Integer, Double> topResources;
 
 	public ResourceRecommenderEngine() {
@@ -54,9 +55,10 @@ public class ResourceRecommenderEngine implements EngineInterface {
 		CFResourceCalculator calculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		CFResourceCalculator tagCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.TAGS);
 		CFResourceCalculator cbCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, false, true, 5, Similarity.COSINE, Features.TAGS);
+		CFResourceCalculator resCFCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, false, true, 5, Similarity.COSINE, Features.ENTITIES);
 		
 		Map<Integer, Double> topResources = EngineUtils.calcTopEntities(reader, EntityType.RESOURCE);
-		resetStructure(reader, calculator, tagCalculator, cbCalculator, topResources);
+		resetStructure(reader, calculator, tagCalculator, cbCalculator, resCFCalculator, topResources);
 	}
 
 	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
@@ -77,20 +79,31 @@ public class ResourceRecommenderEngine implements EngineInterface {
 		if (user != null) {
 			userID = this.reader.getUsers().indexOf(user);
 		}
+		int resID = -1;
+		if (resource != null) {
+			resID = this.reader.getResources().indexOf(resource);
+		}
 		// used to filter own resources if necessary
 		List<Integer> userResources = null;
-		if (filterOwnEntities.booleanValue()) {
+		if (userID != -1 && filterOwnEntities.booleanValue()) {
 			userResources = Bookmark.getResourcesFromUser(this.reader.getBookmarks(), userID);
 		}
 
-		// first call CF if wished
 		if (algorithm == null || algorithm != Algorithm.RESOURCEMP) {
-			if (algorithm == Algorithm.RESOURCETAGCF) {
-				resourceIDs = this.tagCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
-			} else if (algorithm == Algorithm.RESOURCETAGCB)  {
-				resourceIDs = this.cbCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
-			} else {
-				resourceIDs = this.calculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+			if (userID != -1) {
+					if (algorithm == Algorithm.RESOURCETAGCF) {
+						resourceIDs = this.tagCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+					} else if (algorithm == Algorithm.RESOURCETAGCB)  {
+						resourceIDs = this.cbCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+					} else {
+						resourceIDs = this.calculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+					}
+			} else if (resID != -1) {
+				if (algorithm == Algorithm.RESOURCETAGCF) {
+					resourceIDs = this.cbCalculator.getRankedResourcesList(-1, resID, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+				} else {
+					resourceIDs = this.resCFCalculator.getRankedResourcesList(-1, resID, false, false, false, filterOwnEntities.booleanValue(), false); // not sorted!
+				}
 			}
 		}
 		// then call MP if necessary
@@ -123,11 +136,13 @@ public class ResourceRecommenderEngine implements EngineInterface {
 		return resourceMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, CFResourceCalculator tagCalculator, CFResourceCalculator cbCalculator, Map<Integer, Double> topResources) {
+	public synchronized void resetStructure(BookmarkReader reader, CFResourceCalculator calculator, 
+			CFResourceCalculator tagCalculator, CFResourceCalculator cbCalculator, CFResourceCalculator resCFCalculator, Map<Integer, Double> topResources) {
 		this.reader = reader;
 		this.calculator = calculator;
 		this.tagCalculator = tagCalculator;
 		this.cbCalculator = cbCalculator;
+		this.resCFCalculator = resCFCalculator;
 		
 		this.topResources.clear();
 		this.topResources.putAll(topResources);

@@ -83,17 +83,20 @@ public class UserRecommenderEngine implements EngineInterface {
 		if (resource != null) {
 			resID = this.reader.getResources().indexOf(resource);
 		}
+		// used to filter already assigned users
+		List<Integer> resourceUsers = null;
+		if (resID != -1 && filterOwnEntities.booleanValue()) {
+			resourceUsers = Bookmark.getUsersFromResource(this.reader.getBookmarks(), resID);
+		}
 
-		if (userID != -1) {
-			if (algorithm == null || algorithm != Algorithm.USERMP) {
+		if (algorithm == null || algorithm != Algorithm.USERMP) {
+			if (userID != -1) {
 				if (algorithm == Algorithm.USERTAGCF) {
 					userIDs = this.tagCalculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
 				} else {
 					userIDs = this.calculator.getRankedResourcesList(userID, -1, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted!
 				}
-			}
-		} else if (resID != -1) {
-			if (algorithm == null || algorithm != Algorithm.USERMP) {
+			} else if (resID != -1) {
 				userIDs = this.cbCalculator.getRankedResourcesList(-1, resID, false, false, false, filterOwnEntities.booleanValue(), true); // not sorted
 			}
 		}
@@ -102,7 +105,7 @@ public class UserRecommenderEngine implements EngineInterface {
 			for (Map.Entry<Integer, Double> t : this.topUsers.entrySet()) {
 				if (userIDs.size() < count) {
 					// add MP users if they are not already in the recommeded list
-					if (!userIDs.containsKey(t.getKey())) {
+					if (!userIDs.containsKey(t.getKey())  && (resourceUsers == null || !resourceUsers.contains(t.getKey()))) {
 						userIDs.put(t.getKey(), t.getValue());
 					}
 				} else {
