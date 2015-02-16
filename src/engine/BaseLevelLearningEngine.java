@@ -25,10 +25,8 @@ import common.CooccurenceMatrix;
 import common.DoubleMapComparator;
 import common.Utilities;
 import file.BookmarkReader;
-import file.BookmarkSplitter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;

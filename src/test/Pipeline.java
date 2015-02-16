@@ -85,8 +85,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "bib";
-	private final static String SUBDIR = "/resource";
+	private final static String DATASET = "lastfm";
+	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -107,6 +107,7 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 
+		//startAllTagRecommenderApproaches(dir, path);
 		//getTrainTestStatistics(path);
 		//BookmarkSplitter.splitSample("flickr_core/flickr_core1_lda_1000", "flickr_core/flickr_sample", 1, 20, true);
 		
@@ -262,6 +263,8 @@ public class Pipeline {
 			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, false, true, false, true);
 		} else if (op.equals("item_sustain")) {
 			startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
+		} else if (op.equals("tag_all")) {
+			startAllTagRecommenderApproaches(sampleDir, samplePath);
 		} else {
 			System.out.println("Unknown operation");
 		}
@@ -269,6 +272,20 @@ public class Pipeline {
 
 	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------
 	
+	private static void startAllTagRecommenderApproaches(String sampleDir, String samplePath) {
+		startBaselineCalculator(sampleDir, samplePath, 1, true);		// MP
+		startModelCalculator(sampleDir, samplePath, 1, -5);				// MPur
+		startRecCalculator(sampleDir, samplePath);						// GIRPTM
+		startActCalculator(sampleDir, samplePath, 1, -5, -5, true, CalculationType.NONE);				// BLL
+		startActCalculator(sampleDir, samplePath, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE);	// BLLac
+		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, true, false, false);	// 3L		
+		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, true, true, false);	// 3LTtop
+		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, true, false, true);	// 3LTtag
+		startCfTagCalculator(sampleDir, samplePath, 1, 20, -5, true);	// CFur
+		startFolkRankCalculator(sampleDir, samplePath, 1);				// APR+FR
+		startLdaCalculator(sampleDir, samplePath, 1000, 1);				// LDA
+	}
+
 	private static void startActCalculator(String sampleDir, String sampleName, int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type) {
 		getTrainTestSize(sampleName);
 		List<Integer> dValues = getBetaValues(dUpperBound);

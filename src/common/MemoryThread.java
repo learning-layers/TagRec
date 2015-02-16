@@ -8,6 +8,10 @@ public class MemoryThread extends TimerTask {
 	
 	private long maxMemory = -1;
 	
+	public MemoryThread() {
+		Runtime.getRuntime().gc();
+	}
+	
 	private void trackMaxMemory() {
 	    // Get the Java runtime
 	    Runtime runtime = Runtime.getRuntime();
