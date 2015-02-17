@@ -177,10 +177,17 @@ public class SustainApproach {
 	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta){
 		//LinkedList<Integer> topics = new LinkedList<Integer>();
 		ArrayList<GVector> clusterList = new ArrayList<GVector>();
-				
-		double[] array = new double[this.numberOfTopics];
-		Arrays.fill(array,1);
-		GVector lambda = new GVector(array);
+		GVector lambda = new GVector(this.numberOfTopics);
+		lambda.zero();
+	
+		
+		// lambda=1 for all topics a user has looked at
+		for (Integer resource : list){
+			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
+			for (Integer t : topics)
+				lambda.setElement(t, 1);
+		}
+		
 		//clusterList.add(c0);
 		//GVector bestCluster = new GVector(0);
 		
