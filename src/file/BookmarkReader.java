@@ -39,6 +39,7 @@ public class BookmarkReader {
 	
 	private final int countLimit;
 	private List<Bookmark> userLines;
+	private List<Bookmark> testLines;
 	private List<String> categories;
 	
 	private List<String> tags;
@@ -57,6 +58,7 @@ public class BookmarkReader {
 	public BookmarkReader(int countLimit, boolean stemming) {
 		this.countLimit = countLimit;
 		this.userLines = new ArrayList<Bookmark>();
+		this.testLines = null;
 		this.categories = new ArrayList<String>();
 		
 		this.tags = new ArrayList<String>();
@@ -229,8 +231,12 @@ public class BookmarkReader {
 		return this.userLines;
 	}
 	
-	public void setUserLines(List<Bookmark> userLines) {
-		this.userLines = userLines;
+	public List<Bookmark> getTestLines() {
+		return this.testLines;
+	}
+	
+	public void setTestLines(List<Bookmark> userLines) {
+		this.testLines = userLines;
 	}
 	
 	public List<String> getCategories() {

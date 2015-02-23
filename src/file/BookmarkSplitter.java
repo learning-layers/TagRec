@@ -97,7 +97,7 @@ public class BookmarkSplitter {
 				userIndex = 1;
 			}
 			if (userIndex++ == userSize) {
-				if (coldStart || (!coldStart && userSize > 1)) {
+				if (coldStart || userSize > 1) {
 					testLines.add(data);
 				} else {
 					trainLines.add(data);
@@ -198,7 +198,8 @@ public class BookmarkSplitter {
 				bw.write("\"" + bookmark.getTimestamp().replace("\"", "") + "\";\"");
 				int i = 0;
 				for (int tag : bookmark.getTags()) {
-					bw.write(reader.getTags().get(tag).replace("\"", ""));
+					//bw.write(reader.getTags().get(tag).replace("\"", "")); // enable if you need tag strings!
+					bw.write(Integer.toString(tag));
 					if (++i < bookmark.getTags().size()) {
 						bw.write(',');
 					}					
@@ -232,14 +233,14 @@ public class BookmarkSplitter {
 	
 	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec) {		
 		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);		
-		BookmarkSplitter splitter = new BookmarkSplitter(reader);
+		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
+		BookmarkSplitter splitter = new BookmarkSplitter(reader);
 		for (int i = 1; i <= count; i++) {
 			if (percentage > 0) {
 				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec);
 			} else {
-				splitter.leaveLastOutSplit(sampleName, true);
+				splitter.leaveLastOutSplit(sampleName, false);
 			}
 		}
 	}

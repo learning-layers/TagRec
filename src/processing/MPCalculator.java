@@ -112,7 +112,7 @@ public class MPCalculator {
 			values = getPerfectTags(reader, sampleSize, 10);
 		}
 		
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, values);
 		writer.writeFile(filename + "_mp");
 		

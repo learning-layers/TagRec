@@ -107,7 +107,7 @@ public class ThreeLTCalculator {
 			userResultMap = getResultMap(userB, testCats, userTagMap, userCatMap, testTimestamp, topicBLL);
 			if (this.cType == CalculationType.USER_TO_RESOURCE && resID < this.resCounts.size()) {
 				resCount = this.resCounts.get(resID);
-				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true);
+				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true, false);
 				for (Map.Entry<Integer, Double> entry : associativeValues.entrySet()) {
 					Double val = userResultMap.get(entry.getKey());				
 					userResultMap.put(entry.getKey(), val == null ? entry.getValue().doubleValue() : val.doubleValue() + entry.getValue().doubleValue());
@@ -320,7 +320,7 @@ public class ThreeLTCalculator {
 		}
 		
 		String outputFile = filename + suffix + "_" + beta + "_" + d;	
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(outputFile);
 		

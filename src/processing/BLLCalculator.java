@@ -114,7 +114,7 @@ public class BLLCalculator {
 			if ((cType.equals(CalculationType.USER_TO_RESOURCE_ONLY) || cType.equals(CalculationType.USER_TO_RESOURCE) || cType.equals(CalculationType.BOTH)) && resID < this.resMaps.size()){	
 				resMap = this.resMaps.get(resID);
 				resCount = this.resCounts.get(resID);
-				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true);	
+				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true, false);	
 
 				double denom = 0.0;
 				/*
@@ -159,11 +159,11 @@ public class BLLCalculator {
 							Double val = resResultMap.get(entry.getKey());
 							resResultMap.put(entry.getKey(), val == null ? resVal : val.doubleValue() + resVal);
 						}
-					}					
+					}				
 					if ((cType.equals(CalculationType.RESOURCE_TO_USER_ONLY) || cType.equals(CalculationType.RESOURCE_TO_USER) || cType.equals(CalculationType.BOTH)) && userID < this.userMaps.size()) {	
 						userMap = this.userMaps.get(userID);
 						userCount = this.userCounts.get(userID);
-						Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(resCount, userCount, true, false);	
+						Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(resCount, userCount, false, false, true);	
 
 						double denom = 0.0;
 						/*
@@ -360,7 +360,7 @@ public class BLLCalculator {
 		if (cType == CalculationType.USER_TO_RESOURCE) {
 			suffix += "_ac";
 		}
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		String outputfile = filename + suffix + "_" + beta + "_" + dVal;
 		writer.writeFile(outputfile);

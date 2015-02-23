@@ -51,7 +51,7 @@ public class PredictionFileWriter {
 				int j = 0;
 				String resultString = "";
 				int[] userResults = this.results.get(i);
-				Bookmark userData = this.reader.getBookmarks().get(i);
+				Bookmark userData = this.reader.getTestLines().get(i);
 				List<Integer> userCats = userData.getTags();
 				
 				resultString += (userData.getUserID() + (userData.getWikiID() == -1 ? "" : "-" + userData.getWikiID()) + "|");

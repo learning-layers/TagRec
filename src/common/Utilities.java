@@ -137,6 +137,26 @@ public class Utilities {
 		return resMaps;
 	}
 	
+	public static List<Map<Integer, Double>> getResourceMapsForTags(List<Bookmark> userLines) {
+		List<Map<Integer, Double>> tagMaps = new ArrayList<Map<Integer, Double>>();
+		for (Bookmark data : userLines) {
+			for (int tagID : data.getTags()) {
+				Map<Integer, Double> tagMap = null;
+				if (tagID >= tagMaps.size()) {
+					tagMap = new LinkedHashMap<Integer, Double>();
+					tagMaps.add(tagMap);
+				} else {
+					tagMap = tagMaps.get(tagID);
+				}
+				if (tagMap != null) {
+					Double count = tagMap.get(data.getWikiID());
+					tagMap.put(data.getWikiID(), count == null ? 1.0 : count.doubleValue() + 1.0);
+				}
+			}
+		}
+		return tagMaps;
+	}
+	
 	public static List<int[]> createRandomBaseline(int from, int to, int count) {
 		List<int[]> baseline = new ArrayList<int[]>();
 		

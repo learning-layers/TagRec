@@ -286,7 +286,7 @@ public class CFTagRecommender {
 		} else if (!resBased) {
 			suffix = "_usercf_";
 		}
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		String outputFile = filename + suffix + beta;
 		writer.writeFile(outputFile);

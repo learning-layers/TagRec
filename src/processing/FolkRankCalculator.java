@@ -115,7 +115,7 @@ public class FolkRankCalculator {
 		predictionValues = frResults;
 		prPredictionValues = prResults;
 		
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(filename + "_fr");
 		PredictionFileWriter prWriter = new PredictionFileWriter(reader, prPredictionValues);

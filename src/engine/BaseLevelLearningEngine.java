@@ -113,7 +113,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 					}
 				}
 				if (algorithm == null || algorithm == Algorithm.BLLac || algorithm == Algorithm.BLLacMPr) {
-					Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCountMap, resCountMap, false, true);
+					Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCountMap, resCountMap, false, true, false);
 					for (Map.Entry<Integer, Double> entry : associativeValues.entrySet()) {
 						Double val = resultMap.get(entry.getKey());
 						if (!filterTags.contains(entry.getKey())) {

@@ -136,12 +136,10 @@ public class GIRPTMCalculator {
 		
 		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, sampleSize);		
 		String suffix = "_girp";
-		if (!userBased) {
-			suffix = "_resgirp";
-		} else if (!resBased) {
+		if (userBased && resBased) {
 			suffix = "_girptm";
 		}
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(filename + suffix);
 		

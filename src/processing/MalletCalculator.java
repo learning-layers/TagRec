@@ -63,10 +63,12 @@ public class MalletCalculator {
 	private InstanceList instances;
 	private List<Map<Integer, Double>> docList;
 	private List<Map<Integer, Double>> topicList;
+	private Map<Integer, Double> mostPopularTopics;
 	
 	public MalletCalculator(List<Map<Integer, Integer>> maps, int numTopics) {
 		this.numTopics = numTopics;
-		this.maps = maps;		
+		this.maps = maps;
+		this.mostPopularTopics = new LinkedHashMap<Integer, Double>();
 		initializeDataStructures();
 	}
 	
@@ -87,6 +89,7 @@ public class MalletCalculator {
 	
 	private List<Map<Integer, Double>> getMaxTopicsByDocs(ParallelTopicModel LDA, int maxTopicsPerDoc) {
 		List<Map<Integer, Double>> docList = new ArrayList<Map<Integer, Double>>();
+		Map<Integer, Double> unsortedMostPopularTopics = new LinkedHashMap<Integer, Double>();
         int numDocs = this.instances.size();
         for (int doc = 0; doc < numDocs; ++doc) {
         	Map<Integer, Double> topicList = new LinkedHashMap<Integer, Double>();
@@ -94,7 +97,10 @@ public class MalletCalculator {
         	//double probSum = 0.0;
         	for (int topic = 0; topic < topicProbs.length && topic < maxTopicsPerDoc; topic++) {
         		if (topicProbs[topic] > TOPIC_THRESHOLD) { // TODO
-        			topicList.put(topic, topicProbs[topic]);
+        			double newTopicProb = topicProbs[topic];
+        			topicList.put(topic, newTopicProb);
+        			Double oldTopicProb = unsortedMostPopularTopics.get(topic);
+        			unsortedMostPopularTopics.put(topic, oldTopicProb == null ? newTopicProb : oldTopicProb.doubleValue() + newTopicProb);
         			//probSum += topicProbs[topic];
         		}
         	}
@@ -102,7 +108,16 @@ public class MalletCalculator {
         	Map<Integer, Double> sortedTopicList = new TreeMap<Integer, Double>(new DoubleMapComparator(topicList));
         	sortedTopicList.putAll(topicList);
         	docList.add(sortedTopicList);
-        }       
+        }
+        
+        Map<Integer, Double> sortedMostPopularTopics = new TreeMap<Integer, Double>(new DoubleMapComparator(unsortedMostPopularTopics));
+        sortedMostPopularTopics.putAll(unsortedMostPopularTopics);
+        for (Map.Entry<Integer, Double> entry : sortedMostPopularTopics.entrySet()) {
+        	if (this.mostPopularTopics.size() < MAX_RECOMMENDATIONS) {
+        		this.mostPopularTopics.put(entry.getKey(), entry.getValue());
+        	}
+        }
+        
 		return docList;
 	}
 	
@@ -186,6 +201,10 @@ public class MalletCalculator {
 		return terms;
 	}
 	
+	public Map<Integer, Double> getMostPopularTopics() {
+		return this.mostPopularTopics;
+	}
+	
 	// Statics -------------------------------------------------------------------------------------------------------------------------	
 	private static String timeString;
 	
@@ -226,6 +245,7 @@ public class MalletCalculator {
 	private static List<Map<Integer, Double>> startLdaCreation(BookmarkReader reader, int sampleSize, boolean sorting, int numTopics, boolean userBased, boolean resBased, boolean topicCreation) {
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
+		//int oldTrainSize = trainSize;
 		
 		Stopwatch timer = new Stopwatch();
 		timer.start();
@@ -246,7 +266,7 @@ public class MalletCalculator {
 			System.out.println("Res-Training finished");
 		}
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
-		if (trainSize == size) {
+		if (topicCreation) {
 			trainSize = 0;
 		}
         timer.stop();
@@ -254,6 +274,7 @@ public class MalletCalculator {
 
 		timer.reset();
 		timer.start();
+		int mpCount = 0;
 		for (int i = trainSize; i < size; i++) { // the test set
 			Bookmark data = reader.getBookmarks().get(i);
 			int userID = data.getUserID();
@@ -265,7 +286,14 @@ public class MalletCalculator {
 			}
 			Map<Integer, Double> resPredMap = null;
 			if (resCalc != null) {
+				//if (i > oldTrainSize) {
+				//	System.out.println("Test-Set");
+				//}
 				resPredMap = resCalc.getValueProbsForID(resID, topicCreation);
+				if (topicCreation && resPredMap == null) {
+					resPredMap = resCalc.getMostPopularTopics();
+					mpCount++;
+				}
 			}
 			Map<Integer, Double> map = getRankedTagList(reader, userPredMap, resPredMap, sorting);
 			results.add(map);
@@ -274,6 +302,7 @@ public class MalletCalculator {
 		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
 		
 		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, (topicCreation ? size : sampleSize));
+		System.out.println("MpCount: " + mpCount);
 		return results;
 	}
     
@@ -293,7 +322,7 @@ public class MalletCalculator {
 			Map<Integer, Double> ldaVal = ldaValues.get(i);
 			predictionValues.add(Ints.toArray(ldaVal.keySet()));
 		}
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(filename + "_lda_" + numTopics);
 		
@@ -303,7 +332,7 @@ public class MalletCalculator {
 		return reader;
 	}
 	
-	public static void createSample(String filename, short numTopics, boolean tagRec) {
+	public static void createSample(String filename, short numTopics, boolean tagRec, Integer creationTrainSize) {
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
 		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
@@ -316,12 +345,11 @@ public class MalletCalculator {
 			TOPIC_THRESHOLD = 0.01;
 		}
 
-		BookmarkReader reader = new BookmarkReader(0, false);
+		BookmarkReader reader = new BookmarkReader(creationTrainSize == null ? 0 : creationTrainSize.intValue(), false);
 		reader.readFile(filename);
 		int size = reader.getBookmarks().size();
-		//int trainSize = size - sampleSize;	
 		
-		List<Map<Integer, Double>> ldaValues = startLdaCreation(reader, 0, true, numTopics, false, true, true);
+		List<Map<Integer, Double>> ldaValues = startLdaCreation(reader, creationTrainSize == null ? 0 : size - creationTrainSize.intValue(), true, numTopics, false, true, true);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
 		//List<double[]> probValues = new ArrayList<double[]>();
@@ -330,12 +358,16 @@ public class MalletCalculator {
 			predictionValues.add(Ints.toArray(ldaVal.keySet()));
 			//probValues.add(Doubles.toArray(ldaVal.values()));
 		}
-		//List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, trainSize);
-		//List<Bookmark> testUserSample = reader.getBookmarks().subList(trainSize, trainSize + sampleSize);
 		List<Bookmark> userSample = reader.getBookmarks().subList(0, size);		
-		//BookmarkSplitter.writeWikiSample(reader, trainUserSample, outputFile + "_train", predictionValues);
-		//BookmarkSplitter.writeWikiSample(reader, testUserSample, outputFile + "_test", predictionValues);
 		BookmarkSplitter.writeSample(reader, userSample, outputFile, predictionValues);
+		if (creationTrainSize != null) {
+			List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, creationTrainSize.intValue());
+			List<int[]> trainPredictionValues = predictionValues.subList(0, creationTrainSize.intValue());
+			List<Bookmark> testUserSample = reader.getBookmarks().subList(creationTrainSize.intValue(), size);
+			List<int[]> testPredictionValues = predictionValues.subList(creationTrainSize.intValue(), size);
+			BookmarkSplitter.writeSample(reader, trainUserSample, outputFile + "_train", trainPredictionValues);
+			BookmarkSplitter.writeSample(reader, testUserSample, outputFile + "_test", testPredictionValues);
+		}
 				
 		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
 		timerThread.cancel();
