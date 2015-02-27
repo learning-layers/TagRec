@@ -33,8 +33,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 
 	private EngineInterface lmEngine;
 	private EngineInterface bllEngine;
-	//private EngineInterface threelEngine;
-	
+	//private EngineInterface threelEngine;	
 	//private Random random;
 	private BufferedWriter bw;
 	
@@ -42,8 +41,8 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 		this.lmEngine = null;
 		this.bllEngine = null;
 		//this.threelEngine = null;
-		this.bw = null;
 		//this.random = new Random();
+		this.bw = null;
 		
 		try {
 			FileWriter writer = new FileWriter(new File("./data/tagrec_log.txt"), true);
@@ -74,7 +73,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 	}
 
 	@Override
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm, EntityType type) {
 		Map<String, Double> returnMap = null;
 		String algorithmString = null;
 		
@@ -87,13 +86,13 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 				algorithmString = "BLL";
 			}
 			if (algorithmString != null) {
-				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
+				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
 			}
 		}
 		
 		if (algorithmString == null) {
 			algorithmString = "MPur";
-			returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm);
+			returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
 		}
 
 		if (this.bw != null) {

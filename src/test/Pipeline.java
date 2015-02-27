@@ -52,11 +52,12 @@ import processing.GIRPTMCalculator;
 import processing.ThreeLTCalculator;
 import engine.Algorithm;
 import engine.BaseLevelLearningEngine;
+import engine.EntityRecommenderEngine;
+import engine.EntityType;
 import engine.ResourceRecommenderEngine;
 import engine.UserRecommenderEngine;
 import engine.EngineInterface;
 import engine.LanguageModelEngine;
-import engine.TagRecommenderEngine;
 import engine.TagRecommenderEvalEngine;
 import engine.ThreeLayersEngine;
 import file.BookmarkReader;
@@ -215,14 +216,14 @@ public class Pipeline {
 		} else if (op.equals("mp")) {
 			startBaselineCalculator(sampleDir, samplePath, sampleCount, true);
 		} else if (op.equals("3layers")) {
-			start3LayersJavaCalculator(sampleDir, samplePath, "lda_1000", sampleCount, -5, -5, !narrowFolksonomy, false, false);
+			start3LayersJavaCalculator(sampleDir, samplePath, "", sampleCount, -5, -5, !narrowFolksonomy, false, false);
 		} else if (op.equals("3LT")) {
-			start3LayersJavaCalculator(sampleDir, samplePath, "lda_1000", sampleCount, -5, -5, !narrowFolksonomy, true, false);
-			start3LayersJavaCalculator(sampleDir, samplePath, "lda_1000", sampleCount, -5, -5, !narrowFolksonomy, false, true);
+			start3LayersJavaCalculator(sampleDir, samplePath, "", sampleCount, -5, -5, !narrowFolksonomy, true, false);
+			start3LayersJavaCalculator(sampleDir, samplePath, "", sampleCount, -5, -5, !narrowFolksonomy, false, true);
 		} else if (op.equals("lda")) {
 			startLdaCalculator(sampleDir, samplePath, 1000, sampleCount, !narrowFolksonomy);
 		} else if (op.equals("lda_samples")) {
-			createLdaSamples(samplePath, sampleCount, 1000, true, true);
+			createLdaSamples(samplePath, sampleCount, 1000, true, false);
 		} else if (op.equals("tensor_samples")) {
 			writeTensorFiles(samplePath, true);
 		} else if (op.equals("mymedialite_samples")) {
@@ -455,74 +456,30 @@ public class Pipeline {
 	// Engine testing
 	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private static void startEngineTest(String path) {
-		/*
-		EngineInterface engine = new ThreeLayersEngine();
+		EngineInterface recEngine = new EntityRecommenderEngine();
 		try {
-			engine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		System.out.println("3LT: " + engine.getEntitiesWithLikelihood("41", "545", Arrays.asList("ontology", "conference", "tutorial", "web2.0", "rss", "tools"), 10, false, null));
-		BaseLevelLearningEngine bllEngine = new BaseLevelLearningEngine();
-		try {
-			bllEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		System.out.println("BLL: " + bllEngine.getEntitiesWithLikelihood("41", "545", null, 10, false, null));
-		EngineInterface lmEngine = new LanguageModelEngine();
-		try {
-			lmEngine.loadFile("bib_core/bib_sample" + "_1_lda_500_res");
-		} catch (Exception e3) {
-			e3.printStackTrace();
-		}
-		System.out.println("LM: " + lmEngine.getEntitiesWithLikelihood("41", "545", null, 10, false, null));		
-		EngineInterface tagrecEngine = new TagRecommenderEvalEngine();
-		try {
-			tagrecEngine.loadFile(path);
+			recEngine.loadFile(path);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("TagRec BLLac+MPr" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLLacMPr));
-		System.out.println("TagRec BLLac" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, null));
-		//System.out.println("TagRec BLL" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.BLL));
-		//System.out.println("TagRec MPur" + tagrecEngine.getEntitiesWithLikelihood("0", "250", null, 10, false, Algorithm.MPur));
-		*/		
-		EngineInterface resrecEngine = new ResourceRecommenderEngine();
-		try {
-			resrecEngine.loadFile(path);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		System.out.println("Res2User MP" + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCEMP));
-		System.out.println("Res2User CF " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.RESOURCECF));
-		System.out.println("Res2User TAG_CF: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCF));
-		System.out.println("Res2User TAG_CB: " + resrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.RESOURCETAGCB));
-		System.out.println("Res2Res CF: " + resrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.RESOURCECF));
-		System.out.println("Res2Res TAG_CF: " + resrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.RESOURCETAGCF));
-		System.out.println();
-		
-		EngineInterface userrecEngine = new UserRecommenderEngine();
-		try {
-			userrecEngine.loadFile(path);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		System.out.println("User2User MP" + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERMP));
-		System.out.println("User2User CF " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, false, Algorithm.USERCF));
-		System.out.println("User2User TAG_CF: " + userrecEngine.getEntitiesWithLikelihood("0", null, null, 20, true, Algorithm.USERTAGCF));
-		System.out.println("User2Res TAG_CB: " + userrecEngine.getEntitiesWithLikelihood(null, "0", null, 20, true, Algorithm.USERTAGCB));
-		System.out.println();
+		System.out.println("Tag U-R: " + recEngine.getEntitiesWithLikelihood("0", "0", null, 10, false, null, EntityType.TAG));
+		System.out.println("Tag U: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.TAG));
+		System.out.println("Tag R: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.TAG));
+		System.out.println("Tag MP: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.TAG));
+		System.out.println("Res U: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.RESOURCE));
+		System.out.println("Res R: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.RESOURCE));
+		System.out.println("Res MP: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.RESOURCE));
+		System.out.println("User U: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.USER));
+		System.out.println("User R: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.USER));
+		System.out.println("User MP: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.USER));
 	}
 	
 	// Helpers
 	// -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	private static void createLdaSamples(String sampleName, int size, int topics, boolean tagrec, boolean personalizedTopicCreation) {
-		if (personalizedTopicCreation) {
-			getTrainTestSize(sampleName);
-		}
+		getTrainTestSize(sampleName);
 		for (int i = 1; i <= size; i++) {
-			MalletCalculator.createSample(sampleName, (short)topics, tagrec, personalizedTopicCreation ? TRAIN_SIZE : null);			
+			MalletCalculator.createSample(sampleName, (short)topics, tagrec, TRAIN_SIZE, personalizedTopicCreation);			
 		}
 	}
 	

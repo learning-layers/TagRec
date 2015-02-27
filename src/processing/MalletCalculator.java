@@ -332,7 +332,7 @@ public class MalletCalculator {
 		return reader;
 	}
 	
-	public static void createSample(String filename, short numTopics, boolean tagRec, Integer creationTrainSize) {
+	public static void createSample(String filename, short numTopics, boolean tagRec, int trainSize, boolean personalizedTopicCreation) {
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
 		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
@@ -344,7 +344,8 @@ public class MalletCalculator {
 		} else {
 			TOPIC_THRESHOLD = 0.01;
 		}
-
+		Integer creationTrainSize = (personalizedTopicCreation ? trainSize : null);
+		
 		BookmarkReader reader = new BookmarkReader(creationTrainSize == null ? 0 : creationTrainSize.intValue(), false);
 		reader.readFile(filename);
 		int size = reader.getBookmarks().size();
@@ -360,14 +361,14 @@ public class MalletCalculator {
 		}
 		List<Bookmark> userSample = reader.getBookmarks().subList(0, size);		
 		BookmarkSplitter.writeSample(reader, userSample, outputFile, predictionValues);
-		if (creationTrainSize != null) {
-			List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, creationTrainSize.intValue());
-			List<int[]> trainPredictionValues = predictionValues.subList(0, creationTrainSize.intValue());
-			List<Bookmark> testUserSample = reader.getBookmarks().subList(creationTrainSize.intValue(), size);
-			List<int[]> testPredictionValues = predictionValues.subList(creationTrainSize.intValue(), size);
+		//if (creationTrainSize != null) {
+			List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, trainSize);
+			List<int[]> trainPredictionValues = predictionValues.subList(0, trainSize);
+			List<Bookmark> testUserSample = reader.getBookmarks().subList(trainSize, size);
+			List<int[]> testPredictionValues = predictionValues.subList(trainSize, size);
 			BookmarkSplitter.writeSample(reader, trainUserSample, outputFile + "_train", trainPredictionValues);
 			BookmarkSplitter.writeSample(reader, testUserSample, outputFile + "_test", testPredictionValues);
-		}
+		//}
 				
 		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
 		timerThread.cancel();

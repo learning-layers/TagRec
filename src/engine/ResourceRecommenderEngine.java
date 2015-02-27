@@ -60,7 +60,7 @@ public class ResourceRecommenderEngine implements EngineInterface {
 		resetStructure(reader, calculator, tagCalculator, cbCalculator, resCFCalculator, topResources);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm, EntityType type) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}

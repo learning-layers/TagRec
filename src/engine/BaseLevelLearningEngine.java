@@ -89,7 +89,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		resetStructures(userMaps, resMaps, reader, topTags, matrix, userCounts, resCounts);
 	}
 	
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm, EntityType type) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
@@ -112,7 +112,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 						resultMap.put(entry.getKey(), entry.getValue().doubleValue());
 					}
 				}
-				if (algorithm == null || algorithm == Algorithm.BLLac || algorithm == Algorithm.BLLacMPr) {
+				if (resCountMap != null && (algorithm == null || algorithm == Algorithm.BLLac || algorithm == Algorithm.BLLacMPr)) {
 					Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCountMap, resCountMap, false, true, false);
 					for (Map.Entry<Integer, Double> entry : associativeValues.entrySet()) {
 						Double val = resultMap.get(entry.getKey());
