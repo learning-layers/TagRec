@@ -132,6 +132,21 @@ _Bibtex:_
  address = {New York, NY, USA},
 }`
 
+C. Trattner, D. Kowald and E. Lacic: [TagRec: Towards a Toolkit for Reproducible Evaluation and Development of Tag-Based Recommender Algorithms](http://www.christophtrattner.info/pubs/sigweb2015.pdf), ACM SIGWEB Newsletter, Spring 2015, ACM, New York, NY, USA, 2015. (invited)
+
+_Bibtex:_
+`@article{Trattner:2015:TTT:2719943.2719946,
+ author = {Trattner, Christoph and Kowald, Dominik and Lacic, Emanuel},
+ title = {TagRec: Towards a Toolkit for Reproducible Evaluation and Development of Tag-based Recommender Algorithms},
+ journal = {SIGWEB Newsl.},
+ issue_date = {Winter 2015},
+ year = {2015},
+ pages = {3:1--3:10},
+ numpages = {10},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}`
+
 ## References
 * P. Seitlinger, D. Kowald, S. Kopeinik, I. Hasani-Mavriqi, T. Ley, and Elisabeth Lex: [Attention Please! A Hybrid Resource Recommender Mimicking Attention-Interpretation Dynamics](http://arxiv.org/pdf/1501.07716v1.pdf). Under review. 2015.
 * D. Kowald, S. Kopeinik, P. Seitinger, T. Ley, D. Albert, and C. Trattner: [Refining Frequency-Based Tag Reuse Predictions by Means of Time and Semantic Context](http://www.christophtrattner.info/pubs/msm7_kowald.pdf). In Mining, Modeling, and Recommending 'Things' in Social Media, Lecture Notes in Computer Science, Vol. 8940, Springer, 2015a.
