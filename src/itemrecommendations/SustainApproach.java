@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -177,19 +178,27 @@ public class SustainApproach {
 	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta){
 		//LinkedList<Integer> topics = new LinkedList<Integer>();
 		ArrayList<GVector> clusterList = new ArrayList<GVector>();
+		
+		//double[] array = new double[this.numberOfTopics];
+		//Arrays.fill(array,1);
+		//GVector lambda = new GVector(array);
 		GVector lambda = new GVector(this.numberOfTopics);
 		lambda.zero();
-	
-		
-		// lambda=1 for all topics a user has looked at
-		for (Integer resource : list){
-			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
-			for (Integer t : topics)
-				lambda.setElement(t, 1);
-		}
 		
 		//clusterList.add(c0);
 		//GVector bestCluster = new GVector(0);
+		
+		double maxUserActivation = 0.0;
+		double minUserActivation = 1.0;
+		
+		// set lambda of all usertopics to 1		
+		for (Integer resource : list){
+			 for (Integer t : this.resTopicTrainList.get(resource).keySet())
+				 lambda.setElement(t, 1);
+		} 
+		
+		GVector workingLambda = (GVector) lambda.clone();
+
 		
 		for (Integer resource : list){
 			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
@@ -197,14 +206,20 @@ public class SustainApproach {
 			// Vector, write 1 for every existing topic
 			GVector currentResource = new GVector(this.numberOfTopics);
 			currentResource.zero();
-			for (Integer t : topics)
+			for (Integer t : topics){
 				currentResource.setElement(t, 1);
+			/*	double e = lambda.getElement(t); 
+				if ( e==0)
+					lambda.setElement(t, 1);*/
+				
+			}	
 			
-			// create the first cluster
 			if (clusterList.size()==0){
-				clusterList.add(currentResource);				
+				clusterList.add(currentResource);
 				continue;
 			}
+			
+			
 			
 			double maxActivation = 0;
 			GVector bestCluster = new GVector(0);
@@ -214,7 +229,8 @@ public class SustainApproach {
 			int index = 0;
 			int bestIndex=0;
 			for (GVector c : clusterList){
-				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, lambda, r);
+				//fixme_changed
+				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, workingLambda, r);
 				if (activationPair.getLeft()>maxActivation){
 					bestCluster = c;							
 					minDistance= new GVector(activationPair.getRight());
@@ -225,9 +241,11 @@ public class SustainApproach {
 				index++;
 			}
 			
-	//		System.out.println("test");
+			//System.out.println("max activation before Hemmung: "+maxActivation);
 			// equation 6 Hemmung
-			maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation; 
+		 	maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation; 
+			//System.out.println("max activation nach Hemmung: "+maxActivation);
+			
 			
 			if (maxActivation<=tau){
 				// input forms a new cluster
@@ -238,14 +256,18 @@ public class SustainApproach {
 			}
 			
 			GVector deltaLambda = new GVector(lambda.getSize());
+			deltaLambda.zero();
 			// equation 13
 			for (int i =0; i<lambda.getSize(); i++){
+				//if (lambda.getElement(i)==0)
+					//continue;
 				double elementProduct = lambda.getElement(i)*minDistance.getElement(i);
 				deltaLambda.setElement(i, learningRate*Math.exp(-elementProduct)*(1-elementProduct));
 			}
 			//GVector.add = adds the two vectors elements
 			lambda.add(deltaLambda); 
-						
+			// FIXME: try if hemmung fits here 
+			//maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
 			// equation 12
 			GVector deltaBestCluster = new GVector(bestCluster.getSize());
 			//  delta_winCluster <- n*(I-Cluster[WinCluster,]) # eq 12 
@@ -255,9 +277,14 @@ public class SustainApproach {
 		    //??? why adding the cluster? 
 		    bestCluster.add(deltaBestCluster);
 		    clusterList.set(bestIndex, deltaBestCluster);
+		    
+		    if (maxUserActivation<maxActivation)
+		    	maxUserActivation = maxActivation;
+		    if (minUserActivation>maxActivation)
+		    	minUserActivation = maxActivation;
 		}
-		if (clusterList.size()>3)
-			System.out.println(clusterList.size()+"cluster for user"+userId);
+		//if (clusterList.size()>3)
+			System.out.println(clusterList.size()+"cluster for user "+userId+" with "+list.size()+" resources and activation "+minUserActivation+" to "+maxUserActivation);
 		
 		this.userLambdaList.put(userId, lambda);
 		this.userClusterList.put(userId, clusterList);
