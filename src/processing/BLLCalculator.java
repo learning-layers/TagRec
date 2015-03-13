@@ -21,13 +21,10 @@
 package processing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Timer;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +35,8 @@ import common.CalculationType;
 import common.CooccurenceMatrix;
 import common.DoubleMapComparator;
 import common.Bookmark;
+import common.MemoryThread;
+import common.PerformanceMeasurement;
 import common.Utilities;
 import file.PredictionFileWriter;
 import file.BookmarkReader;
@@ -64,7 +63,6 @@ public class BLLCalculator {
 		
 	private List<Bookmark> trainList;
 	
-	private BM25Calculator cfCalc;
 	private CooccurenceMatrix rMatrix;
 		
 	public BLLCalculator(BookmarkReader reader, int trainSize, int dVal, int beta, boolean userBased, boolean resBased, CalculationType cType) {
@@ -91,7 +89,6 @@ public class BLLCalculator {
 		this.resTimestamps = new ArrayList<Long>();
 		//if (this.resBased) {		
 			this.resMaps = getArtifactMaps(reader, this.trainList, testList, true, this.resTimestamps, this.resDenoms, this.dVal, true);
-			//this.cfCalc = new BM25Calculator(this.reader, trainSize, true, true, false, 5, Similarity.JACCARD, Features.TAGS);
 		//}
 	}	
 
@@ -117,7 +114,7 @@ public class BLLCalculator {
 			if ((cType.equals(CalculationType.USER_TO_RESOURCE_ONLY) || cType.equals(CalculationType.USER_TO_RESOURCE) || cType.equals(CalculationType.BOTH)) && resID < this.resMaps.size()){	
 				resMap = this.resMaps.get(resID);
 				resCount = this.resCounts.get(resID);
-				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true);	
+				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true, false);	
 
 				double denom = 0.0;
 				/*
@@ -150,7 +147,6 @@ public class BLLCalculator {
 		}
 		
 		if (this.resBased) {
-			// Most Popular
 			if (this.resMaps != null) {
 				if (resID < this.resMaps.size()) {
 					if (resMap == null || resCount == null) {
@@ -163,12 +159,11 @@ public class BLLCalculator {
 							Double val = resResultMap.get(entry.getKey());
 							resResultMap.put(entry.getKey(), val == null ? resVal : val.doubleValue() + resVal);
 						}
-					}
-					
+					}				
 					if ((cType.equals(CalculationType.RESOURCE_TO_USER_ONLY) || cType.equals(CalculationType.RESOURCE_TO_USER) || cType.equals(CalculationType.BOTH)) && userID < this.userMaps.size()) {	
 						userMap = this.userMaps.get(userID);
 						userCount = this.userCounts.get(userID);
-						Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(resCount, userCount, true, false);	
+						Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(resCount, userCount, false, false, true);	
 
 						double denom = 0.0;
 						/*
@@ -194,23 +189,6 @@ public class BLLCalculator {
 						}
 					}	
 				}
-			} else { // CF
-				/*
-				resMap = this.cfCalc.getRankedTagList(userID, resID, false);
-				double denom = 0.0;
-				for (Map.Entry<Integer, Double> entry : resMap.entrySet()) {
-					double val = Math.log(entry.getValue());
-					denom += Math.exp(val);
-				}
-				for (Map.Entry<Integer, Double> entry : resMap.entrySet()) {
-					entry.setValue(Math.exp(Math.log(entry.getValue())) / denom);
-				}	
-				for (Map.Entry<Integer, Double> entry : resMap.entrySet()) {
-					double resVal = entry.getValue().doubleValue();
-					Double val = resultMap.get(entry.getKey());
-					resultMap.put(entry.getKey(), val == null ? resVal : val.doubleValue() + resVal);
-				}
-				*/
 			}
 			for (Map.Entry<Integer, Double> entry : resResultMap.entrySet()) {
 				double entryVal = (1.0 - this.beta) * entry.getValue().doubleValue();
@@ -226,7 +204,6 @@ public class BLLCalculator {
 			}
 		}
 		*/
-
 		if (sorting) {
 			Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
 			sortedResultMap.putAll(resultMap);
@@ -328,12 +305,10 @@ public class BLLCalculator {
 		return actValues;
 	}
 	
-	// Helpers -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	
+	// Statics  -------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 	private static String timeString;
 	
 	private static List<Map<Integer, Double>> startActCreation(BookmarkReader reader, int sampleSize, boolean sorting, boolean userBased, boolean resBased, int dVal, int beta, CalculationType cType) {
-		timeString = "";
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		
@@ -347,7 +322,7 @@ public class BLLCalculator {
 			trainSize = 0;
 		}
 		
-		timer = new Stopwatch();
+		timer.reset();
 		timer.start();
 		for (int i = trainSize; i < size; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
@@ -356,21 +331,16 @@ public class BLLCalculator {
 		}
 		timer.stop();
 		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
-		timeString += ("Full training time: " + trainingTime + "\n");
-		timeString += ("Full test time: " + testTime + "\n");
-		timeString += ("Average test time: " + testTime / (double)sampleSize) + "\n";
-		timeString += ("Total time: " + (trainingTime + testTime) + "\n");
+		
+		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, sampleSize);
 		return results;
 	}
 	
-	// default call
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize) {
-		return predictSample(filename, trainSize, sampleSize, true, true, -5, -5, CalculationType.NONE);
-	}
-	
 	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int dVal, int beta, CalculationType cType ) {
-		//filename += "_res";
-
+		Timer timerThread = new Timer();
+		MemoryThread memoryThread = new MemoryThread();
+		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
+		
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 
@@ -390,11 +360,13 @@ public class BLLCalculator {
 		if (cType == CalculationType.USER_TO_RESOURCE) {
 			suffix += "_ac";
 		}
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		String outputfile = filename + suffix + "_" + beta + "_" + dVal;
 		writer.writeFile(outputfile);
 		
+		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
+		timerThread.cancel();
 		Utilities.writeStringToFile("./data/metrics/" + outputfile + "_TIME.txt", timeString);
 		return reader;
 	}

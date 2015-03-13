@@ -25,16 +25,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 
 import common.DoubleMapComparator;
 import common.Bookmark;
+import common.MemoryThread;
+import common.PerformanceMeasurement;
 import common.Utilities;
 import cc.mallet.pipe.StringList2FeatureSequence;
 import cc.mallet.topics.ParallelTopicModel;
@@ -61,10 +63,12 @@ public class MalletCalculator {
 	private InstanceList instances;
 	private List<Map<Integer, Double>> docList;
 	private List<Map<Integer, Double>> topicList;
+	private Map<Integer, Double> mostPopularTopics;
 	
 	public MalletCalculator(List<Map<Integer, Integer>> maps, int numTopics) {
 		this.numTopics = numTopics;
-		this.maps = maps;		
+		this.maps = maps;
+		this.mostPopularTopics = new LinkedHashMap<Integer, Double>();
 		initializeDataStructures();
 	}
 	
@@ -85,6 +89,7 @@ public class MalletCalculator {
 	
 	private List<Map<Integer, Double>> getMaxTopicsByDocs(ParallelTopicModel LDA, int maxTopicsPerDoc) {
 		List<Map<Integer, Double>> docList = new ArrayList<Map<Integer, Double>>();
+		Map<Integer, Double> unsortedMostPopularTopics = new LinkedHashMap<Integer, Double>();
         int numDocs = this.instances.size();
         for (int doc = 0; doc < numDocs; ++doc) {
         	Map<Integer, Double> topicList = new LinkedHashMap<Integer, Double>();
@@ -92,7 +97,10 @@ public class MalletCalculator {
         	//double probSum = 0.0;
         	for (int topic = 0; topic < topicProbs.length && topic < maxTopicsPerDoc; topic++) {
         		if (topicProbs[topic] > TOPIC_THRESHOLD) { // TODO
-        			topicList.put(topic, topicProbs[topic]);
+        			double newTopicProb = topicProbs[topic];
+        			topicList.put(topic, newTopicProb);
+        			Double oldTopicProb = unsortedMostPopularTopics.get(topic);
+        			unsortedMostPopularTopics.put(topic, oldTopicProb == null ? newTopicProb : oldTopicProb.doubleValue() + newTopicProb);
         			//probSum += topicProbs[topic];
         		}
         	}
@@ -100,7 +108,16 @@ public class MalletCalculator {
         	Map<Integer, Double> sortedTopicList = new TreeMap<Integer, Double>(new DoubleMapComparator(topicList));
         	sortedTopicList.putAll(topicList);
         	docList.add(sortedTopicList);
-        }       
+        }
+        
+        Map<Integer, Double> sortedMostPopularTopics = new TreeMap<Integer, Double>(new DoubleMapComparator(unsortedMostPopularTopics));
+        sortedMostPopularTopics.putAll(unsortedMostPopularTopics);
+        for (Map.Entry<Integer, Double> entry : sortedMostPopularTopics.entrySet()) {
+        	if (this.mostPopularTopics.size() < MAX_RECOMMENDATIONS) {
+        		this.mostPopularTopics.put(entry.getKey(), entry.getValue());
+        	}
+        }
+        
 		return docList;
 	}
 	
@@ -115,8 +132,8 @@ public class MalletCalculator {
     		//int i = 0;
     		double weightSum = 0.0;
     		for (IDSorter entry : topicWords) {
-    			if (entry.getWeight() > 0.0) { // TODO
-    				//if (i++ < limit) { // TODO
+    			if (entry.getWeight() > 0.0) {
+    				//if (i++ < limit) { 
     					int tag = Integer.parseInt(alphabet.lookupObject(entry.getID()).toString());
     					termList.put(tag, entry.getWeight());
     					weightSum += entry.getWeight();
@@ -184,23 +201,14 @@ public class MalletCalculator {
 		return terms;
 	}
 	
-	// Statics -------------------------------------------------------------------------------------------------------------------------	
-	
-	private static List<Double> getDenoms(List<Map<Integer, Double>> maps) {
-		List<Double> denoms = new ArrayList<Double>();
-		for (Map<Integer, Double> map : maps) {
-			double denom = 0.0;
-			for (Map.Entry<Integer, Double> entry : map.entrySet()) {
-				denom += Math.exp(entry.getValue());
-			}
-			denoms.add(denom);
-		}
-		
-		return denoms;
+	public Map<Integer, Double> getMostPopularTopics() {
+		return this.mostPopularTopics;
 	}
 	
-	private static Map<Integer, Double> getRankedTagList(BookmarkReader reader, Map<Integer, Double> userMap, double userDenomVal, 
-			Map<Integer, Double> resMap, double resDenomVal, boolean sorting, boolean smoothing, boolean topicCreation) {
+	// Statics -------------------------------------------------------------------------------------------------------------------------	
+	private static String timeString;
+	
+	private static Map<Integer, Double> getRankedTagList(BookmarkReader reader, Map<Integer, Double> userMap, Map<Integer, Double> resMap, boolean sorting) {
 		
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
 		if (userMap != null) {
@@ -232,196 +240,138 @@ public class MalletCalculator {
 			return returnMap;
 		}
 		return resultMap;
-		/*
-		double size = (double)reader.getTagAssignmentsCount();
-		double tagSize = (double)reader.getTags().size();
-		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
-		for (int i = 0; i < tagSize; i++) {
-			double pt = (double)reader.getTagCounts().get(i) / size;
-			Double userVal = 0.0;
-			if (userMap != null && userMap.containsKey(i)) {
-				userVal = userMap.get(i);//Math.exp(userMap.get(i)) / userDenomVal;
-			}
-			Double resVal = 0.0;
-			if (resMap != null && resMap.containsKey(i)) {
-				resVal = resMap.get(i);//Math.exp(resMap.get(i)) / resDenomVal;
-			}
-			if (userVal > 0.0 || resVal > 0.0) { // TODO
-				if (smoothing) {
-					resultMap.put(i, Utilities.getSmoothedTagValue(userVal, userDenomVal, resVal, resDenomVal, pt));
-				} else {
-					resultMap.put(i, userVal + resVal);
-				}
-			}
-		}
-		
-		if (sorting) {
-			Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-			sortedResultMap.putAll(resultMap);
-			if (topicCreation) {
-				return sortedResultMap;
-			} else { // otherwise filter
-				Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>(MAX_RECOMMENDATIONS);
-				int i = 0;
-				for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
-					if (i++ < MAX_RECOMMENDATIONS) {
-						returnMap.put(entry.getKey(), entry.getValue());
-					} else {
-						break;
-					}
-				}
-				return returnMap;
-			}
-		}
-		return resultMap;
-		*/
 	}
 	
-	private static String timeString;
-	
-	public static List<Map<Integer, Double>> startLdaCreation(BookmarkReader reader, int sampleSize, boolean sorting, int numTopics, boolean userBased, boolean resBased, boolean topicCreation, boolean smoothing) {
-		timeString = "";
+	private static List<Map<Integer, Double>> startLdaCreation(BookmarkReader reader, int sampleSize, boolean sorting, int numTopics, boolean userBased, boolean resBased, boolean topicCreation) {
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
+		//int oldTrainSize = trainSize;
 		
 		Stopwatch timer = new Stopwatch();
 		timer.start();
 		MalletCalculator userCalc = null;
 		List<Map<Integer, Integer>> userMaps = null;
-		//List<Double> userDenoms = null;
 		if (userBased) {
 			userMaps = Utilities.getUserMaps(reader.getBookmarks().subList(0, trainSize));
 			userCalc = new MalletCalculator(userMaps, numTopics);
 			userCalc.predictValuesProbs(topicCreation);
-			//userDenoms = getDenoms(userPredictionValues);
 			System.out.println("User-Training finished");
 		}
 		MalletCalculator resCalc = null;
 		List<Map<Integer, Integer>> resMaps = null;
-		//List<Double> resDenoms = null;
 		if (resBased) {
 			resMaps = Utilities.getResMaps(reader.getBookmarks().subList(0, trainSize));
 			resCalc = new MalletCalculator(resMaps, numTopics);
 			resCalc.predictValuesProbs(topicCreation);
-			//resDenoms = getDenoms(resPredictionValues);
 			System.out.println("Res-Training finished");
 		}
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
-		if (trainSize == size) {
+		if (topicCreation) {
 			trainSize = 0;
 		}
         timer.stop();
         long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
-        
-		timer = new Stopwatch();
+
+		timer.reset();
 		timer.start();
+		int mpCount = 0;
 		for (int i = trainSize; i < size; i++) { // the test set
 			Bookmark data = reader.getBookmarks().get(i);
 			int userID = data.getUserID();
 			int resID = data.getWikiID();
-			//Map<Integer, Integer> userMap = null;
-			//if (userBased && userMaps != null && userID < userMaps.size()) {
-			//	userMap = userMaps.get(userID);
-			//}
-			//Map<Integer, Integer> resMap = null;
-			//if (resBased && resMaps != null && resID < resMaps.size()) {
-			//	resMap = resMaps.get(resID);
-			//}
-			double userTagCount = 0.0;//Utilities.getMapCount(userMap);
-			double resTagCount = 0.0;//Utilities.getMapCount(resMap);
-			/*
-			double userDenomVal = 0.0;
-			if (userDenoms != null && userID < userDenoms.size()) {
-				userDenomVal = userDenoms.get(userID);
-			}
-			double resDenomVal = 0.0;
-			if (resDenoms != null && resID < resDenoms.size()) {
-				resDenomVal = resDenoms.get(resID);
-			}
-			*/
+
 			Map<Integer, Double> userPredMap = null;
 			if (userCalc != null) {
 				userPredMap = userCalc.getValueProbsForID(userID, topicCreation);
 			}
 			Map<Integer, Double> resPredMap = null;
 			if (resCalc != null) {
+				//if (i > oldTrainSize) {
+				//	System.out.println("Test-Set");
+				//}
 				resPredMap = resCalc.getValueProbsForID(resID, topicCreation);
+				if (topicCreation && resPredMap == null) {
+					resPredMap = resCalc.getMostPopularTopics();
+					mpCount++;
+				}
 			}
-			Map<Integer, Double> map = getRankedTagList(reader, userPredMap, userTagCount, resPredMap, resTagCount, sorting, smoothing, topicCreation);
+			Map<Integer, Double> map = getRankedTagList(reader, userPredMap, resPredMap, sorting);
 			results.add(map);
 		}
 		timer.stop();
 		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
-		timeString += ("Full training time: " + trainingTime + "\n");
-		timeString += ("Full test time: " + testTime + "\n");
-		timeString += ("Average test time: " + testTime / (double)sampleSize) + "\n";
-		timeString += ("Total time: " + (trainingTime + testTime) + "\n");
+		
+		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, (topicCreation ? size : sampleSize));
+		System.out.println("MpCount: " + mpCount);
 		return results;
 	}
     
-	
+	// public statics ---------------------------------------------------------------------------------------------------------------------------------
 	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int numTopics, boolean userBased, boolean resBased) {
+		Timer timerThread = new Timer();
+		MemoryThread memoryThread = new MemoryThread();
+		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
+		
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 
-		List<Map<Integer, Double>> ldaValues = startLdaCreation(reader, sampleSize, true, numTopics, userBased, resBased, false, true);
+		List<Map<Integer, Double>> ldaValues = startLdaCreation(reader, sampleSize, true, numTopics, userBased, resBased, false);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
 		for (int i = 0; i < ldaValues.size(); i++) {
 			Map<Integer, Double> ldaVal = ldaValues.get(i);
 			predictionValues.add(Ints.toArray(ldaVal.keySet()));
 		}
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(filename + "_lda_" + numTopics);
 		
+		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
+		timerThread.cancel();
 		Utilities.writeStringToFile("./data/metrics/" + filename + "_lda_" + numTopics + "_TIME.txt", timeString);
 		return reader;
 	}
 	
-	public static void createSample(String filename, int sampleSize, short numTopics, boolean userBased, boolean resBased, boolean tagRec) {
+	public static void createSample(String filename, short numTopics, boolean tagRec, int trainSize, boolean personalizedTopicCreation) {
+		Timer timerThread = new Timer();
+		MemoryThread memoryThread = new MemoryThread();
+		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
+		 
 		String outputFile = new String(filename) + "_lda_" + numTopics;
 
-		//filename += "_res";
-		//outputFile += "_res";
 		if (tagRec) {
 			TOPIC_THRESHOLD = 0.001;
 		} else {
 			TOPIC_THRESHOLD = 0.01;
 		}
-
-		BookmarkReader reader = new BookmarkReader(0, false);
+		Integer creationTrainSize = (personalizedTopicCreation ? trainSize : null);
+		
+		BookmarkReader reader = new BookmarkReader(creationTrainSize == null ? 0 : creationTrainSize.intValue(), false);
 		reader.readFile(filename);
-
-		int trainSize = reader.getBookmarks().size() - sampleSize;	
-		List<Map<Integer, Double>> ldaValues = startLdaCreation(reader, 0, true, numTopics, userBased, resBased, true, true);
+		int size = reader.getBookmarks().size();
+		
+		List<Map<Integer, Double>> ldaValues = startLdaCreation(reader, creationTrainSize == null ? 0 : size - creationTrainSize.intValue(), true, numTopics, false, true, true);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
-		// TODO: make argument for the probValues
-		List<double[]> probValues = new ArrayList<double[]>();
+		//List<double[]> probValues = new ArrayList<double[]>();
 		for (int i = 0; i < ldaValues.size(); i++) {
 			Map<Integer, Double> ldaVal = ldaValues.get(i);
 			predictionValues.add(Ints.toArray(ldaVal.keySet()));
-			probValues.add(Doubles.toArray(ldaVal.values()));
-			/*
-			int[] values = new int[MAX_RECOMMENDATIONS];
-			int j = 0;
-			for (Integer val : ldaVal.keySet()) {
-				if (j < MAX_RECOMMENDATIONS) {
-					values[j++] = val;
-				} else {
-					break;
-				}
-			}
-			predictionValues.add(values);
-			*/
+			//probValues.add(Doubles.toArray(ldaVal.values()));
 		}
-
-		List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, trainSize);
-		List<Bookmark> testUserSample = reader.getBookmarks().subList(trainSize, trainSize + sampleSize);
-		List<Bookmark> userSample = reader.getBookmarks().subList(0, trainSize + sampleSize);		
-		BookmarkSplitter.writeWikiSample(reader, trainUserSample, outputFile + "_train", predictionValues);
-		BookmarkSplitter.writeWikiSample(reader, testUserSample, outputFile + "_test", predictionValues);
-		BookmarkSplitter.writeWikiSample(reader, userSample, outputFile, predictionValues);
+		List<Bookmark> userSample = reader.getBookmarks().subList(0, size);		
+		BookmarkSplitter.writeSample(reader, userSample, outputFile, predictionValues);
+		//if (creationTrainSize != null) {
+			List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, trainSize);
+			List<int[]> trainPredictionValues = predictionValues.subList(0, trainSize);
+			List<Bookmark> testUserSample = reader.getBookmarks().subList(trainSize, size);
+			List<int[]> testPredictionValues = predictionValues.subList(trainSize, size);
+			BookmarkSplitter.writeSample(reader, trainUserSample, outputFile + "_train", trainPredictionValues);
+			BookmarkSplitter.writeSample(reader, testUserSample, outputFile + "_test", testPredictionValues);
+		//}
+				
+		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
+		timerThread.cancel();
+		Utilities.writeStringToFile("./data/metrics/" + filename + "_lda_creation_" + numTopics + "_TIME.txt", timeString);
 	}
 }

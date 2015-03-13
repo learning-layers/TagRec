@@ -23,7 +23,6 @@ package processing;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class MetricsCalculator {
 	private double serendipity;
 	private double nDCG;
 
-	private BookmarkReader wikiReader;
+	private BookmarkReader bookmarkReader;
 	
 	// used for averages
 	public static double precisionSum = 0.0;
@@ -64,14 +63,14 @@ public class MetricsCalculator {
 	public static double serendipitySum = 0.0;
 	public static double nDCGSum = 0.0;
 	
-	public MetricsCalculator(PredictionFileReader reader, String outputFile, int k, BookmarkReader wikiReader) {
+	public MetricsCalculator(PredictionFileReader reader, String outputFile, int k, BookmarkReader bookmarkReader, boolean recommTags) {
 		this.reader = reader;
-		this.wikiReader = wikiReader;
+		if (recommTags) { // TODO: check
+			this.bookmarkReader = bookmarkReader;
+		}
 		BufferedWriter bw = null;
-		boolean recommTags = (wikiReader == null);
 		// TODO: Enable if you need data for statistical tests
-		/*
-		if (k == 20) {
+		if ((recommTags && (k == 5 || k == 10)) || (!recommTags && k == 20)) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
 				bw = new BufferedWriter(writer);
@@ -79,61 +78,77 @@ public class MetricsCalculator {
 				e.printStackTrace();
 			}
 		}
-		*/
 		
 		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
 		double count = this.reader.getPredictionData().size();		 // all users
-		double recall = 0.0, precision = 0.0, mrr = 0.0, fMeasure = 0.0, map = 0.0;
-		double diversity = 0.0, serendipity = 0.0;
-		double nDCG = 0.0;
+		double recall = 0.0, precision = 0.0, mrr = 0.0, fMeasure = 0.0, map = 0.0, nDCG = 0.0, diversity = 0.0, serendipity = 0.0;
 		
-		List<Map<Integer, Double>> resourceTopics = null;
-		int trainSize = 0;
-		if (wikiReader != null) {
-			trainSize = this.wikiReader.getCountLimit();
-			// TODO: could be replaced by tags
-			resourceTopics = Utilities.getUniqueTopicMaps(wikiReader.getBookmarks(), true);
-			//resourceTopics = Utilities.getRelativeTagMaps(wikiReader.getBookmarks().subList(0, trainSize), true);
-		}		
+		List<Map<Integer, Double>> entityFeatures = null;
+		List<Map<Integer, Integer>> tagCountMaps = null;
+		List<Bookmark> trainList = null;
+		if (this.bookmarkReader != null) {
+			trainList = this.bookmarkReader.getBookmarks().subList(0, this.bookmarkReader.getCountLimit());
+			if (recommTags) {
+				tagCountMaps = Utilities.getResMaps(trainList);
+				entityFeatures = Utilities.getResourceMapsForTags(trainList);
+			} else {
+				entityFeatures = Utilities.getUniqueTopicMaps(trainList, true); // TODO: check regarding unique!
+			}
+		}
+		// process each predicted line
 		for (PredictionData data : this.reader.getPredictionData()) {
 			if (data == null) {
 				if (bw != null) {
 					try {
-						bw.write("0.0;0.0;0.0;0.0;0.0;0.0\n");
-						//if (resourceTopics != null) {
-						//	bw.write(Double.toString(data.getDiversity(resourceTopics)).replace('.', ',') + ";");		
-						//}
+						bw.write("0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0\n");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 				continue;
 			}
-			
-			recall += data.getRecall();
-			precision += data.getPrecision(recommTags);
-			fMeasure += data.getFMeasure(recommTags);
-			mrr += data.getMRR();
-			map += data.getMAP();
-			if (resourceTopics != null) {
-				List<Integer> knownResources = Bookmark.getResourcesFromUser(wikiReader.getBookmarks().subList(0, trainSize), data.getUserID());
-				diversity += data.getDiversity(resourceTopics);
-				serendipity += data.getSerendipity(resourceTopics, knownResources);
+			double cRecall = data.getRecall();
+			recall += cRecall;
+			double cPrecision = data.getPrecision(recommTags);
+			precision += cPrecision;
+			double cFMeasure = data.getFMeasure(recommTags);
+			fMeasure += cFMeasure;
+			double cMRR = data.getMRR();
+			mrr += cMRR;
+			double cMAP = data.getMAP();
+			map += cMAP;
+			double cNDCG = data.getNDCG();
+			nDCG += cNDCG;
+			double cDiversity = 0.0, cSerendipity = 0.0;
+			if (this.bookmarkReader != null) {
+				if (recommTags) {
+					cDiversity = data.getTagDiversity(entityFeatures);
+					if (data.getResID() < tagCountMaps.size()) {
+						Map<Integer, Integer> tagCountMap = tagCountMaps.get(data.getResID());
+						cSerendipity = data.getTagSerendipity(tagCountMap, false);
+					} else {
+						cSerendipity = 1.0;
+					}
+				} else {
+					List<Integer> knownEntities = Bookmark.getResourcesFromUser(trainList, data.getUserID());
+					cDiversity = data.getDiversity(entityFeatures, true);
+					cSerendipity = data.getSerendipity(entityFeatures, knownEntities);
+				}
+				diversity += cDiversity;
+				serendipity += cSerendipity;
 			}
-			nDCG += data.getNDCG();
 			
-			// TODO: check for diversity and serendipity
 			if (bw != null) {
 				try {
-					bw.write(Double.toString(data.getRecall()).replace(',', '.') + ";");
-					bw.write(Double.toString(data.getPrecision(recommTags)).replace(',', '.') + ";");
-					bw.write(Double.toString(data.getFMeasure(recommTags)).replace(',', '.') + ";");
-					bw.write(Double.toString(data.getMRR()).replace(',', '.') + ";");
-					bw.write(Double.toString(data.getMAP()).replace(',', '.') + ";");
-					bw.write(Double.toString(data.getNDCG()).replace(',', '.'));
-					//if (resourceTopics != null) {
-					//	bw.write(Double.toString(data.getDiversity(resourceTopics)).replace('.', ',') + ";");		
-					//}
+					bw.write(Double.toString(cRecall).replace(',', '.') + ";");
+					bw.write(Double.toString(cPrecision).replace(',', '.') + ";");
+					bw.write(Double.toString(cFMeasure).replace(',', '.') + ";");
+					bw.write(Double.toString(cMRR).replace(',', '.') + ";");
+					bw.write(Double.toString(cMAP).replace(',', '.') + ";");
+					bw.write(Double.toString(cNDCG).replace(',', '.') + ";");
+					bw.write(Double.toString(data.getCoverage()).replace(',', '.') + ";");
+					bw.write(Double.toString(cDiversity).replace('.', ',') + ";");
+					bw.write(Double.toString(cSerendipity).replace('.', ','));	
 					bw.write("\n");
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -146,13 +161,12 @@ public class MetricsCalculator {
 		this.fMeasure = fMeasure / count;
 		this.mrr = mrr / count;
 		this.map = map / count;		
+		this.nDCG = nDCG / count;
 		this.userCoverage = (double)this.reader.getPredictionCount() / (double)this.reader.getPredictionData().size();
 		this.diversity = diversity / count;
 		this.serendipity = serendipity / count;
-		this.nDCG = nDCG / count;
 		
 		// TODO: enable in case statistics are needed
-		/*
 		if (bw != null) {
 			try {
 				//bw.write("\n");
@@ -162,7 +176,6 @@ public class MetricsCalculator {
 				e.printStackTrace();
 			}
 		}
-		*/
 	}
 	
 	public double getRecall() {
@@ -185,6 +198,10 @@ public class MetricsCalculator {
 		return this.map;
 	}
 	
+	public double getNDCG(){
+		return this.nDCG;
+	}
+	
 	public double getUserCoverage() {
 		return this.userCoverage;
 	}
@@ -195,10 +212,6 @@ public class MetricsCalculator {
 	
 	public double getSerendipity() {
 		return this.serendipity;
-	}
-	
-	public double getNDCG(){
-		return this.nDCG;
 	}
 	
 	// Statics ----------------------------------------------------------------------------------------------------------------------
@@ -214,7 +227,7 @@ public class MetricsCalculator {
 			suffix += ("_" + (describer.getDescriber() ? "desc" : "cat"));
 		}
 		
-		MetricsCalculator calc = new MetricsCalculator(reader, "./data/metrics/" + outputFile + suffix + "_all", k, calcTags ? null : bookmarkReader);
+		MetricsCalculator calc = new MetricsCalculator(reader, "./data/metrics/" + outputFile + suffix + "_all", k, bookmarkReader, calcTags);
 		recallSum += calc.getRecall();
 		precisionSum += calc.getPrecision();
 		fMeasureSum += calc.getFMeasure();
@@ -224,23 +237,6 @@ public class MetricsCalculator {
 		diversitySum += calc.getDiversity();
 		serendipitySum += calc.getSerendipity();
 		nDCGSum += calc.getNDCG();
-		
-		/*
-		if (outputFile != null) {
-			try {
-				FileWriter writer = new FileWriter(new File("./data/metrics/" + outputFile + "_all.txt"), true);
-				BufferedWriter bw = new BufferedWriter(writer);
-				bw.write(Double.toString(calc.getRecall()).replace('.', ',') + ";");
-				bw.write(Double.toString(calc.getPrecision()).replace('.', ',') + ";");
-				bw.write(Double.toString(calc.getFMeasure()).replace('.', ',') + ";");
-				bw.write(Double.toString(calc.getMRR()).replace('.', ',') + ";");
-				bw.write(Double.toString(calc.getMAP()).replace('.', ',') + (endline ? "\n" : ";"));			
-				bw.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		*/
 	}
 	
 	public static void writeAverageMetrics(String outputFile, int k, double size, boolean calcTags, boolean endLine, Boolean describer) {
@@ -257,19 +253,20 @@ public class MetricsCalculator {
 			bw.write(Double.toString(recall).replace('.', ',') + ";");		
 			bw.write(Double.toString(precision).replace('.', ',') + ";");		
 			//bw.write(Double.toString((fMeasureSum / size)).replace('.', ',') + ";");
-			bw.write(Double.toString(2.0 * recall * precision / (recall + precision == 0 ? 1.0 : recall + precision)).replace('.', ',') + ";");
+			bw.write(Double.toString(2.0 * recall * precision / ((recall + precision) == 0 ? 1.0 : (recall + precision))).replace('.', ',') + ";");
 			bw.write(Double.toString((mrrSum / size)).replace('.', ',') + ";");		
 			bw.write(Double.toString((mapSum / size)).replace('.', ',') + ";");
 			bw.write(Double.toString((nDCGSum / size)).replace('.', ',') + ";");
 			bw.write(Double.toString((userCoverageSum / size)).replace('.', ','));
-			if (!calcTags) {
+			//if (!calcTags) {
 				bw.write(";");
 				bw.write(Double.toString((diversitySum / size)).replace('.', ',') + ";");		
-				bw.write(Double.toString((serendipitySum / size)).replace('.', ',') + ";");
-			}
-			if (endLine)
-				bw.write("\n");
+				bw.write(Double.toString((serendipitySum / size)).replace('.', ','));
+			//}
 			
+			if (endLine) {
+				bw.write("\n");
+			}		
 			bw.write("\n");
 			bw.close();
 			
@@ -285,12 +282,13 @@ public class MetricsCalculator {
 		fMeasureSum = 0.0;
 		mrrSum = 0.0;
 		mapSum = 0.0;
+		nDCGSum = 0.0;
 		userCoverageSum = 0.0;
 		diversitySum = 0.0;
 		serendipitySum = 0.0;
-		nDCGSum = 0.0;
 	}
 	
+	// could be used to manually calculate F1-score
 	public static void calcF1Score(String dirName) {
 		File dir = new File("./data/metrics/" + dirName);
 		for (File file : dir.listFiles()) {

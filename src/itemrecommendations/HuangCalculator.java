@@ -140,7 +140,7 @@ public class HuangCalculator {
 		// find similar users
 		int i = 0;
 		Map<Integer, Double> sortedNeighbors = 
-				Utilities.getNeighbors(userID, -1, allUsersSimilarities, userResourcesWeights, trainList, similarity);
+				Utilities.getNeighbors(userID, -1, allUsersSimilarities, userResourcesWeights, trainList, similarity, true);
 		
 		Set<Integer> targetUserResources = huangApproach.getUserResourceTagMaping().get(userID).keySet();
 		

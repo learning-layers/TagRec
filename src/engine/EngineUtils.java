@@ -20,62 +20,80 @@
 
 package engine;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import common.Bookmark;
 import common.IntMapComparator;
-
 import file.BookmarkReader;
+import file.BookmarkSplitter;
 
 public class EngineUtils {
 
-	public static void logRecommendationCall() {
+	public static BookmarkReader getSortedBookmarkReader(String filename) {
+		BookmarkReader reader = new BookmarkReader(0, false);
+		reader.readFile(filename);
+		Collections.sort(reader.getBookmarks());
 		
+		String sortedFile = filename + "_sorted";
+		BookmarkSplitter.writeSample(reader, reader.getBookmarks(), sortedFile, null);
+		reader = new BookmarkReader(0, false);
+		reader.readFile(sortedFile);
+		return reader;
 	}
 	
-	public static Map<String, Double> calcTopTags(BookmarkReader reader) {
-		Map<String, Double> tagMap = new LinkedHashMap<>();
-		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
-
-		Integer countSum = 0;
-
-		for (int i = 0; i < reader.getTagCounts().size(); i++) {
-			countMap.put(i, reader.getTagCounts().get(i));
-
-			countSum += reader.getTagCounts().get(i);
+	public static List<Integer> getFilterTags(boolean filterOwnEntities, BookmarkReader reader, String user, String resource, Map<Integer, Double> userMap) {
+		List<Integer> filterTags = null;
+		if (filterOwnEntities && user != null) {
+			if (resource != null) {
+				int userID = -1;
+				if (user != null) {
+					userID = reader.getUsers().indexOf(user);
+				}
+				int resID = -1;
+				if (resource != null) {
+					resID = reader.getResources().indexOf(resource);
+				}
+				filterTags = Bookmark.getTagsOfBookmark(reader.getBookmarks(), userID, resID);
+			} else {
+				if (userMap != null) {
+					filterTags = new ArrayList<Integer>(userMap.keySet());
+				}
+			}
+		} else {
+			filterTags = new ArrayList<Integer>();
 		}
-
-		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(
-				new IntMapComparator(countMap));
-		sortedCountMap.putAll(countMap);
-
-		for (Map.Entry<Integer, Integer> entry : sortedCountMap.entrySet()) {
-			double tagValue = countSum != 0 ? ((double) entry.getValue()) / countSum : 0.0;
-			tagMap.put(reader.getTags().get(entry.getKey()), tagValue);
-		}
-
-		return tagMap;
+		
+		return filterTags;
 	}
 	
-	public static Map<String, Double> calcTopResources(BookmarkReader reader) {
-		Map<String, Double> resourceMap = new LinkedHashMap<>();
+	public static Map<Integer, Double> calcTopEntities(BookmarkReader reader, EntityType type) {
+		Map<Integer, Double> map = new LinkedHashMap<>();
 		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
-
+		List<Integer> entityCounts = null;
+		if (type == EntityType.TAG) {
+			entityCounts = reader.getTagCounts();
+		} else if (type == EntityType.RESOURCE) {
+			entityCounts = reader.getResourceCounts();
+		} else {
+			entityCounts = reader.getUserCounts();
+		}
+		
 		Integer countSum = 0;
-		for (int i = 0; i < reader.getResourceCounts().size(); i++) {
-			countMap.put(i, reader.getResourceCounts().get(i));
-
-			countSum += reader.getResourceCounts().get(i);
+		for (int i = 0; i < entityCounts.size(); i++) {
+			countMap.put(i, entityCounts.get(i));
+			countSum += entityCounts.get(i);
 		}
 
 		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(new IntMapComparator(countMap));
 		sortedCountMap.putAll(countMap);
-
 		for (Map.Entry<Integer, Integer> entry : sortedCountMap.entrySet()) {
-			resourceMap.put(reader.getResources().get(entry.getKey()), ((double) entry.getValue()) / countSum);
+			map.put(entry.getKey(), ((double) entry.getValue()) / countSum);
 		}
-
-		return resourceMap;
+		return map;
 	}
 }

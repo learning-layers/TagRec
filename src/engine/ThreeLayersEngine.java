@@ -20,7 +20,7 @@
 
 package engine;
 
-import processing.ThreeLayersCalculator;
+import processing.ThreeLTCalculator;
 import file.BookmarkReader;
 
 import java.util.ArrayList;
@@ -28,88 +28,102 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import common.CalculationType;
+import common.DoubleMapComparator;
+
+// TODO: integrate Tag-Filtering!
+// TODO: make it work in online setting! (caching + LDA topic calculation)
 public class ThreeLayersEngine implements EngineInterface {
 
 	private BookmarkReader reader = null;
-	private ThreeLayersCalculator calculator = null;
-	private final Map<String, Double> topTags;
+	private ThreeLTCalculator calculator = null;
+	private final Map<Integer, Double> topTags;
 
 	public ThreeLayersEngine() {
-		topTags = new LinkedHashMap<>();
-		
-		reader = new BookmarkReader(0, false);
+		this.topTags = new LinkedHashMap<>();		
+		this.reader = null;
 	}
 	
 	public void loadFile(String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
 
-		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
-
-		Collections.sort(reader.getBookmarks());
-		//System.out.println("read in and sorted file");
-
-		ThreeLayersCalculator calculator = new ThreeLayersCalculator(reader, reader.getBookmarks().size(), 5, 5, true, true, false);
-
-		resetStructure(reader, calculator);
+		ThreeLTCalculator calculator = new ThreeLTCalculator(reader, reader.getBookmarks().size(), 5, 5, true, true, false, CalculationType.NONE);
+		Map<Integer, Double> topTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);
+		resetStructure(reader, calculator, topTags);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm, EntityType type) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
+		if (filterOwnEntities == null) {
+			filterOwnEntities = true;
+		}
+		
+		Map<Integer, Double> tagIDs = new LinkedHashMap<>();
 		Map<String, Double> tagMap = new LinkedHashMap<>();
 		if (this.reader == null || this.calculator == null) {
 			return tagMap;
 		}
-		int userID = -1;
-		if (user != null) {
-			userID = this.reader.getUsers().indexOf(user);
-		}
-		int resID = -1;
-		if (resource != null) {
-			resID = this.reader.getResources().indexOf(resource);
-		}
-		List<Integer> topicIDs = new ArrayList<>();
-		if (topics != null) {
-			for (String t : topics) {
-				int tID = this.reader.getCategories().indexOf(t);
-				if (tID != -1) {
-					topicIDs.add(tID);
+		if (algorithm == null || algorithm != Algorithm.MP) {			
+			int userID = -1;
+			if (user != null) {
+				userID = this.reader.getUsers().indexOf(user);
+			}
+			int resID = -1;
+			if (resource != null) {
+				resID = this.reader.getResources().indexOf(resource);
+			}
+			List<Integer> topicIDs = new ArrayList<>();
+			if (topics != null) {
+				for (String t : topics) {
+					int tID = this.reader.getCategories().indexOf(t);
+					if (tID != -1) {
+						topicIDs.add(tID);
+					}
 				}
 			}
-		}
-
-		Map<Integer, Double> tagIDs = this.calculator.getRankedTagList(userID,
-				resID, topicIDs, System.currentTimeMillis() / 1000.0, count,
-				this.reader.hasTimestamp(), false);
-		for (Map.Entry<Integer, Double> tEntry : tagIDs.entrySet()) {
-			if (tagMap.size() < count) {
-				tagMap.put(this.reader.getTags().get(tEntry.getKey()), tEntry.getValue());
+			if (algorithm == null || algorithm == Algorithm.THREELTMPr) {
+				tagIDs = this.calculator.getRankedTagList(userID, resID, topicIDs, System.currentTimeMillis() / 1000.0, count, this.reader.hasTimestamp(), false, false); // not sorted
+			} else if (algorithm == Algorithm.THREELT) {
+				tagIDs = this.calculator.getRankedTagList(userID, -1, topicIDs, System.currentTimeMillis() / 1000.0, count, this.reader.hasTimestamp(), false, false); // not sorted
+			} else if (algorithm == Algorithm.THREEL) {
+				tagIDs = this.calculator.getRankedTagList(userID, -1, topicIDs, System.currentTimeMillis() / 1000.0, count, false, false, false); // not sorted
 			}
 		}
 		
-		if (tagMap.size() < count) {
-			for (Map.Entry<String, Double> t : this.topTags.entrySet()) {
-				if (tagMap.size() < count) {
-					if (!tagMap.containsKey(t.getKey())) {
-						tagMap.put(t.getKey(), t.getValue());
+		// fill up with MP tags
+		if (tagIDs.size() < count) {
+			for (Map.Entry<Integer, Double> t : this.topTags.entrySet()) {
+				if (tagIDs.size() < count) {
+					if (!tagIDs.containsKey(t.getKey())) {
+						tagIDs.put(t.getKey(), t.getValue());
 					}
 				} else {
 					break;
 				}
 			}
 		}
-
+		
+		// sort
+		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(tagIDs));
+		sortedResultMap.putAll(tagIDs);
+		// map tag-IDs back to strings
+		for (Map.Entry<Integer, Double> tEntry : sortedResultMap.entrySet()) {
+			if (tagMap.size() < count) {
+				tagMap.put(this.reader.getTags().get(tEntry.getKey()), tEntry.getValue());
+			}
+		}
 		return tagMap;
 	}
 
-	public synchronized void resetStructure(BookmarkReader reader,
-			ThreeLayersCalculator calculator) {
+	public synchronized void resetStructure(BookmarkReader reader, ThreeLTCalculator calculator, Map<Integer, Double> topTags) {
 		this.reader = reader;
 		this.calculator = calculator;
 		
 		this.topTags.clear();
-		this.topTags.putAll(EngineUtils.calcTopTags(this.reader));
+		this.topTags.putAll(topTags);
 	}
 }

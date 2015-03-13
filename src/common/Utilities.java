@@ -137,6 +137,26 @@ public class Utilities {
 		return resMaps;
 	}
 	
+	public static List<Map<Integer, Double>> getResourceMapsForTags(List<Bookmark> userLines) {
+		List<Map<Integer, Double>> tagMaps = new ArrayList<Map<Integer, Double>>();
+		for (Bookmark data : userLines) {
+			for (int tagID : data.getTags()) {
+				Map<Integer, Double> tagMap = null;
+				if (tagID >= tagMaps.size()) {
+					tagMap = new LinkedHashMap<Integer, Double>();
+					tagMaps.add(tagMap);
+				} else {
+					tagMap = tagMaps.get(tagID);
+				}
+				if (tagMap != null) {
+					Double count = tagMap.get(data.getWikiID());
+					tagMap.put(data.getWikiID(), count == null ? 1.0 : count.doubleValue() + 1.0);
+				}
+			}
+		}
+		return tagMaps;
+	}
+	
 	public static List<int[]> createRandomBaseline(int from, int to, int count) {
 		List<int[]> baseline = new ArrayList<int[]>();
 		
@@ -531,7 +551,9 @@ public class Utilities {
 		return allEntities;
 	}
 	
-	public static Map<Integer, Double> getNeighbors(int userID, int resID, Map<Integer, Double> allNeighbors, List<Map<Integer, Double>> userMaps, List<Bookmark> trainList, Similarity sim) {
+	public static Map<Integer, Double> getNeighbors(int userID, int resID, Map<Integer, Double> allNeighbors, List<Map<Integer, Double>> userMaps, List<Bookmark> trainList,
+			Similarity sim, boolean sorting) {
+		
 		Map<Integer, Double> neighbors = new LinkedHashMap<Integer, Double>();
 		//List<Map<Integer, Integer>> neighborMaps = new ArrayList<Map<Integer, Integer>>();
 		Map<Integer, Double> targetMap = null;	
@@ -567,7 +589,7 @@ public class Utilities {
 		// double lAverage = getLAverage(neighborMaps);
 		for (Map.Entry<Integer, Double> entry : neighbors.entrySet()) {
 			Map<Integer, Double> nMap = userMaps.get(entry.getKey());
-			//if (userID != entry.getKey() && !nMap.isEmpty()) {
+			if (userID != entry.getKey()/* && !nMap.isEmpty()*/) {
 				Double bm25Value = (sim == Similarity.JACCARD ? Utilities.getJaccardFloatSim(targetMap, nMap) : Utilities.getCosineFloatSim(targetMap, nMap));
 				//if (resID == -1) {
 				//	bm25Value = Math.pow(bm25Value.doubleValue(), 3);
@@ -577,16 +599,21 @@ public class Utilities {
 				if (!bm25Value.isInfinite() && !bm25Value.isNaN()) {
 					entry.setValue(bm25Value);
 				}
-			//}
+			}
 		}
 
-		// return the sorted neighbors
-		Map<Integer, Double> sortedNeighbors = new TreeMap<Integer, Double>(new DoubleMapComparator(neighbors));
-		sortedNeighbors.putAll(neighbors);
-		return sortedNeighbors;
+		if (sorting) {
+			// return the sorted neighbors
+			Map<Integer, Double> sortedNeighbors = new TreeMap<Integer, Double>(new DoubleMapComparator(neighbors));
+			sortedNeighbors.putAll(neighbors);
+			return sortedNeighbors;
+		} else {
+			return neighbors;
+		}
 	}
 	
-	public static Map<Integer, Double> getSimResources(int userID, int resID, List<Integer> userResources, Map<Integer, Double> allResources, List<Map<Integer, Double>> resMaps, List<Bookmark> trainList, Similarity sim) {
+	public static Map<Integer, Double> getSimResources(int userID, int resID, List<Integer> userResources, Map<Integer, Double> allResources, List<Map<Integer, Double>> resMaps,
+			List<Bookmark> trainList, Similarity sim, boolean sorting) {
 		Map<Integer, Double> resources = new LinkedHashMap<Integer, Double>();
 		Map<Integer, Double> targetMap = null;	
 		if (resID < resMaps.size()) {
@@ -614,21 +641,25 @@ public class Utilities {
 		
 		for (Map.Entry<Integer, Double> entry : resources.entrySet()) {
 			Map<Integer, Double> rMap = resMaps.get(entry.getKey());
-			if (!userResources.contains(entry.getKey()) && !rMap.isEmpty()) {
+			if ((userResources == null || !userResources.contains(entry.getKey())) && !rMap.isEmpty() && entry.getKey() != resID) {
 				double bm25Value = (sim == Similarity.JACCARD ? Utilities.getJaccardFloatSim(targetMap, rMap) :
 					Utilities.getCosineFloatSim(targetMap, rMap));
 				entry.setValue(bm25Value);
 			}
 		}
 
-		// return the sorted resources
-		Map<Integer, Double> sortedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(resources));
-		sortedResources.putAll(resources);
-		return sortedResources;
+		if (sorting) {
+			// return the sorted resources
+			Map<Integer, Double> sortedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(resources));
+			sortedResources.putAll(resources);
+			return sortedResources;
+		} else {
+			return resources;
+		}
 	}
 	
 	public static Map<Integer, Double> getSimResourcesForUser(int userID, Map<Integer, Double> allResources, List<Map<Integer, Double>> userMaps, List<Map<Integer, Double>> resMaps, 
-			List<Bookmark> trainList, List<Integer> userResources, Similarity sim) {
+			List<Integer> userResources, Similarity sim, boolean sorting) {
 		Map<Integer, Double> resources = new LinkedHashMap<Integer, Double>();
 		Map<Integer, Double> targetMap = null;	
 		if (userID < userMaps.size()) {
@@ -649,8 +680,43 @@ public class Utilities {
 		}
 		
 		// return the sorted resources
-		Map<Integer, Double> sortedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(resources));
-		sortedResources.putAll(resources);
-		return sortedResources;
+		if (sorting) {
+			Map<Integer, Double> sortedResources = new TreeMap<Integer, Double>(new DoubleMapComparator(resources));
+			sortedResources.putAll(resources);
+			return sortedResources;
+		} else {
+			return resources;
+		}
+	}
+
+	public static Map<Integer, Double> getSimUsersForResource(int resID, Map<Integer, Double> allUsers, List<Map<Integer, Double>> userMaps,
+			List<Map<Integer, Double>> resMaps, List<Integer> resourceUsers, Similarity sim, boolean sorting) {
+		Map<Integer, Double> users = new LinkedHashMap<Integer, Double>();
+		Map<Integer, Double> targetMap = null;	
+		if (resID < resMaps.size()) {
+			targetMap = resMaps.get(resID);
+		}
+		if (targetMap == null || targetMap.isEmpty()) {
+			return users;
+		}
+		users.putAll(allUsers);
+		
+		for (Map.Entry<Integer, Double> entry : users.entrySet()) {
+			Map<Integer, Double> uMap = userMaps.get(entry.getKey());
+			if (!uMap.isEmpty() && !resourceUsers.contains(entry.getKey())) {
+				double simValue = (sim == Similarity.JACCARD ? Utilities.getJaccardFloatSim(targetMap, uMap) :
+					Utilities.getCosineFloatSim(targetMap, uMap));
+				entry.setValue(simValue);
+			}
+		}
+		
+		// return the sorted users
+		if (sorting) {
+			Map<Integer, Double> sortedUsers = new TreeMap<Integer, Double>(new DoubleMapComparator(users));
+			sortedUsers.putAll(users);
+			return sortedUsers;
+		} else {
+			return users;
+		}
 	}
 }

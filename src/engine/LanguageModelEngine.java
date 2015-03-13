@@ -35,92 +35,82 @@ public class LanguageModelEngine implements EngineInterface {
 	private BookmarkReader reader;
 	private final Map<String, Map<Integer, Double>> userMaps;
 	private final Map<String, Map<Integer, Double>> resMaps;
-	private final Map<String, Double> topTags;
+	private final Map<Integer, Double> topTags;
 
 	public LanguageModelEngine() {
-
 		this.userMaps = new HashMap<>();
 		this.resMaps = new HashMap<>();
 		topTags = new LinkedHashMap<>();
 
-		reader = new BookmarkReader(0, false);
+		reader = null;
 	}
 
 	public void loadFile(String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+		
 		Map<String, Map<Integer, Double>> userMaps = new HashMap<>();
 		Map<String, Map<Integer, Double>> resMaps = new HashMap<>();
-		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
 
-		List<Map<Integer, Integer>> userStats = Utilities.getUserMaps(reader
-				.getBookmarks());
+		List<Map<Integer, Double>> userStats = Utilities.getNormalizedMaps(reader.getBookmarks(), false);
 		int i = 0;
-		for (Map<Integer, Integer> map : userStats) {
-			Map<Integer, Double> resultMap = new HashMap<>();
-			for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-				resultMap.put(entry.getKey(), (double) entry.getValue()
-						/ (double) Utilities.getMapCount(map));
-			}
-			userMaps.put(reader.getUsers().get(i++), resultMap);
+		for (Map<Integer, Double> map : userStats) {
+			//Map<Integer, Double> resultMap = new HashMap<>();
+			//for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+			//	resultMap.put(entry.getKey(), (double) entry.getValue() / (double) Utilities.getMapCount(map));
+			//}
+			userMaps.put(reader.getUsers().get(i++), map);
 		}
-		List<Map<Integer, Integer>> resStats = Utilities.getResMaps(reader
-				.getBookmarks());
+		List<Map<Integer, Double>> resStats = Utilities.getNormalizedMaps(reader.getBookmarks(), true);
 		i = 0;
-		for (Map<Integer, Integer> map : resStats) {
-			Map<Integer, Double> resultMap = new HashMap<>();
-			for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-				resultMap.put(entry.getKey(), (double) entry.getValue()
-						/ (double) Utilities.getMapCount(map));
-			}
-			resMaps.put(reader.getResources().get(i++), resultMap);
+		for (Map<Integer, Double> map : resStats) {
+			//Map<Integer, Double> resultMap = new HashMap<>();
+			//for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+			//	resultMap.put(entry.getKey(), (double) entry.getValue() / (double) Utilities.getMapCount(map));
+			//}
+			resMaps.put(reader.getResources().get(i++), map);
 		}
 
-		resetStructures(userMaps, resMaps, reader);
+		Map<Integer, Double> topTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);
+		resetStructures(userMaps, resMaps, reader, topTags);
 	}
 
-	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count) {
+	public synchronized Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm, EntityType type) {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
-		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
 		Map<Integer, Double> userMap = this.userMaps.get(user);
-		Map<Integer, Double> resMap = this.resMaps.get(resource);
-		// user-based and resource-based
-		if (userMap != null) {
-			for (Map.Entry<Integer, Double> entry : userMap.entrySet()) {
-				resultMap.put(entry.getKey(), entry.getValue().doubleValue());
+		if (filterOwnEntities == null) {
+			filterOwnEntities = true;
+		}
+		List<Integer> filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource, userMap);
+		
+		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
+		if (algorithm == null || algorithm != Algorithm.MP) {
+			Map<Integer, Double> resMap = this.resMaps.get(resource);
+			if ((algorithm == null || algorithm == Algorithm.MPu || algorithm == Algorithm.MPur) && userMap != null) {
+				for (Map.Entry<Integer, Double> entry : userMap.entrySet()) {
+					if (!filterTags.contains(entry.getKey())) {
+						resultMap.put(entry.getKey(), entry.getValue().doubleValue());
+					}
+				}
+			}
+			if ((algorithm == null || algorithm == Algorithm.MPr || algorithm == Algorithm.MPur) && resMap != null) {
+				for (Map.Entry<Integer, Double> entry : resMap.entrySet()) {
+					if (!filterTags.contains(entry.getKey())) {
+						double resVal = entry.getValue().doubleValue();
+						Double val = resultMap.get(entry.getKey());
+						resultMap.put(entry.getKey(), val == null ? resVal : val.doubleValue() + resVal);
+					}
+				}
 			}
 		}
-		if (resMap != null) {
-			for (Map.Entry<Integer, Double> entry : resMap.entrySet()) {
-				double resVal = entry.getValue().doubleValue();
-				Double val = resultMap.get(entry.getKey());
-				resultMap.put(entry.getKey(),
-						val == null ? resVal : val.doubleValue() + resVal);
-			}
-		}
-		// sort and add MP tags if necessary
-		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(
-				new DoubleMapComparator(resultMap));
-
-		sortedResultMap.putAll(resultMap);
-		int i = 0;
-		Map<String, Double> tagMap = new LinkedHashMap<>();
-		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
-
-			if (i++ < count) {
-				tagMap.put(this.reader.getTags().get(entry.getKey()),
-						(double) entry.getValue());
-			} else {
-				break;
-			}
-		}
-
-		if (tagMap.size() < count) {
-			for (Map.Entry<String, Double> t : this.topTags.entrySet()) {
-				if (tagMap.size() < count) {
-					if (!tagMap.containsKey(t.getKey())) {
-						tagMap.put(t.getKey(), t.getValue());
+				
+		// add MP tags if necessary
+		if (resultMap.size() < count) {
+			for (Map.Entry<Integer, Double> t : this.topTags.entrySet()) {
+				if (resultMap.size() < count) {
+					if (!resultMap.containsKey(t.getKey()) && !filterTags.contains(t.getKey())) {
+						resultMap.put(t.getKey(), t.getValue());
 					}
 				} else {
 					break;
@@ -128,12 +118,24 @@ public class LanguageModelEngine implements EngineInterface {
 			}
 		}
 
+		// sort
+		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
+		sortedResultMap.putAll(resultMap);
+		
+		// map tag-IDs back to strings
+		int i = 0;
+		Map<String, Double> tagMap = new LinkedHashMap<>();
+		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
+			if (i++ < count) {
+				tagMap.put(this.reader.getTags().get(entry.getKey()), (double) entry.getValue());
+			} else {
+				break;
+			}
+		}
 		return tagMap;
 	}
 
-	private synchronized void resetStructures(
-			Map<String, Map<Integer, Double>> userMaps,
-			Map<String, Map<Integer, Double>> resMaps, BookmarkReader reader) {
+	private synchronized void resetStructures(Map<String, Map<Integer, Double>> userMaps, Map<String, Map<Integer, Double>> resMaps, BookmarkReader reader, Map<Integer, Double> topTags) {
 
 		this.reader = reader;
 		
@@ -144,6 +146,6 @@ public class LanguageModelEngine implements EngineInterface {
 		this.resMaps.putAll(resMaps);
 
 		this.topTags.clear();
-		this.topTags.putAll(EngineUtils.calcTopTags(this.reader));
+		this.topTags.putAll(topTags);
 	}
 }

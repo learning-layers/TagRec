@@ -1,10 +1,10 @@
 package processing;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -15,10 +15,9 @@ import common.CalculationType;
 import common.CooccurenceMatrix;
 import common.DoubleMapComparator;
 import common.Bookmark;
-import common.Features;
-import common.Similarity;
+import common.MemoryThread;
+import common.PerformanceMeasurement;
 import common.Utilities;
-
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
@@ -35,13 +34,12 @@ public class ThreeLTCalculator {
 	private List<List<Bookmark>> userBookmarks;
 	List<Map<Integer, Double>> resMaps;
 	
-	private BM25Calculator cfCalc;
 	private CooccurenceMatrix rMatrix;
 	private CalculationType cType;
 	private List<Map<Integer, Double>> userCounts;
 	private List<Map<Integer, Double>> resCounts;
 	
-	public ThreeLTCalculator(BookmarkReader reader, int trainSize, int dValue, int beta, boolean userBased, boolean resBased, boolean bookmarkBLL, CalculationType cType, boolean mp) {
+	public ThreeLTCalculator(BookmarkReader reader, int trainSize, int dValue, int beta, boolean userBased, boolean resBased, boolean bookmarkBLL, CalculationType cType) {
 		this.reader = reader;
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
 		this.userBookmarks = Utilities.getBookmarks(this.trainList, false);
@@ -52,12 +50,7 @@ public class ThreeLTCalculator {
 		this.bookmarkBLL = bookmarkBLL;		
 		this.cType = cType;
 		
-		//if (this.resBased) {
-		if (mp) {
-			this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true);
-		} else {
-			this.cfCalc = new BM25Calculator(this.reader, trainSize, true, true, false, 5, Similarity.JACCARD, Features.TAGS);
-		}
+		this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true);
 		this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 		this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);
 		if (this.cType == CalculationType.USER_TO_RESOURCE) {
@@ -90,7 +83,7 @@ public class ThreeLTCalculator {
 		return usageMap;
 	}
 	
-	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL) {	
+	public Map<Integer, Double> getRankedTagList(int userID, int resID, List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL, boolean sorting) {	
 		Map<Integer, Double> userResultMap = null;
 		if (this.userBased) {
 			List<Bookmark> userB = null;
@@ -114,7 +107,7 @@ public class ThreeLTCalculator {
 			userResultMap = getResultMap(userB, testCats, userTagMap, userCatMap, testTimestamp, topicBLL);
 			if (this.cType == CalculationType.USER_TO_RESOURCE && resID < this.resCounts.size()) {
 				resCount = this.resCounts.get(resID);
-				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true);
+				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true, false);
 				for (Map.Entry<Integer, Double> entry : associativeValues.entrySet()) {
 					Double val = userResultMap.get(entry.getKey());				
 					userResultMap.put(entry.getKey(), val == null ? entry.getValue().doubleValue() : val.doubleValue() + entry.getValue().doubleValue());
@@ -140,15 +133,6 @@ public class ThreeLTCalculator {
 				} else {
 					resResultMap = new LinkedHashMap<Integer, Double>();
 				}
-			} else {
-				resResultMap = this.cfCalc.getRankedTagList(userID, resID, false);
-				double denom = 0.0;
-				for (double val : resResultMap.values()) {
-					denom += Math.exp(val);
-				}
-				for (Map.Entry<Integer, Double> entry : resResultMap.entrySet()) {
-					entry.setValue(Math.exp(entry.getValue()) / denom);
-				}
 			}
 		}
 
@@ -171,8 +155,13 @@ public class ThreeLTCalculator {
 		
 		// sort and return
 		Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>();
-		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-		sortedResultMap.putAll(resultMap);
+		Map<Integer, Double> sortedResultMap = null;
+		if (sorting) {
+			sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
+			sortedResultMap.putAll(resultMap);
+		} else {
+			sortedResultMap = resultMap;
+		}
 		int count = 0;
 		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
 			if (count++ < limit) {
@@ -281,13 +270,15 @@ public class ThreeLTCalculator {
 	}
 	*/
 		
-	// Statics -----------------------------------------------------------------------------------------------------------------------
-		
-	private static String timeString = "";
+	// Statics -----------------------------------------------------------------------------------------------------------------------		
+	private static String timeString;
 	
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int d, int beta, boolean userBased, boolean resBased, boolean tagBLL, boolean topicBLL, CalculationType cType, boolean mp) {
-		timeString = "";		
-		//filename += "_res";
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, int d, int beta, boolean userBased, boolean resBased,
+			boolean tagBLL, boolean topicBLL, CalculationType cType) {
+		
+		Timer timerThread = new Timer();
+		MemoryThread memoryThread = new MemoryThread();
+		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
 		
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
@@ -295,25 +286,22 @@ public class ThreeLTCalculator {
 		List<int[]> predictionValues = new ArrayList<int[]>();
 		Stopwatch timer = new Stopwatch();
 		timer.start();
-		ThreeLTCalculator calculator = new ThreeLTCalculator(reader, trainSize, d, beta, userBased, resBased, false, cType, mp);
+		ThreeLTCalculator calculator = new ThreeLTCalculator(reader, trainSize, d, beta, userBased, resBased, false, cType);
 		timer.stop();
 		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
 		
-		timer = new Stopwatch();
+		timer.reset();
 		timer.start();
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
 			long timestamp = Long.parseLong((data.getTimestamp()));
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL);
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL, true);
 			predictionValues.add(Ints.toArray(map.keySet()));
 		}
 		timer.stop();
 		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
-		timeString += ("Full training time: " + trainingTime + "\n");
-		timeString += ("Full test time: " + testTime + "\n");
-		timeString += ("Average test time: " + testTime / (double)sampleSize) + "\n";
-		timeString += ("Total time: " + (trainingTime + testTime) + "\n");
 		
+		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, sampleSize);		
 		String suffix = "_layers";
 		if (!userBased) {
 			suffix = "_reslayers";
@@ -330,15 +318,15 @@ public class ThreeLTCalculator {
 		if (cType == CalculationType.USER_TO_RESOURCE) {
 			suffix += "ac";
 		}
-		if (!mp) {
-			suffix += "cf";
-		}
-		String outputFile = filename + suffix + "_" + beta + "_" + d;
-
-		Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);		
-		reader.setUserLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+		
+		String outputFile = filename + suffix + "_" + beta + "_" + d;	
+		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeFile(outputFile);
+		
+		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
+		timerThread.cancel();
+		Utilities.writeStringToFile("./data/metrics/" + outputFile + "_TIME.txt", timeString);	
 		return reader;
 	}
 }

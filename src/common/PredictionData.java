@@ -21,20 +21,23 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class PredictionData {
 	
 	private int userID;
+	private int resID;
 	private int k;
 	private List<String> realData;
 	private List<String> predictionData;
 	
 	private double numFoundRelevantDocs;
 	
-	public PredictionData(int userID, List<String> realData, List<String> predictionData, int k) {
+	public PredictionData(int userID, int resID, List<String> realData, List<String> predictionData, int k) {
 		this.userID = userID;
+		this.resID = resID;
 		this.realData = realData;
 		this.k = k;
 		if (k == 0) {
@@ -62,7 +65,8 @@ public class PredictionData {
 	
 	public double getPrecision(boolean recommTags) {
 		if (this.predictionData.size() != 0) {
-			return this.numFoundRelevantDocs / (recommTags ? this.predictionData.size() : this.k);
+			//return this.numFoundRelevantDocs / (recommTags ? this.predictionData.size() : this.k);
+			return this.numFoundRelevantDocs / this.k;
 		}
 		return 0.0;
 	}
@@ -101,6 +105,10 @@ public class PredictionData {
 		return 0.0;
 	}
 	
+	public double getCoverage() {
+		return (this.predictionData.size() > 0 ? 1.0 : 0.0);
+	}
+	
 	private double getPrecisionK(int k) {
 		if (k != 0 && k <= this.predictionData.size()) {
 			List<String> foundRelevantDocs = new ArrayList<String>(this.realData);
@@ -124,9 +132,8 @@ public class PredictionData {
 		this.numFoundRelevantDocs = foundRelevantDocs.size();
 	}
 	
-	// Resource-rec metrics
-	
-	private double getNovelty(int targetRes, List<Integer> resources, List<Map<Integer, Double>> resourceTopics) {
+	// Resource-rec metrics	
+	private double getNovelty(int targetRes, List<Integer> resources, List<Map<Integer, Double>> resourceTopics, boolean cosine) {
 		double novelty = 0.0;
 		
 		int count = 0;
@@ -134,7 +141,8 @@ public class PredictionData {
 		for (int res : resources) {
 			if (targetRes != res) {
 				Map<Integer, Double> resTopics = resourceTopics.get(res);
-				double disSim = 1.0 - Utilities.getCosineFloatSim(targetTopics, resTopics);
+				double sim = (cosine ? Utilities.getCosineFloatSim(targetTopics, resTopics) : Utilities.getJaccardFloatSim(targetTopics, resTopics));
+				double disSim = 1.0 - sim;
 				novelty += disSim;
 				count++;
 			}
@@ -145,7 +153,7 @@ public class PredictionData {
 		return novelty / count;
 	}
 	
-	public double getDiversity(List<Map<Integer, Double>> resourceTopics) {
+	public double getDiversity(List<Map<Integer, Double>> resourceTopics, boolean cosine) {
 		double diversity = 0.0;
 		if (this.predictionData == null || this.predictionData.size() == 0) {
 			return diversity;
@@ -156,7 +164,7 @@ public class PredictionData {
 			predictionIDs.add(Integer.valueOf(res));
 		}		
 		for (int resID : predictionIDs) {
-			diversity += getNovelty(resID, predictionIDs, resourceTopics);
+			diversity += getNovelty(resID, predictionIDs, resourceTopics, cosine);
 		}		
 		return diversity / this.predictionData.size();
 	}
@@ -172,11 +180,72 @@ public class PredictionData {
 		
 		for (String res : this.predictionData) {
 			int resID = Integer.parseInt(res);
-			serendipity += getNovelty(resID, knownResources, resourceTopics);
+			serendipity += getNovelty(resID, knownResources, resourceTopics, true);
 		}		
 		return serendipity / this.predictionData.size();
 	}
 	
+	public double getTagDiversity(List<Map<Integer, Double>> tagEntities) {
+		double diversity = 0.0;
+		if (this.predictionData == null || this.predictionData.size() == 0) {
+			return diversity;
+		}
+		
+		List<Integer> predictionIDs = new ArrayList<Integer>(); 
+		for (String res : this.predictionData) {
+			predictionIDs.add(Integer.valueOf(res));
+		}
+		int k = predictionIDs.size();
+		for (int i = 0; i < k; i++) {
+			Map<Integer, Double> targetEntities = tagEntities.get(i);
+			for (int j = i + 1; j < k; j++) {
+				Map<Integer, Double> sourceEntities = tagEntities.get(j);
+				diversity += (1.0 - Utilities.getJaccardFloatSim(targetEntities, sourceEntities));
+			}
+		}
+		double normConstant = (k * k - k) / 2.0;
+		if (normConstant > 0.0) {
+			diversity /= normConstant;
+		}
+		return diversity;
+	}
+	
+	public double getTagSerendipity(Map<Integer, Integer> tagFrequencyMap, boolean cosine) {
+		Double serendipity = 0.0;
+		if (this.predictionData == null || this.predictionData.size() == 0) {
+			return 0.0;
+		}
+		if (tagFrequencyMap == null || tagFrequencyMap.size() == 0) {
+			return 1.0;
+		}
+		if (!cosine) {
+			double i = 1.0;
+			double maxIFF = Double.MIN_VALUE;
+			for (String tag : this.predictionData) {
+				int tagID = Integer.parseInt(tag);
+				Integer tagCount = tagFrequencyMap.get(tagID);
+				double iff = Math.log(((double)tagFrequencyMap.size() + 1.0) / ((tagCount == null ? 0.0 : tagCount.doubleValue()) + 1.0));
+				double disc = 1.0 / Math.log(1.0 + i++);
+				serendipity += (disc * iff);
+				if (iff > maxIFF) {
+					maxIFF = iff;
+				}
+			}
+			double normConstant = 0.0;
+			for (double j = 1.0; j <= this.predictionData.size(); j++) {
+				normConstant += ((1.0 / Math.log(1.0 + j)) * maxIFF);
+			}
+			if (normConstant > 0.0) {
+				serendipity /= normConstant;
+			}
+			if (serendipity.isInfinite() || serendipity.isNaN()) {
+				serendipity = 1.0;
+			}
+		} else {
+			serendipity = (1.0 - Utilities.getCosineSim(getPredictionDataAsMap(), tagFrequencyMap));
+		}
+		return serendipity;
+	}
 	
 	/**
 	 * Compute the normalized discounted cumulative gain (NDCG) of a list of ranked items.
@@ -235,11 +304,24 @@ public class PredictionData {
 		return this.userID;
 	}
 	
+	public int getResID() {
+		return this.resID;
+	}
+	
 	public List<String> getRealData() {
 		return this.realData;
 	}
 	
 	public List<String> getPredictionData() {
 		return this.predictionData;
+	}
+	
+	public Map<Integer, Integer> getPredictionDataAsMap() {
+		Map<Integer, Integer> returnMap = new LinkedHashMap<Integer, Integer>();
+		for (String data : this.predictionData) {
+			int intVal = Integer.parseInt(data);
+			returnMap.put(intVal, 1);
+		}
+		return returnMap;
 	}
 }

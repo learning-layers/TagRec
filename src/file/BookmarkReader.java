@@ -39,6 +39,7 @@ public class BookmarkReader {
 	
 	private final int countLimit;
 	private List<Bookmark> userLines;
+	private List<Bookmark> testLines;
 	private List<String> categories;
 	
 	private List<String> tags;
@@ -57,6 +58,7 @@ public class BookmarkReader {
 	public BookmarkReader(int countLimit, boolean stemming) {
 		this.countLimit = countLimit;
 		this.userLines = new ArrayList<Bookmark>();
+		this.testLines = null;
 		this.categories = new ArrayList<String>();
 		
 		this.tags = new ArrayList<String>();
@@ -149,7 +151,6 @@ public class BookmarkReader {
 			}
 			
 			boolean doCount = (this.countLimit == 0 || this.userLines.size() < this.countLimit);
-			//int userIndex = this.users.indexOf(userID);
 			Integer userIndex = this.userMap.get(userID);
 			if (userIndex == null) {
 				this.users.add(userID);
@@ -164,7 +165,6 @@ public class BookmarkReader {
 				this.userCounts.set(userIndex, this.userCounts.get(userIndex) + 1);
 			}
 			userData.setUserID(userIndex);
-			//int resIndex = this.resources.indexOf(wikiID);
 			Integer resIndex = this.resourceMap.get(wikiID);
 			if (resIndex == null) {
 				this.resources.add(wikiID);
@@ -231,8 +231,12 @@ public class BookmarkReader {
 		return this.userLines;
 	}
 	
-	public void setUserLines(List<Bookmark> userLines) {
-		this.userLines = userLines;
+	public List<Bookmark> getTestLines() {
+		return this.testLines;
+	}
+	
+	public void setTestLines(List<Bookmark> userLines) {
+		this.testLines = userLines;
 	}
 	
 	public List<String> getCategories() {

@@ -23,21 +23,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
-import common.IntMapComparator;
 import common.Bookmark;
 import common.Utilities;
 import file.preprocessing.CoreFiltering;
@@ -46,31 +39,14 @@ public class BookmarkSplitter {
 
 	private BookmarkReader reader;
 
-	
 	public BookmarkSplitter(BookmarkReader reader) {
 		this.reader = reader;
 	}
 	
-	public void splitFile(String filename, int testPercentage) {
-		int testUserSize = this.reader.getBookmarks().size() * testPercentage / 100;
-		int trainUserSize = this.reader.getBookmarks().size() - testUserSize;
-		Collections.shuffle(this.reader.getBookmarks());
-		List<Bookmark> userSample = this.reader.getBookmarks().subList(0, trainUserSize + testUserSize);
-		
-		//Collections.sort(userSample);
-		
-		List<Bookmark> trainUserSample = userSample.subList(0, trainUserSize);
-		List<Bookmark> testUserSample = userSample.subList(trainUserSize, trainUserSize + testUserSize);
-			
-		writeWikiSample(this.reader, trainUserSample, filename + "_train", null);
-		writeWikiSample(this.reader, testUserSample, filename + "_test", null);
-		writeWikiSample(this.reader, userSample, filename, null);
-	}
-	
-	public void splitUserPercentage(String filename, int percentage) {
+	public List<Bookmark> getUserPercentage(int percentage, boolean usePercentage) {
 		List<Bookmark> lines = new ArrayList<Bookmark>();
 		int userSize = this.reader.getUsers().size();
-		int userLimit = userSize * percentage / 100;
+		int userLimit = (usePercentage ? userSize * percentage / 100 : percentage);
 		List<Integer> randomIndices = Utilities.getRandomIndices(0, userSize - 1).subList(0, userLimit);
 		int currentUser = -1;
 		boolean takeUser = false;
@@ -83,10 +59,33 @@ public class BookmarkSplitter {
 				lines.add(data);
 			}
 		}
-		
-		writeWikiSample(this.reader, lines, filename + "_" + percentage + "_perc", null);
+		return lines;
 	}
 	
+	// randomly gets x percentage of the user-profiles from the dataset
+	public void splitUserPercentage(String filename, int percentage, boolean usePercentage, int count) {
+		for (int i = 1; i <= count; i++) {
+			List<Bookmark> lines = getUserPercentage(percentage, usePercentage);
+			writeSample(this.reader, lines, filename + "_" + percentage + "_perc_" + i, null);
+		}
+	}
+	
+	// randomly splits the bookmarks
+	public void splitFile(String filename, int testPercentage) {
+		int testUserSize = this.reader.getBookmarks().size() * testPercentage / 100;
+		int trainUserSize = this.reader.getBookmarks().size() - testUserSize;
+		Collections.shuffle(this.reader.getBookmarks());
+		List<Bookmark> userSample = this.reader.getBookmarks().subList(0, trainUserSize + testUserSize);
+		
+		List<Bookmark> trainUserSample = userSample.subList(0, trainUserSize);
+		List<Bookmark> testUserSample = userSample.subList(trainUserSize, trainUserSize + testUserSize);
+			
+		writeSample(this.reader, trainUserSample, filename + "_train", null);
+		writeSample(this.reader, testUserSample, filename + "_test", null);
+		writeSample(this.reader, userSample, filename, null);
+	}
+	
+	// puts the last bookmark of each user into the testset
 	public void leaveLastOutSplit(String filename, boolean coldStart) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
 		List<Bookmark> testLines = new ArrayList<Bookmark>();
@@ -98,7 +97,7 @@ public class BookmarkSplitter {
 				userIndex = 1;
 			}
 			if (userIndex++ == userSize) {
-				if (coldStart || (!coldStart && userSize > 1)) {
+				if (coldStart || userSize > 1) {
 					testLines.add(data);
 				} else {
 					trainLines.add(data);
@@ -108,12 +107,13 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeWikiSample(this.reader, trainLines, filename + "_train", null);
-		writeWikiSample(this.reader, testLines, filename + "_test", null);
+		writeSample(this.reader, trainLines, filename + "_train", null);
+		writeSample(this.reader, testLines, filename + "_test", null);
 		trainLines.addAll(testLines);
-		writeWikiSample(this.reader, trainLines, filename, null);
+		writeSample(this.reader, trainLines, filename, null);
 	}
 	
+	// puts one bookmark at random of each user into the testset
 	public void leaveOneRandOutSplit(String filename) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
 		List<Bookmark> testLines = new ArrayList<Bookmark>();
@@ -132,77 +132,40 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeWikiSample(this.reader, trainLines, filename + "_train", null);
-		writeWikiSample(this.reader, testLines, filename + "_test", null);
+		writeSample(this.reader, trainLines, filename + "_train", null);
+		writeSample(this.reader, testLines, filename + "_test", null);
 		trainLines.addAll(testLines);
-		writeWikiSample(this.reader, trainLines, filename, null);
+		writeSample(this.reader, trainLines, filename, null);
 	}
 	
-	/**
-	 * split bookmarks at given index 
-	 * @param index
-	 * @param filename
-	 */
-	public void leaveSomeOutSplit(int index, String filename) {
-		List<Bookmark> trainLines = new ArrayList<Bookmark>();
-		List<Bookmark> testLines = new ArrayList<Bookmark>();
-		int currentUser = -1;
-		int userIndex = 0;
-		
-		Collections.sort(this.reader.getBookmarks());
-
-		int cntUsers=0;
-		
-		for (Bookmark data : this.reader.getBookmarks()) {
-			if (currentUser != data.getUserID())  { // new user
-				
-				cntUsers++;
-				/*if (cntUsers == 500) {
-					break;
-				}*/
-				
-				if (userIndex <= index && currentUser != -1) {
-				}
-				currentUser = data.getUserID();
-				userIndex = 0;
-			}
-			if (++userIndex > index) {
-				trainLines.add(data);
-			} else {
-				testLines.add(data);
-			}
-		}
-		
-		writeWikiSample(this.reader, trainLines, filename + "_train", null);
-		writeWikiSample(this.reader, testLines, filename + "_test", null);
-		trainLines.addAll(testLines);
-		writeWikiSample(this.reader, trainLines, filename, null);
-	}
-	
-	public void leavePercentageOutSplit(String filename, int percentage, boolean random) {
+	public void leavePercentageOutSplit(String filename, int percentage, boolean last, Integer userNumber, boolean tagRec) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
 		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		Set<Integer> indices = new HashSet<Integer>();
 		int currentUser = -1, userIndex = -1, userSize = -1;
-		for (int i = 0; i < this.reader.getBookmarks().size(); i++) {
-			Bookmark data = this.reader.getBookmarks().get(i);
+		List<Bookmark> allLines = null;
+		if (userNumber == null) {
+			allLines = this.reader.getBookmarks();
+		} else {
+			allLines = getUserPercentage(userNumber, false);
+		}
+		
+		for (int i = 0; i < allLines.size(); i++) {
+			Bookmark data = allLines.get(i);
 			if (currentUser != data.getUserID())  { // new user
 				currentUser = data.getUserID();
-				userSize = this.reader.getUserCounts().get(currentUser);
+				userSize = this.reader.getUserCounts().get(currentUser);			
 				userIndex = 1;
 				indices.clear();
-				int limit = (userSize - 1 < percentage ? userSize - 1 : percentage);
-				if (random) {
-					while (indices.size() < limit) {
-						indices.add(1 + (int)(Math.random() * ((userSize - 1) + 1)));
-					}
-				} else {
-					for (int index : getBestIndices(this.reader.getBookmarks().subList(i, i + userSize), false)) {
-						if (indices.size() < limit) {
-							indices.add(index);
-						} else {
-							break;
-						}
+				int limit = (int)((double)percentage / 100.0 * (double)userSize); // altenative: 10
+				if (tagRec && limit == 0 && userSize > 1) {
+					limit++;
+				}
+				while (indices.size() < limit) { // limit + 1 for cold-start users
+					if (last) {
+						indices.add(userSize - /*1 - */indices.size());
+					} else {
+						indices.add(1 + (int)(Math.random() * ((userSize/* - 1*/) + 1)));
 					}
 				}
 			}
@@ -213,38 +176,30 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeWikiSample(this.reader, trainLines, filename + "_train", null);
-		writeWikiSample(this.reader, testLines, filename + "_test", null);
+		Collections.sort(trainLines);
+		Collections.sort(testLines);
+		writeSample(this.reader, trainLines, filename + "_train", null);
+		writeSample(this.reader, testLines, filename + "_test", null);
 		trainLines.addAll(testLines);
-		writeWikiSample(this.reader, trainLines, filename, null);
-	}
-	
-	private Set<Integer> getBestIndices(List<Bookmark> lines, boolean rating) {
-		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
-		for (int i = 0; i < lines.size(); i++) {
-			Bookmark data = lines.get(i);
-			countMap.put(i + 1, rating ? (int)data.getRating() : this.reader.getResourceCounts().get(data.getWikiID()));
-		}
-		Map<Integer, Integer> sortedCountMap = new TreeMap<Integer, Integer>(new IntMapComparator(countMap));
-		sortedCountMap.putAll(countMap);
-		return sortedCountMap.keySet();
+		writeSample(this.reader, trainLines, filename, null);
 	}
 	
 	// Statics -------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public static boolean writeWikiSample(BookmarkReader reader, List<Bookmark> userSample, String filename, List<int[]> catPredictions) {
+	public static boolean writeSample(BookmarkReader reader, List<Bookmark> userSample, String filename, List<int[]> catPredictions) {
 		try {
 			FileWriter writer = new FileWriter(new File("./data/csv/" + filename + ".txt"));
 			BufferedWriter bw = new BufferedWriter(writer);
 			int userCount = 0;
 			// TODO: check encoding
 			for (Bookmark bookmark : userSample) {
-				bw.write("\"" + reader.getUsers().get(bookmark.getUserID()).replace("\"", "") + "\";");
-				bw.write("\"" + reader.getResources().get(bookmark.getWikiID()).replace("\"", "") + "\";");
+				bw.write("\"" + bookmark.getUserID() + "\";");
+				bw.write("\"" + bookmark.getWikiID() + "\";");
 				bw.write("\"" + bookmark.getTimestamp().replace("\"", "") + "\";\"");
 				int i = 0;
 				for (int tag : bookmark.getTags()) {
-					bw.write(URLEncoder.encode(reader.getTags().get(tag).replace("\"", ""), "UTF-8"));
+					//bw.write(reader.getTags().get(tag).replace("\"", "")); // enable if you need tag strings!
+					bw.write(Integer.toString(tag));
 					if (++i < bookmark.getTags().size()) {
 						bw.write(',');
 					}					
@@ -276,25 +231,29 @@ public class BookmarkSplitter {
 		return false;
 	}
 	
-	public static int determineMaxCore(String filename, String sampleName) {
-		int core = 2;
-		while(true) {
-			int coreCount = splitSample(filename, sampleName, 1, core, core, core, false);
-			core++;
-			if (coreCount <= 0) {
-				break;
+	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec) {		
+		BookmarkReader reader = new BookmarkReader(0, false);
+		reader.readFile(filename);
+		Collections.sort(reader.getBookmarks());
+		BookmarkSplitter splitter = new BookmarkSplitter(reader);
+		for (int i = 1; i <= count; i++) {
+			if (percentage > 0) {
+				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec);
+			} else {
+				splitter.leaveLastOutSplit(sampleName, false);
 			}
 		}
-		return core;
 	}
 	
-	// default call
-	public static int splitSample(String filename, String sampleName, int level) {
-		return splitSample(filename, sampleName, 1, level, level, level, false);
+	public static void drawUserPercentageSample(String filename, int percentage) {
+		BookmarkReader reader = new BookmarkReader(0, false);
+		reader.readFile(filename);		
+		BookmarkSplitter splitter = new BookmarkSplitter(reader);
+		Collections.sort(reader.getBookmarks());
+		splitter.splitUserPercentage(filename, percentage, true, 1);
 	}
 	
-	public static int splitSample(String filename, String sampleName, int count, int userLevel, int resLevel, int tagLevel, boolean resSplit) {
-		
+	public static void calculateCore(String filename, String sampleName, int userLevel, int resLevel, int tagLevel) {
 		String resultfile = sampleName + "_core_u" + userLevel + "_r" + resLevel + "_t" + tagLevel;
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);		
@@ -311,9 +270,9 @@ public class BookmarkSplitter {
 				CoreFiltering filtering = new CoreFiltering(reader);
 				reader = filtering.filterOrphansIterative(userLevel, resLevel, tagLevel);
 				String coreResultfile = resultfile + "_c" + ++i;
-				writeWikiSample(reader, reader.getBookmarks(), coreResultfile, null);
+				writeSample(reader, reader.getBookmarks(), coreResultfile, null);
 				if (reader.getBookmarks().size() >= size) {
-					return reader.getBookmarks().size();
+					return;
 				}
 				
 				// re-read the filtered dataset			
@@ -322,19 +281,6 @@ public class BookmarkSplitter {
 				File file = new File("./data/csv/" + coreResultfile + ".txt");
 				file.delete();
 			}			
-		} else {		
-			BookmarkSplitter splitter = new BookmarkSplitter(reader);
-			Collections.sort(reader.getBookmarks());
-			for (int i = 1; i <= count; i++) {
-				//splitter.splitFile(sampleName, 10);
-				if (resSplit) {
-					splitter.leavePercentageOutSplit(sampleName, 10, false);
-				} else {
-					splitter.leaveLastOutSplit(sampleName, true);
-				}
-				//splitter.splitUserPercentage(filename, 15);
-			}
 		}
-		return -1;
 	}
 }

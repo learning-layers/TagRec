@@ -28,9 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Functions;
-import com.google.common.collect.Lists;
-
 import common.PredictionData;
 import common.Utilities;
 import file.postprocessing.CatDescFiltering;
@@ -78,7 +75,7 @@ public class PredictionFileReader {
 				if (lineParts.length > 2) {
 					List<String> predictionData = Arrays.asList(lineParts[2].split(", "));
 					if (predictionData.size() > 0) {
-						PredictionData data = new PredictionData(userID, realData, predictionData, k);
+						PredictionData data = new PredictionData(userID, resID, realData, predictionData, k);
 						this.predictions.add(data);
 						this.predictionCount++;
 					} else {
@@ -116,7 +113,7 @@ public class PredictionFileReader {
 					continue; // skip invalid line
 				}
 				
-				int userID = -1;
+				int userID = -1, resID = -1;
 				try {
 					userID = Integer.parseInt(lineParts[0]);
 				} catch (Exception e) {
@@ -148,7 +145,7 @@ public class PredictionFileReader {
 						for (String predictionString : predictionStringData) {
 							predictionData.add(predictionString.substring(0, predictionString.indexOf(":")));
 						}
-						PredictionData data = new PredictionData(userID, realData, predictionData, k);
+						PredictionData data = new PredictionData(userID, resID, realData, predictionData, k);
 						this.predictions.add(data);
 						this.predictionCount++;
 					} else {
@@ -171,8 +168,7 @@ public class PredictionFileReader {
 		return false;
 	}
 	
-	// Getter ------------------------------------------------------------------------------------------------
-	
+	// Getter ------------------------------------------------------------------------------------------------	
 	public List<PredictionData> getPredictionData() {
 		return this.predictions;
 	}

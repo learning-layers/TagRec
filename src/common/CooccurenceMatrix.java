@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.sf.javaml.clustering.mcl.SparseMatrix;
@@ -113,15 +114,34 @@ public class CooccurenceMatrix {
 		return resultTags;
 	}
 	
-	public Map<Integer, Double> calculateAssociativeComponentsWithTagAssosiation(Map<Integer, Double> sourceTags, Map<Integer, Double> destinationTags, boolean srcCount, boolean destCount) {
-		Map<Integer, Double> associativeComponents = new LinkedHashMap<Integer, Double>();				
-		for (Map.Entry<Integer, Double> tag : sourceTags.entrySet()){
-			associativeComponents.put(tag.getKey(), (srcCount ? tag.getValue() : 1.0) * this.calculateAssociativeComponent(tag.getKey(), destinationTags, destCount));
-		}		
+	public Map<Integer, Double> calculateAssociativeComponentsWithTagAssosiation(Map<Integer, Double> sourceTags, Map<Integer, Double> destinationTags, boolean srcCount, boolean destCount, boolean onlyTopTags) {
+		Map<Integer, Double> associativeComponents = new LinkedHashMap<Integer, Double>();
+		Map<Integer, Double> destinationTagsCopy = new LinkedHashMap<Integer, Double>();
+		if (onlyTopTags) {
+			Map<Integer, Double> sortedDestinationTags = new TreeMap<Integer, Double>(new DoubleMapComparator(destinationTags));
+			sortedDestinationTags.putAll(destinationTags);
+			for (Map.Entry<Integer, Double> entry : sortedDestinationTags.entrySet()) {
+				if (destinationTagsCopy.size() < 10) {
+					destinationTagsCopy.put(entry.getKey(), entry.getValue());
+				} else {
+					break;
+				}
+			}
+		} else {
+			destinationTagsCopy.putAll(destinationTags);
+		}
+		if (sourceTags != null) {
+			for (Map.Entry<Integer, Double> tag : sourceTags.entrySet()){
+				associativeComponents.put(tag.getKey(), (srcCount ? tag.getValue() : 1.0) * this.calculateAssociativeComponent(tag.getKey(), destinationTagsCopy, destCount));
+			}	
+		}
 		return associativeComponents;
 	}
 
 	private Double calculateAssociativeComponent(int tag, Map<Integer, Double> destinationTags, boolean destCount) {
+		if (destinationTags == null) {
+			return 0.0;
+		}
 		SparseVector vec = this.coocurenceMatrix.get(tag);
 		double associativeValue = 0.0;
 		int numbAssociatedNodes = 0;
