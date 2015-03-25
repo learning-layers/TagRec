@@ -14,17 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class FlickrProcessor {
+public class PintsProcessor {
 
-	public static boolean processFile(String inputFile, String outputFile) {
+	// used for datasets from PINTS: Delicious (big) and Flickr
+	public static boolean processFile(String dir, String inputFile, String outputFile) {
 		
-		System.out.println("Start preprocessing with Flickr Preprocessor");
 		Map<String, Set<String>> tagMap = new LinkedHashMap<String, Set<String>>();
 		List<String> timestamps = new ArrayList<String>();
 		
 		try {
-			FileReader reader = new FileReader(new File("./data/csv/flickr_core/" + inputFile));
-			FileWriter writer = new FileWriter(new File("./data/csv/flickr_core/" + outputFile + ".txt"));
+			FileReader reader = new FileReader(new File("./data/csv/" + dir + "/" + inputFile));
+			FileWriter writer = new FileWriter(new File("./data/csv/" + dir + "/" + outputFile + ".txt"));
 			BufferedReader br = new BufferedReader(reader);
 			BufferedWriter bw = new BufferedWriter(writer);
 			String line = null;

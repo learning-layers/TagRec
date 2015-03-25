@@ -57,8 +57,16 @@ public class WikipediaFactReader implements FactReader {
     			return true;
     		} else {
     			this.tagIndex = 0;
-    			if (++this.lineIndex < this.trainSize) {
-    				return true;
+    			while (true) { // go to the next line with tags
+    				if (++this.lineIndex < this.trainSize) {
+    					if (this.reader.getBookmarks().get(this.lineIndex).getTags().size() > 0) {
+    						return true;
+    					} else {
+    						continue;
+    					}
+    				} else {
+    					break;
+    				}
     			}
     		}
     	}

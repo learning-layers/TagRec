@@ -240,7 +240,7 @@ public class BookmarkSplitter {
 			if (percentage > 0) {
 				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec);
 			} else {
-				splitter.leaveLastOutSplit(sampleName, false);
+				splitter.leaveLastOutSplit(sampleName, false); // TODO check cold-start
 			}
 		}
 	}

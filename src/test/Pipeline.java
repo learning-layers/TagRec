@@ -65,8 +65,7 @@ import file.BookmarkSplitter;
 import file.postprocessing.CatDescFiltering;
 import file.preprocessing.BibsonomyProcessor;
 import file.preprocessing.CiteULikeProcessor;
-import file.preprocessing.DeliciousProcessor;
-import file.preprocessing.FlickrProcessor;
+import file.preprocessing.PintsProcessor;
 import file.preprocessing.LastFMProcessor;
 import file.preprocessing.MovielensProcessor;
 import file.preprocessing.TensorProcessor;
@@ -86,8 +85,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "ml";
-	private final static String SUBDIR = "/core1";
+	private final static String DATASET = "flickr";
+	private final static String SUBDIR = "/ipm";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -108,6 +107,8 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 
+		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
+		
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
@@ -153,8 +154,8 @@ public class Pipeline {
 		
 		// Resource-Recommender testing
 		//try { getStatistics("ml_core/movielens", false); } catch (IOException e) { e.printStackTrace(); }
-		//writeTensorFiles(path, false);
-		//evaluate(dir, path, "wrmf_500_mml", TOPIC_NAME, false, true);
+		//writeTensorFiles(path, true);
+		//evaluate(dir, path, "wrmf_500_mml", TOPIC_NAME, false, true, null);
 		//createLdaSamples(path, 1, 500, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, true, false, Features.ENTITIES);
@@ -245,9 +246,9 @@ public class Pipeline {
 		} else if (op.equals("process_ml")) {
 			MovielensProcessor.processFile("tags.dat", args[2]);	
 		} else if (op.equals("process_del")) {
-			DeliciousProcessor.processFile("delicious", args[2]);	
+			PintsProcessor.processFile(sampleDir, "delicious", args[2]);	
 		} else if (op.equals("process_flickr")) {
-			FlickrProcessor.processFile("flickr", args[2]);	
+			PintsProcessor.processFile(sampleDir, "flickr", args[2]);	
 		} else if (op.equals("item_mp")) {
 			startBaselineCalculatorForResources(sampleDir, samplePath, sampleCount, false);
 		} else if (op.equals("item_cft")) {
@@ -282,7 +283,7 @@ public class Pipeline {
 		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, false);			// 3L		
 		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, true, false);				// 3LTtop
 		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, true);				// 3LTtag
-		startCfTagCalculator(sampleDir, samplePath, 1, 20, -5, all);	// CFur
+		startCfTagCalculator(sampleDir, samplePath, 1, 20, -5, false);	// CFur
 		startFolkRankCalculator(sampleDir, samplePath, 1);				// APR+FR
 		startLdaCalculator(sampleDir, samplePath, 1000, 1, all);		// LDA
 	}
@@ -325,11 +326,11 @@ public class Pipeline {
 		for (int i = 1; i <= sampleCount; i++) {
 			for (int dVal : dValues) {
 				reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, dVal, 5, type);
-				writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader);
+				writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader, null);
 				if (all) {
 					for (int betaVal : betaValues) {
 						reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal, type);
-						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, 10, null, reader);
+						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, 10, null, reader, null);
 					}
 					//reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, false, true, dVal, 5, type);
 					//writeMetrics(sampleDir, sampleName, "bll_r" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader);
@@ -342,10 +343,10 @@ public class Pipeline {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
 		reader = GIRPTMCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false);
-		writeMetrics(sampleDir, sampleName, "girp", 1, 10, null, reader);
+		writeMetrics(sampleDir, sampleName, "girp", 1, 10, null, reader, null);
 		if (all) {
 			reader = GIRPTMCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true);
-			writeMetrics(sampleDir, sampleName, "girptm", 1, 10, null, reader);
+			writeMetrics(sampleDir, sampleName, "girptm", 1, 10, null, reader, null);
 		}
 	}
 
@@ -358,14 +359,14 @@ public class Pipeline {
 			reader = MPurCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, 5);
 			if (all) reader = MPurCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, false, true, 5);
 		}
-		writeMetrics(sampleDir, sampleName, "mp_u_" + 5, sampleCount, 10, null, reader);
-		if (all) writeMetrics(sampleDir, sampleName, "mp_r_" + 5, sampleCount, 10, null, reader);
+		writeMetrics(sampleDir, sampleName, "mp_u_" + 5, sampleCount, 10, null, reader, null);
+		if (all) writeMetrics(sampleDir, sampleName, "mp_r_" + 5, sampleCount, 10, null, reader, null);
 		if (all) {
 			for (int beta : betaValues) {
 				for (int i = 1; i <= sampleCount; i++) {
 					reader = MPurCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, beta);
 				}
-				writeMetrics(sampleDir, sampleName, "mp_ur_" + beta, sampleCount, 10, null, reader);
+				writeMetrics(sampleDir, sampleName, "mp_ur_" + beta, sampleCount, 10, null, reader, null);
 			}
 		}
 	}
@@ -378,15 +379,15 @@ public class Pipeline {
 			reader = CFTagRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, false, 5);
 			if (all) reader = CFTagRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, false, true, 5);
 		}
-		writeMetrics(sampleDir, sampleName, "usercf_" + 5, sampleCount, 10, null, reader);
-		if (all) writeMetrics(sampleDir, sampleName, "rescf_" + 5, sampleCount, 10, null, reader);
+		writeMetrics(sampleDir, sampleName, "usercf_" + 5, sampleCount, 10, null, reader, null);
+		if (all) writeMetrics(sampleDir, sampleName, "rescf_" + 5, sampleCount, 10, null, reader, null);
 		
 		if (all) {
 			for (int beta : betaValues) {
 				for (int i = 1; i <= sampleCount; i++) {
 					reader = CFTagRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, true, true, beta);
 				}
-				writeMetrics(sampleDir, sampleName, "cf_" + beta, sampleCount, 10, null, reader);
+				writeMetrics(sampleDir, sampleName, "cf_" + beta, sampleCount, 10, null, reader, null);
 			}
 		}
 	}
@@ -397,8 +398,8 @@ public class Pipeline {
 		for (int i = 1; i <= size; i++) {
 			reader = FolkRankCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
 		}
-		writeMetrics(sampleDir, sampleName, "fr", size, 10, null, reader);
-		writeMetrics(sampleDir, sampleName, "apr", size, 10, null, reader);
+		writeMetrics(sampleDir, sampleName, "fr", size, 10, null, reader, null);
+		writeMetrics(sampleDir, sampleName, "apr", size, 10, null, reader, null);
 	}
 
 	private static void startBaselineCalculator(String sampleDir, String sampleName, int size, boolean mp) {
@@ -407,7 +408,7 @@ public class Pipeline {
 		for (int i = 1; i <= size; i++) {
 			reader = MPCalculator.predictPopularTags(sampleName, TRAIN_SIZE, TEST_SIZE, mp);
 		}
-		writeMetrics(sampleDir, sampleName, "mp", size, 10, null, reader);
+		writeMetrics(sampleDir, sampleName, "mp", size, 10, null, reader, null);
 	}
 
 	private static void startLdaCalculator(String sampleDir, String sampleName, int topics, int sampleCount, boolean all) {
@@ -416,7 +417,7 @@ public class Pipeline {
 		for (int i = 1; i <= sampleCount; i++) {
 			reader = MalletCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, topics, true, all);
 		}
-		writeMetrics(sampleDir, sampleName, "lda_" + topics, sampleCount, 10, null, reader);
+		writeMetrics(sampleDir, sampleName, "lda_" + topics, sampleCount, 10, null, reader, null);
 	}
 		
 	private static void start3LayersJavaCalculator(String sampleDir, String sampleName, String topicString, int size, int dUpperBound, int betaUpperBound, boolean resBased, boolean tagBLL, boolean topicBLL) {
@@ -438,11 +439,11 @@ public class Pipeline {
 				if (resBased) {
 					for (int b : betaValues) {
 						reader = ThreeLTCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, d, b, true, true, tagBLL, topicBLL, CalculationType.NONE);
-						writeMetrics(sampleDir, sampleName, suffix + "_" + b + "_" + d, size, 10, !topicString.isEmpty() ? topicString : null, reader);
+						writeMetrics(sampleDir, sampleName, suffix + "_" + b + "_" + d, size, 10, !topicString.isEmpty() ? topicString : null, reader, null);
 					}
 				}
 				reader = ThreeLTCalculator.predictSample(sampleName + (!topicString.isEmpty() ? "_" + topicString : ""), TRAIN_SIZE, TEST_SIZE, d, 5, true, false, tagBLL, topicBLL, CalculationType.NONE);
-				writeMetrics(sampleDir, sampleName, "user" + suffix + "_" + 5 + "_" + d, size, 10, !topicString.isEmpty() ? topicString : null, reader);
+				writeMetrics(sampleDir, sampleName, "user" + suffix + "_" + 5 + "_" + d, size, 10, !topicString.isEmpty() ? topicString : null, reader, null);
 			}
 		}
 	}
@@ -450,7 +451,7 @@ public class Pipeline {
 	private static void startContentBasedCalculator(String sampleDir, String sampleName) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = ContentBasedCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
-		writeMetrics(sampleDir, sampleName, "cb", 1, 10, null, reader);
+		writeMetrics(sampleDir, sampleName, "cb", 1, 10, null, reader, null);
 	}
 	
 	// Engine testing
@@ -494,7 +495,7 @@ public class Pipeline {
 		TensorProcessor.writeFiles(sampleName, TRAIN_SIZE, TEST_SIZE, tagRec, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, filter);
 	}
 	
-	private static void writeMetrics(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
+	private static void writeMetrics(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader, Integer trainSize) {
 		CatDescFiltering filter = null;
 		if (DESCRIBER != null) {
 			filter = CatDescFiltering.instantiate(sampleName, TRAIN_SIZE);
@@ -506,7 +507,7 @@ public class Pipeline {
 			for (int j = 1; j <= sampleCount; j++) {
 				MetricsCalculator.calculateMetrics(sampleName
 						+ topicString + "_" + prefix, i, sampleDir + "/"
-						+ prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, filter, true, null);
+						+ prefix + topicString + "_metrics", false, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, filter, true, trainSize);
 			}
 			MetricsCalculator.writeAverageMetrics(sampleDir + "/" + prefix + topicString + "_metrics", i, (double) sampleCount, true, i == k, DESCRIBER);
 		}
@@ -611,16 +612,16 @@ public class Pipeline {
 	}
 	
 	// passing the trainSize means that MyMediaLite files will be evaluated
-	private static void evaluate(String sampleDir, String sampleName, String prefix, String postfix, boolean calcTags, boolean mymedialite, BookmarkReader reader) {
+	private static void evaluate(String sampleDir, String sampleName, String prefix, String postfix, boolean calcTags, boolean tensor, BookmarkReader reader) {
 		if (reader == null) {
 			getTrainTestSize(sampleName + (postfix != null ? "_" + postfix : ""));
 			reader = new BookmarkReader(TRAIN_SIZE, false);
 			reader.readFile(sampleName + (postfix != null ? "_" + postfix : ""));
 		}
 		if (calcTags) {
-			writeMetrics(sampleDir, sampleName, prefix, 1, 10, postfix, reader);
+			writeMetrics(sampleDir, sampleName, prefix, 1, 10, postfix, reader,  tensor ? TRAIN_SIZE : null);
 		} else {
-			writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, postfix, reader, mymedialite ? TRAIN_SIZE : null);
+			writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, postfix, reader, tensor ? TRAIN_SIZE : null);
 		}
 	}
 	

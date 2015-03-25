@@ -22,12 +22,20 @@ package file;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.Lists;
+
+import common.Bookmark;
+import common.DoubleMapComparator;
 import common.PredictionData;
 import common.Utilities;
 import file.postprocessing.CatDescFiltering;
@@ -87,7 +95,7 @@ public class PredictionFileReader {
 					this.predictions.add(null);
 				}
 			}
-			if (k == 20) {
+			if (k == 10) {
 				System.out.println("Number of users to predict: " + this.predictions.size());
 			}
 			br.close();
@@ -96,6 +104,48 @@ public class PredictionFileReader {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public boolean readTensorFile(String filename, int k, int trainSize, BookmarkReader bookmarkReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering categorizer) {
+		this.filename = filename;
+		List<Bookmark> testLines = bookmarkReader.getBookmarks().subList(trainSize, bookmarkReader.getBookmarks().size());
+		
+		FileReader reader;
+		try {
+			reader = new FileReader(new File("./data/results/" + filename + ".txt"));
+			BufferedReader br = new BufferedReader(reader);
+			String line = null;
+			String userID = null, resID = null;
+			Map<Integer, Double> tensorTags = new LinkedHashMap<Integer, Double>();
+			int count = 0;
+			while ((line = br.readLine()) != null) {
+				String[] lineParts = line.split(" ");
+				if (userID != null && resID != null && (!userID.equals(lineParts[0]) || !resID.equals(lineParts[1]))) {
+					// new testline
+					List<Integer> realData = testLines.get(count++).getTags();
+					List<Integer> predictionData = new ArrayList<Integer>();
+					Map<Integer, Double> sortedTensorTags = new TreeMap<Integer, Double>(new DoubleMapComparator(tensorTags));
+					sortedTensorTags.putAll(tensorTags);
+					for (Integer tag : sortedTensorTags.keySet()) {
+						predictionData.add(tag);
+					}
+					
+					PredictionData data = new PredictionData(Integer.parseInt(userID), Integer.parseInt(resID),
+							Lists.transform(realData, Functions.toStringFunction()), Lists.transform(predictionData, Functions.toStringFunction()), k);
+					this.predictions.add(data);
+					this.predictionCount++;
+					tensorTags.clear();
+				}
+				userID = lineParts[0];
+				resID = lineParts[1];
+				tensorTags.put(Integer.parseInt(lineParts[2]), Double.parseDouble(lineParts[3]));
+			}
+			br.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return true;
 	}
 	
 	public boolean readMyMediaLiteFile(String filename, int k, int trainSize, BookmarkReader bookmarkReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering categorizer) {

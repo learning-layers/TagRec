@@ -54,6 +54,8 @@ public class BookmarkReader {
 	private englishStemmer stemmer;
 	
 	private boolean hasTimestamp = false;
+	
+	private Set<String> userResPairs = new HashSet<String>();
  	
 	public BookmarkReader(int countLimit, boolean stemming) {
 		this.countLimit = countLimit;
@@ -207,11 +209,23 @@ public class BookmarkReader {
 				}
 				userData.getTags().add(tagIndex);
 			}
+			if (checkForDuplicate(userData)) {
+				System.out.println("WARNING: Duplicate entry");
+			}
 			this.userLines.add(userData);
 			//if (this.userLines.size() % 100000 == 0) {
 			//	System.out.println("Read in 10000000 lines");
 			//}
 		}
+	}
+	
+	private boolean checkForDuplicate(Bookmark userData) {
+		boolean dup = false;
+		if (this.userResPairs.contains(userData.getUserID() + "_" + userData.getWikiID())) {
+			dup = true;
+		}
+		this.userResPairs.add(userData.getUserID() + "_" + userData.getWikiID());
+		return dup;
 	}
 	
 	// Getter + setter --------------------------------------------------------------------------------------------------------------------

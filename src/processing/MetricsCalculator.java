@@ -220,7 +220,11 @@ public class MetricsCalculator {
 		if (trainSize == null) {
 			reader.readFile(filename, k, bookmarkReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);
 		} else { // means my MyMediaLite files
-			reader.readMyMediaLiteFile(filename, k, trainSize.intValue(), bookmarkReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);
+			if (calcTags) {
+				reader.readTensorFile(filename, k, trainSize, bookmarkReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);
+			} else {
+				reader.readMyMediaLiteFile(filename, k, trainSize.intValue(), bookmarkReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);
+			}
 		}
 		String suffix = "";
 		if (describer != null) {

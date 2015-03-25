@@ -30,13 +30,14 @@ public class TensorProcessor {
 		String name = "";//(tagRec ? "_tensor" : "_mymedialite");
 		String outputFilename = filename.split("_")[0];
 		// train file
-		createFile(trainList, "./data/csv/" + outputFilename + "_train" + name + ".txt", reader, false, tagRec, minBookmarks, maxBookmarks, null);
+		// TODO: reader
+		createFile(trainList, "./data/csv/" + outputFilename + "_train" + name + ".txt", null, false, tagRec, minBookmarks, maxBookmarks, null);
 		// test file
 		String suffix = "";
 		if (filter != null) {
 			suffix += ("_" + (filter.getDescriber() ? "desc" : "cat"));
 		}
-		createFile(testList, "./data/csv/" + outputFilename + suffix + "_test" + name + ".txt", reader, true, tagRec, minBookmarks, maxBookmarks, filter);
+		createFile(testList, "./data/csv/" + outputFilename + suffix + "_test" + name + ".txt", null, true, tagRec, minBookmarks, maxBookmarks, filter);
 	}
 	
 	private static void createFile(List<Bookmark> list, String filename, BookmarkReader reader, boolean testset, boolean tagRec, Integer minBookmarks, Integer maxBookmarks, CatDescFiltering filter) {
