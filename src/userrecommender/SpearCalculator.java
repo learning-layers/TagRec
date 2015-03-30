@@ -66,20 +66,20 @@ public class SpearCalculator {
 		for (Bookmark bookmark : reader.getBookmarks()) {
 			UserActivity activity = new UserActivity();
 			activity.setUserId(bookmark.getUserID());
-			activity.setResourceId(bookmark.getWikiID());
+			activity.setResourceId(bookmark.getResourceID());
 			activity.setTimeStamp(Long.parseLong(bookmark.getTimestamp()));
 
 		
-			if (activities.containsKey(bookmark.getWikiID())) {
+			if (activities.containsKey(bookmark.getResourceID())) {
 				//already contains values, get list, add new value
-				TreeSet<UserActivity> values = activities.get(bookmark.getWikiID());
+				TreeSet<UserActivity> values = activities.get(bookmark.getResourceID());
 				values.add(activity);
-				activities.put(bookmark.getWikiID(), values);
+				activities.put(bookmark.getResourceID(), values);
 			
 			} else {
 				TreeSet<UserActivity> userActivityTree = new TreeSet<UserActivity>();
 				userActivityTree.add(activity);
-				activities.put(bookmark.getWikiID(), userActivityTree);
+				activities.put(bookmark.getResourceID(), userActivityTree);
 			}
 		}
 		

@@ -231,7 +231,7 @@ public class BLLCalculator {
 			int refID = 0;
 			//System.out.println(data);
 			if (resource) {
-				refID = data.getWikiID();
+				refID = data.getResourceID();
 			} else {
 				refID = data.getUserID();
 			}
@@ -326,7 +326,7 @@ public class BLLCalculator {
 		timer.start();
 		for (int i = trainSize; i < size; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), sorting, cType);
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getResourceID(), sorting, cType);
 			results.add(map);
 		}
 		timer.stop();

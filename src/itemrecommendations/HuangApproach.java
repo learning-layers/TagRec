@@ -78,7 +78,7 @@ public class HuangApproach {
 		
 		for (Bookmark trainData : trainList) {
 			Integer userID = trainData.getUserID();
-			Integer resID = trainData.getWikiID();
+			Integer resID = trainData.getResourceID();
 			List<Integer> tags = trainData.getTags();
 			Long day = TimeUnit.SECONDS.toDays(Long.parseLong(trainData.getTimestamp()));
 			

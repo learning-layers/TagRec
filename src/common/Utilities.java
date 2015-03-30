@@ -81,7 +81,7 @@ public class Utilities {
 	public static List<Map<Integer, Integer>> getResMaps(List<Bookmark> userLines) {
 		List<Map<Integer, Integer>> resMaps = new ArrayList<Map<Integer, Integer>>();
 		for (Bookmark data : userLines) {
-			int resID = data.getWikiID();
+			int resID = data.getResourceID();
 			if (resID >= resMaps.size()) {
 				resMaps.add(Utilities.mergeListWithMap(data.getTags(), new LinkedHashMap<Integer, Integer>()));
 			} else {
@@ -107,7 +107,7 @@ public class Utilities {
 	public static List<Map<Integer, Integer>> getResTopics(List<Bookmark> userLines) {
 		List<Map<Integer, Integer>> resMaps = new ArrayList<Map<Integer, Integer>>();
 		for (Bookmark data : userLines) {
-			int resID = data.getWikiID();
+			int resID = data.getResourceID();
 			if (resID >= resMaps.size()) {
 				resMaps.add(Utilities.mergeListWithMap(data.getCategories(), new LinkedHashMap<Integer, Integer>()));
 			} else {
@@ -120,7 +120,7 @@ public class Utilities {
 	public static List<Map<Integer, Double>> getUniqueTopicMaps(List<Bookmark> userLines, boolean resource) {
 		List<Map<Integer, Double>> resMaps = new ArrayList<Map<Integer, Double>>();
 		for (Bookmark data : userLines) {
-			int resID = resource ? data.getWikiID() : data.getUserID();
+			int resID = resource ? data.getResourceID() : data.getUserID();
 			Map<Integer, Double> rMap = null;
 			if (resID >= resMaps.size()) {
 				rMap = new LinkedHashMap<Integer, Double>();
@@ -149,8 +149,8 @@ public class Utilities {
 					tagMap = tagMaps.get(tagID);
 				}
 				if (tagMap != null) {
-					Double count = tagMap.get(data.getWikiID());
-					tagMap.put(data.getWikiID(), count == null ? 1.0 : count.doubleValue() + 1.0);
+					Double count = tagMap.get(data.getResourceID());
+					tagMap.put(data.getResourceID(), count == null ? 1.0 : count.doubleValue() + 1.0);
 				}
 			}
 		}
@@ -259,7 +259,7 @@ public class Utilities {
 	public static Set<Integer> getUsersByResource(List<Bookmark> userLines, int resID) {
 		Set<Integer> userList = new HashSet<Integer>();
 		for (Bookmark data : userLines) {
-			if (data.getWikiID() == resID) {
+			if (data.getResourceID() == resID) {
 				userList.add(data.getUserID());
 			}
 		}
@@ -277,7 +277,7 @@ public class Utilities {
 			} else {
 				resList = userLists.get(userID);
 			}
-			resList.add(data.getWikiID());
+			resList.add(data.getResourceID());
 		}
 		return userLists;
 	}
@@ -341,7 +341,7 @@ public class Utilities {
 	public static List<List<Bookmark>> getBookmarks(List<Bookmark> lines, boolean resource) {
 		List<List<Bookmark>> bookmarks = new ArrayList<List<Bookmark>>();
 		for (Bookmark data : lines) {
-			int id = (resource ? data.getWikiID() : data.getUserID());
+			int id = (resource ? data.getResourceID() : data.getUserID());
 			List<Bookmark> b = null;
 			if (id >= bookmarks.size()) {
 				b = new ArrayList<Bookmark>();
@@ -357,8 +357,8 @@ public class Utilities {
 	public static List<Map<Integer, Double>> getUsedEntities(List<Bookmark> lines, boolean resource, List<Map<Integer, Double>> valueMaps) {
 		List<Map<Integer, Double>> entities = new ArrayList<Map<Integer, Double>>();
 		for (Bookmark data : lines) {
-			int id = (resource ? data.getWikiID() : data.getUserID());
-			int entityID = (resource ? data.getUserID() : data.getWikiID());
+			int id = (resource ? data.getResourceID() : data.getUserID());
+			int entityID = (resource ? data.getUserID() : data.getResourceID());
 			Map<Integer, Double> values = null;
 			if (valueMaps != null && id < valueMaps.size()) {
 				values = valueMaps.get(id);
@@ -505,7 +505,7 @@ public class Utilities {
 		if (testLines != null) {
 			long maxTimestamp = -1;
 			for (Bookmark data : testLines) {
-				int id = resource ? data.getWikiID() : data.getUserID();
+				int id = resource ? data.getResourceID() : data.getUserID();
 				if (id == refID) {
 					long timestamp = Long.parseLong(data.getTimestamp());
 					if (timestamp > maxTimestamp) {
@@ -543,7 +543,7 @@ public class Utilities {
 		Map<Integer, Double> allEntities = new LinkedHashMap<Integer, Double>();
 		for (Bookmark data : trainList) {
 			if (resource) {
-				allEntities.put(data.getWikiID(), 0.0);
+				allEntities.put(data.getResourceID(), 0.0);
 			} else {
 				allEntities.put(data.getUserID(), 0.0);
 			}
@@ -562,7 +562,7 @@ public class Utilities {
 		if (resID != -1) {
 			for (Bookmark data : trainList) {
 				if (data.getUserID() != userID) {
-					if (data.getWikiID() == resID) {
+					if (data.getResourceID() == resID) {
 						neighbors.put(data.getUserID(), 0.0);
 					}
 				}
@@ -627,9 +627,9 @@ public class Utilities {
 		// get all resources that have been tagged by the user
 		if (userID != -1) {
 			for (Bookmark data : trainList) {
-				if (data.getWikiID() != resID) {
+				if (data.getResourceID() != resID) {
 					if (data.getUserID() == userID) {
-						resources.put(data.getWikiID(), 0.0);
+						resources.put(data.getResourceID(), 0.0);
 					}
 				}
 			}

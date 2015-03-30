@@ -72,7 +72,7 @@ public class FolkRankCalculator {
 			Bookmark data = reader.getBookmarks().get(i);
 	        int u = data.getUserID();
 	        int[] uPrefs = (u < usrCounts ? new int[]{u} : new int[]{});
-	        int r = data.getWikiID();
+	        int r = data.getResourceID();
 	        int[] rPrefs = (r < resCounts ? new int[]{r} : new int[]{});
 	        pref.setPreference(new int[][]{new int[]{}, uPrefs, rPrefs}, prefWeights);
 	        FolkRankResult result = folk.computeFolkRank(facts, pref);

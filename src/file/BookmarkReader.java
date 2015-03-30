@@ -221,10 +221,10 @@ public class BookmarkReader {
 	
 	private boolean checkForDuplicate(Bookmark userData) {
 		boolean dup = false;
-		if (this.userResPairs.contains(userData.getUserID() + "_" + userData.getWikiID())) {
+		if (this.userResPairs.contains(userData.getUserID() + "_" + userData.getResourceID())) {
 			dup = true;
 		}
-		this.userResPairs.add(userData.getUserID() + "_" + userData.getWikiID());
+		this.userResPairs.add(userData.getUserID() + "_" + userData.getResourceID());
 		return dup;
 	}
 	
@@ -320,7 +320,7 @@ public class BookmarkReader {
 				resources = new ArrayList<Integer>();
 			}
 			
-			resources.add(data.getWikiID());
+			resources.add(data.getResourceID());
 			
 			resourcesMap.put(userID, resources);			
 		}

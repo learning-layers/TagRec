@@ -115,7 +115,7 @@ public class CFTagRecommender {
 			if (data.getUserID() != userID) {
 				if (resID == -1) {
 					neighbors.put(data.getUserID(), 0.0);
-				} else if (data.getWikiID() == resID) {
+				} else if (data.getResourceID() == resID) {
 					neighbors.put(data.getUserID(), 0.0);
 				}
 			}
@@ -153,18 +153,18 @@ public class CFTagRecommender {
 		Map<Integer, Double> resources = new LinkedHashMap<Integer, Double>();
 		// get all resources that have been tagged by the user
 		for (Bookmark data : this.trainList) {
-			if (data.getWikiID() != resID) {
+			if (data.getResourceID() != resID) {
 				if (userID == -1) {
-					resources.put(data.getWikiID(), 0.0);
+					resources.put(data.getResourceID(), 0.0);
 				} else if (data.getUserID() == userID) {
-					resources.put(data.getWikiID(), 0.0);
+					resources.put(data.getResourceID(), 0.0);
 				}
 			}
 		}
 		// if list is empty, use all users		
 		if (resources.size() == 0) {
 			for (Bookmark data : this.trainList) {
-				resources.put(data.getWikiID(), 0.0);
+				resources.put(data.getResourceID(), 0.0);
 			}
 		}
 		
@@ -248,7 +248,7 @@ public class CFTagRecommender {
 		for (int i = trainSize; i < size; i++) {
 			Bookmark data = reader.getBookmarks().get(i);
 			Map<Integer, Double> map = null;
-			map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), true);
+			map = calculator.getRankedTagList(data.getUserID(), data.getResourceID(), true);
 			results.add(map);
 			//System.out.println(data.getTags() + "|" + map.keySet());
 		}

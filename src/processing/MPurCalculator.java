@@ -139,7 +139,7 @@ public class MPurCalculator {
 		timer.start();
 		for (int i = trainSize; i < size; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), sorting);
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getResourceID(), sorting);
 			results.add(map);
 		}
 		timer.stop();

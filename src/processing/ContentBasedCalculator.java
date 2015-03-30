@@ -68,7 +68,7 @@ public class ContentBasedCalculator {
 		
 		for (int i = trainSize; i < size; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID());
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getResourceID());
 			results.add(map);
 		}
 		return results;

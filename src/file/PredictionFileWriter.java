@@ -54,7 +54,7 @@ public class PredictionFileWriter {
 				Bookmark userData = this.reader.getTestLines().get(i);
 				List<Integer> userCats = userData.getTags();
 				
-				resultString += (userData.getUserID() + (userData.getWikiID() == -1 ? "" : "-" + userData.getWikiID()) + "|");
+				resultString += (userData.getUserID() + (userData.getResourceID() == -1 ? "" : "-" + userData.getResourceID()) + "|");
 				for (int c : userCats) {
 					//if (j++ < OUTPUT_LIMIT) {
 						//resultString += (categories.get(c) + ", ");

@@ -20,6 +20,8 @@
 
 package engine;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -40,9 +42,17 @@ public class EngineUtils {
 		Collections.sort(reader.getBookmarks());
 		
 		String sortedFile = filename + "_sorted";
-		BookmarkSplitter.writeSample(reader, reader.getBookmarks(), sortedFile, null);
+		BookmarkSplitter.writeSample(reader, reader.getBookmarks(), sortedFile, null, true);
 		reader = new BookmarkReader(0, false);
 		reader.readFile(sortedFile);
+		
+		try {
+			if (!new File("./data/csv/" + sortedFile + ".txt").delete()) {
+				System.out.println("Problem while deleting sorted temp-file");
+			}
+		} catch (Exception e) {
+			System.out.println("Problem while deleting sorted temp-file");
+		}
 		return reader;
 	}
 	

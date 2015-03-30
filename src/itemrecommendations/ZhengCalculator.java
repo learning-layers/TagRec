@@ -89,7 +89,7 @@ public class ZhengCalculator {
 		ZhengApproach zhengApproach = new ZhengApproach(trainList);
 		for (Bookmark data : trainList) {
 			int user = data.getUserID();
-			int resource = data.getWikiID();
+			int resource = data.getResourceID();
 			
 			Map<Integer, Double> resourceTagTimeWeights = null;
 			
@@ -113,7 +113,7 @@ public class ZhengCalculator {
 		ZhengApproach zhengApproach = new ZhengApproach(trainList);
 		for (Bookmark data : trainList) {
 			int user = data.getUserID();
-			int resource = data.getWikiID();
+			int resource = data.getResourceID();
 			
 			if (user == userID) {
 				Double tagTimeWeight = zhengApproach.getTagTimeWeight(user, resource, LAMBDA);
@@ -130,7 +130,7 @@ public class ZhengCalculator {
 	private void fillZhengWeights() {
 		for (Bookmark data : trainList) {
 			int user = data.getUserID();
-			int resource = data.getWikiID();
+			int resource = data.getResourceID();
 			
 			Map<Integer, Double> resourceTagWeights = null;
 			Map<Integer, Double> resourceTimeWeights = null;

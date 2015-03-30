@@ -71,7 +71,7 @@ public class CoreFiltering {
 		System.out.println("Start removing ...");
 		ArrayList<Bookmark> keepData = new ArrayList<Bookmark>();
 		for (Bookmark data : this.reader.getBookmarks()) {
-			int resID = data.getWikiID();
+			int resID = data.getResourceID();
 			int userID = data.getUserID();
 			if (resIDs.contains(resID) && userIDs.contains(userID)) {
 				if (tagLevel > 0) {

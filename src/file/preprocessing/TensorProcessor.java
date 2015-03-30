@@ -57,15 +57,15 @@ public class TensorProcessor {
 					}
 				}
 					
-				if (!entries.contains(data.getUserID() + "_" + data.getWikiID())) {
+				if (!entries.contains(data.getUserID() + "_" + data.getResourceID())) {
 					if (tagRec) {
 						for (int tag : data.getTags()) {
-							bw.write(data.getUserID() + "\t" + data.getWikiID() + "\t" + tag + "\n");
+							bw.write(data.getUserID() + "\t" + data.getResourceID() + "\t" + tag + "\n");
 						}
 					} else {
-						bw.write(data.getUserID() + "\t" + (reader == null ? data.getWikiID() : reader.getResources().get(data.getWikiID())) + "\n");
+						bw.write(data.getUserID() + "\t" + (reader == null ? data.getResourceID() : reader.getResources().get(data.getResourceID())) + "\n");
 					}
-					entries.add(data.getUserID() + "_" + data.getWikiID());
+					entries.add(data.getUserID() + "_" + data.getResourceID());
 				}
 			}
 			bw.flush();

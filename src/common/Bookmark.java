@@ -83,7 +83,7 @@ public class Bookmark implements Comparable<Bookmark> {
 		this.resID = wikiID;
 	}
 	
-	public int getWikiID() {
+	public int getResourceID() {
 		return this.resID;
 	}
 	

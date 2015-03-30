@@ -66,7 +66,7 @@ public class BookmarkSplitter {
 	public void splitUserPercentage(String filename, int percentage, boolean usePercentage, int count) {
 		for (int i = 1; i <= count; i++) {
 			List<Bookmark> lines = getUserPercentage(percentage, usePercentage);
-			writeSample(this.reader, lines, filename + "_" + percentage + "_perc_" + i, null);
+			writeSample(this.reader, lines, filename + "_" + percentage + "_perc_" + i, null, false);
 		}
 	}
 	
@@ -80,9 +80,9 @@ public class BookmarkSplitter {
 		List<Bookmark> trainUserSample = userSample.subList(0, trainUserSize);
 		List<Bookmark> testUserSample = userSample.subList(trainUserSize, trainUserSize + testUserSize);
 			
-		writeSample(this.reader, trainUserSample, filename + "_train", null);
-		writeSample(this.reader, testUserSample, filename + "_test", null);
-		writeSample(this.reader, userSample, filename, null);
+		writeSample(this.reader, trainUserSample, filename + "_train", null, false);
+		writeSample(this.reader, testUserSample, filename + "_test", null, false);
+		writeSample(this.reader, userSample, filename, null, false);
 	}
 	
 	// puts the last bookmark of each user into the testset
@@ -107,10 +107,10 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeSample(this.reader, trainLines, filename + "_train", null);
-		writeSample(this.reader, testLines, filename + "_test", null);
+		writeSample(this.reader, trainLines, filename + "_train", null, false);
+		writeSample(this.reader, testLines, filename + "_test", null, false);
 		trainLines.addAll(testLines);
-		writeSample(this.reader, trainLines, filename, null);
+		writeSample(this.reader, trainLines, filename, null, false);
 	}
 	
 	// puts one bookmark at random of each user into the testset
@@ -132,10 +132,10 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeSample(this.reader, trainLines, filename + "_train", null);
-		writeSample(this.reader, testLines, filename + "_test", null);
+		writeSample(this.reader, trainLines, filename + "_train", null, false);
+		writeSample(this.reader, testLines, filename + "_test", null, false);
 		trainLines.addAll(testLines);
-		writeSample(this.reader, trainLines, filename, null);
+		writeSample(this.reader, trainLines, filename, null, false);
 	}
 	
 	public void leavePercentageOutSplit(String filename, int percentage, boolean last, Integer userNumber, boolean tagRec) {
@@ -178,28 +178,30 @@ public class BookmarkSplitter {
 		
 		Collections.sort(trainLines);
 		Collections.sort(testLines);
-		writeSample(this.reader, trainLines, filename + "_train", null);
-		writeSample(this.reader, testLines, filename + "_test", null);
+		writeSample(this.reader, trainLines, filename + "_train", null, false);
+		writeSample(this.reader, testLines, filename + "_test", null, false);
 		trainLines.addAll(testLines);
-		writeSample(this.reader, trainLines, filename, null);
+		writeSample(this.reader, trainLines, filename, null, false);
 	}
 	
 	// Statics -------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public static boolean writeSample(BookmarkReader reader, List<Bookmark> userSample, String filename, List<int[]> catPredictions) {
+	public static boolean writeSample(BookmarkReader reader, List<Bookmark> userSample, String filename, List<int[]> catPredictions, boolean realValues) {
 		try {
 			FileWriter writer = new FileWriter(new File("./data/csv/" + filename + ".txt"));
 			BufferedWriter bw = new BufferedWriter(writer);
 			int userCount = 0;
 			// TODO: check encoding
 			for (Bookmark bookmark : userSample) {
-				bw.write("\"" + bookmark.getUserID() + "\";");
-				bw.write("\"" + bookmark.getWikiID() + "\";");
+				String user = (realValues ? reader.getUsers().get(bookmark.getUserID()).replace("\"", "") : Integer.toString(bookmark.getUserID()));
+				String resource = (realValues ? reader.getResources().get(bookmark.getResourceID()).replace("\"", "") : Integer.toString(bookmark.getResourceID()));
+				bw.write("\"" + user + "\";");
+				bw.write("\"" + resource + "\";");
 				bw.write("\"" + bookmark.getTimestamp().replace("\"", "") + "\";\"");
 				int i = 0;
-				for (int tag : bookmark.getTags()) {
-					//bw.write(reader.getTags().get(tag).replace("\"", "")); // enable if you need tag strings!
-					bw.write(Integer.toString(tag));
+				for (int t : bookmark.getTags()) {
+					String tag = (realValues ? reader.getTags().get(t).replace("\"", "") : Integer.toString(t));
+					bw.write(tag);
 					if (++i < bookmark.getTags().size()) {
 						bw.write(',');
 					}					
@@ -270,7 +272,7 @@ public class BookmarkSplitter {
 				CoreFiltering filtering = new CoreFiltering(reader);
 				reader = filtering.filterOrphansIterative(userLevel, resLevel, tagLevel);
 				String coreResultfile = resultfile + "_c" + ++i;
-				writeSample(reader, reader.getBookmarks(), coreResultfile, null);
+				writeSample(reader, reader.getBookmarks(), coreResultfile, null, false);
 				if (reader.getBookmarks().size() >= size) {
 					return;
 				}

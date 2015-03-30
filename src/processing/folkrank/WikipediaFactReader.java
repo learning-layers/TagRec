@@ -45,7 +45,7 @@ public class WikipediaFactReader implements FactReader {
 
     	fact[0] = data.getTags().get(this.tagIndex).toString();
     	fact[1] = Integer.toString(data.getUserID());
-    	fact[2] = Integer.toString(data.getWikiID());
+    	fact[2] = Integer.toString(data.getResourceID());
     	
     	return fact;
     }

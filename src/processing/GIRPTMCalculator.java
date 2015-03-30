@@ -128,7 +128,7 @@ public class GIRPTMCalculator {
 		timer.start();
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID());
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getResourceID());
 			predictionValues.add(Ints.toArray(map.keySet()));
 		}
 		timer.stop();

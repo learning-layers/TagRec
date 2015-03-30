@@ -87,7 +87,7 @@ public class HuangCalculator {
 	private void fillChengWeights() {
 		for (Bookmark data : trainList) {
 			int user = data.getUserID();
-			int resource = data.getWikiID();
+			int resource = data.getResourceID();
 			List<Integer> tags = data.getTags();
 			
 			Map<Integer, Double> tagUserWeights = null;

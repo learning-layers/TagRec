@@ -278,7 +278,7 @@ public class MalletCalculator {
 		for (int i = trainSize; i < size; i++) { // the test set
 			Bookmark data = reader.getBookmarks().get(i);
 			int userID = data.getUserID();
-			int resID = data.getWikiID();
+			int resID = data.getResourceID();
 
 			Map<Integer, Double> userPredMap = null;
 			if (userCalc != null) {
@@ -360,14 +360,14 @@ public class MalletCalculator {
 			//probValues.add(Doubles.toArray(ldaVal.values()));
 		}
 		List<Bookmark> userSample = reader.getBookmarks().subList(0, size);		
-		BookmarkSplitter.writeSample(reader, userSample, outputFile, predictionValues);
+		BookmarkSplitter.writeSample(reader, userSample, outputFile, predictionValues, false);
 		//if (creationTrainSize != null) {
 			List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, trainSize);
 			List<int[]> trainPredictionValues = predictionValues.subList(0, trainSize);
 			List<Bookmark> testUserSample = reader.getBookmarks().subList(trainSize, size);
 			List<int[]> testPredictionValues = predictionValues.subList(trainSize, size);
-			BookmarkSplitter.writeSample(reader, trainUserSample, outputFile + "_train", trainPredictionValues);
-			BookmarkSplitter.writeSample(reader, testUserSample, outputFile + "_test", testPredictionValues);
+			BookmarkSplitter.writeSample(reader, trainUserSample, outputFile + "_train", trainPredictionValues, false);
+			BookmarkSplitter.writeSample(reader, testUserSample, outputFile + "_test", testPredictionValues, false);
 		//}
 				
 		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());

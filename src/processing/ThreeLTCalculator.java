@@ -295,7 +295,7 @@ public class ThreeLTCalculator {
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
 			long timestamp = Long.parseLong((data.getTimestamp()));
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getWikiID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL, true);
+			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getResourceID(), data.getCategories(), timestamp, 10, tagBLL, topicBLL, true);
 			predictionValues.add(Ints.toArray(map.keySet()));
 		}
 		timer.stop();

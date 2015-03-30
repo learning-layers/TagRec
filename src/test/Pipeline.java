@@ -85,8 +85,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "flickr";
-	private final static String SUBDIR = "/ipm";
+	private final static String DATASET = "ml";
+	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -463,16 +463,19 @@ public class Pipeline {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Tag U-R: " + recEngine.getEntitiesWithLikelihood("0", "0", null, 10, false, null, EntityType.TAG));
-		System.out.println("Tag U: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.TAG));
-		System.out.println("Tag R: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.TAG));
-		System.out.println("Tag MP: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.TAG));
-		System.out.println("Res U: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.RESOURCE));
-		System.out.println("Res R: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.RESOURCE));
-		System.out.println("Res MP: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.RESOURCE));
-		System.out.println("User U: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.USER));
-		System.out.println("User R: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.USER));
-		System.out.println("User MP: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.USER));
+		System.out.println("Tags for user and resource: " + recEngine.getEntitiesWithLikelihood("0", "0", null, 10, false, null, EntityType.TAG)); // BLLac+MPr
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.TAG)); // BLL
+		System.out.println("Tags for resource: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.TAG)); // MPr
+		System.out.println("Tags MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.TAG)); // MP
+
+		System.out.println("LD - Resources for user (Tags):" + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, Algorithm.RESOURCETAGCB, EntityType.RESOURCE)); // CBtags
+		System.out.println("Resources for user (CF): " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null /* or Algorithm.RESOURCECF */, EntityType.RESOURCE)); // CF
+		System.out.println("Resources for resource: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.RESOURCE)); // CF
+		System.out.println("Resources MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.RESOURCE)); // MP
+
+		System.out.println("LD - Users for resource (Tags): " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null /* or Algorithm.USERTAGCB */, EntityType.USER)); // CBtags
+		System.out.println("Users for user: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.USER)); // CF
+		System.out.println("Users MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.USER)); // MP
 	}
 	
 	// Helpers

@@ -79,7 +79,7 @@ public class PearsonSimilarityCalculator {
 			double filteredRating = filterRating(userRating.getRating());
 			ratingSum += filteredRating;
 			
-			fillCoratedItems(coratedItems, userRating.getWikiID(), filteredRating);
+			fillCoratedItems(coratedItems, userRating.getResourceID(), filteredRating);
 		}
 		return ratingSum / userRatings.size();
 	}
