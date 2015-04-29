@@ -65,6 +65,7 @@ import file.BookmarkSplitter;
 import file.postprocessing.CatDescFiltering;
 import file.preprocessing.BibsonomyProcessor;
 import file.preprocessing.CiteULikeProcessor;
+import file.preprocessing.JSONProcessor;
 import file.preprocessing.PintsProcessor;
 import file.preprocessing.LastFMProcessor;
 import file.preprocessing.MovielensProcessor;
@@ -85,8 +86,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "ml";
-	private final static String SUBDIR = "/core1";
+	private final static String DATASET = "twitter";
+	private final static String SUBDIR = "";//"/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -108,11 +109,15 @@ public class Pipeline {
 		String path = dir + "/" + DATASET + "_sample";
 
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
+		//try { getStatistics("bib_core/vedran/bib_bibtex_2_perc_1", false); } catch (Exception e) { e.printStackTrace(); }
+		
+		//JSONProcessor.writeJSONOutput("bib_core/vedran/bib_bibtex_2_perc_1");
 		
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(DATASET + "_core/" + DATASET + "_core1", DATASET + "_core/" + DATASET + "_sample", 1, 0, true);
+		//BookmarkSplitter.splitSample(DATASET + "_core/twitter", DATASET + "_core/" + DATASET + "_sample", 1, 0, true);
+		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/core1/ml_sample", 1, 1000, true, true);
 		
 		// Method Testing -> just uncomment the methods you want to test
@@ -123,7 +128,7 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE);
 		
 		// Test the GIRP and GIRPTM algorithms
-		//startRecCalculator(dir, path);
+		//startRecCalculator(dir, path, true);
 		
 		// Test the MP_u, MP_r and MP_u_r algorithms
 		//startModelCalculator(dir, path, 1, -5, true);
@@ -138,7 +143,7 @@ public class Pipeline {
 		//startFolkRankCalculator(dir, path, 1);
 		
 		// Test the LDA algorithm with 1000 topics (change it if you want)
-		//startLdaCalculator(dir, path, 1000, 1);
+		//startLdaCalculator(dir, path, 1000, 1, false);
 		
 		// Test the 3L algorithm
 		//start3LayersJavaCalculator(dir, path, "", 1, -5, -5, true, false, false);
@@ -153,7 +158,6 @@ public class Pipeline {
 		//startContentBasedCalculator(dir, path);
 		
 		// Resource-Recommender testing
-		//try { getStatistics("ml_core/movielens", false); } catch (IOException e) { e.printStackTrace(); }
 		//writeTensorFiles(path, true);
 		//evaluate(dir, path, "wrmf_500_mml", TOPIC_NAME, false, true, null);
 		//createLdaSamples(path, 1, 500, false);

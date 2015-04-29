@@ -137,6 +137,7 @@ public class Utilities {
 		return resMaps;
 	}
 	
+	// returns for each tag the list of resources this tag was used for
 	public static List<Map<Integer, Double>> getResourceMapsForTags(List<Bookmark> userLines) {
 		List<Map<Integer, Double>> tagMaps = new ArrayList<Map<Integer, Double>>();
 		for (Bookmark data : userLines) {

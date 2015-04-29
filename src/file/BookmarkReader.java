@@ -209,9 +209,9 @@ public class BookmarkReader {
 				}
 				userData.getTags().add(tagIndex);
 			}
-			if (checkForDuplicate(userData)) {
-				System.out.println("WARNING: Duplicate entry");
-			}
+			//if (checkForDuplicate(userData)) {
+			//	System.out.println("WARNING: Duplicate entry");
+			//}
 			this.userLines.add(userData);
 			//if (this.userLines.size() % 100000 == 0) {
 			//	System.out.println("Read in 10000000 lines");
