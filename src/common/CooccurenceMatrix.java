@@ -36,12 +36,14 @@ public class CooccurenceMatrix {
 	private SparseMatrix coocurenceMatrix;
 	private List<Integer> tagCounts;
 
-	public CooccurenceMatrix(List<Bookmark> bookmarks, List<Integer> tagCounts) {
+	public CooccurenceMatrix(List<Bookmark> bookmarks, List<Integer> tagCounts, boolean normalize) {
 		System.out.println("Building matrix ...");
 		this.coocurenceMatrix = new SparseMatrix();
 		this.tagCounts = tagCounts;
 		this.initMatrix(bookmarks);
-		normalizeMatrix();
+		if (normalize) {
+			normalizeMatrix();
+		}
 		//calculateRelatedness();
 	}
 
@@ -95,6 +97,18 @@ public class CooccurenceMatrix {
 			}
 			sourceTag++;
 		}
+	}
+	
+	public int getCoocurenceCount(int tag, List<Integer> destinationTags) {
+		int count = 0;
+		SparseVector vec = this.coocurenceMatrix.get(tag);
+		for (int destTag : destinationTags) {
+			Double coVal = vec.get(destTag);
+			if (coVal != null && coVal.doubleValue() > 0.0) {
+				count += coVal.doubleValue();
+			}
+		}		
+		return count;
 	}
 	
 	// tags = sourceTags zur aktivierung

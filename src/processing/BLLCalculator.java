@@ -82,7 +82,7 @@ public class BLLCalculator {
 			this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 			this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);
 			if (cType != CalculationType.NONE) {
-				this.rMatrix = new CooccurenceMatrix(this.trainList, reader.getTagCounts());
+				this.rMatrix = new CooccurenceMatrix(this.trainList, reader.getTagCounts(), true);
 			}
 		//}
 		this.resDenoms = new ArrayList<Double>();
@@ -336,7 +336,7 @@ public class BLLCalculator {
 		return results;
 	}
 	
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int dVal, int beta, CalculationType cType ) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int dVal, int beta, CalculationType cType) {
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
 		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);

@@ -54,7 +54,7 @@ public class ThreeLTCalculator {
 		this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 		this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);
 		if (this.cType == CalculationType.USER_TO_RESOURCE) {
-			this.rMatrix = new CooccurenceMatrix(this.trainList, this.reader.getTagCounts());
+			this.rMatrix = new CooccurenceMatrix(this.trainList, this.reader.getTagCounts(), true);
 		}
 	}
 	

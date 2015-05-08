@@ -145,7 +145,7 @@ public class Bookmark implements Comparable<Bookmark> {
 		return diversity / size;
 	}
 	
-	public static Bookmark getUserData(List<Bookmark> lines, int userID, int resID) {
+	public static Bookmark getBookmark(List<Bookmark> lines, int userID, int resID) {
 		Bookmark returnData = null;
 		for (Bookmark data : lines) {
 			if (data.userID == userID) {

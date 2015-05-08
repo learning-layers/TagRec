@@ -84,7 +84,7 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		Map<Integer, Double> topTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);
 		
 		// calculate associative component
-		CooccurenceMatrix matrix = new CooccurenceMatrix(reader.getBookmarks(), reader.getTagCounts());
+		CooccurenceMatrix matrix = new CooccurenceMatrix(reader.getBookmarks(), reader.getTagCounts(), true);
 		
 		resetStructures(userMaps, resMaps, reader, topTags, matrix, userCounts, resCounts);
 	}

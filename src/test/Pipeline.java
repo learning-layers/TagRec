@@ -50,6 +50,7 @@ import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.GIRPTMCalculator;
 import processing.ThreeLTCalculator;
+import processing.analyzing.TagReuseProbAnalyzer;
 import engine.Algorithm;
 import engine.BaseLevelLearningEngine;
 import engine.EntityRecommenderEngine;
@@ -86,8 +87,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "";//"/core1";
+	private final static String DATASET = "cul";
+	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -108,6 +109,9 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 
+		//getTrainTestSize(path);
+		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, true);
+		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
 		//try { getStatistics("bib_core/vedran/bib_bibtex_2_perc_1", false); } catch (Exception e) { e.printStackTrace(); }
 		

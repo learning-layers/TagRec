@@ -58,7 +58,7 @@ public class CFTagRecommender {
 			for (Map.Entry<Integer, Double> entry : neighbors.entrySet()) {
 				if (i++ < MAX_NEIGHBORS) {
 					//neighborMaps.add(this.userMaps.get(entry.getKey()));
-					List<Integer> tags = Bookmark.getUserData(this.trainList, entry.getKey(), resID).getTags();
+					List<Integer> tags = Bookmark.getBookmark(this.trainList, entry.getKey(), resID).getTags();
 					double bm25 = this.beta * entry.getValue();
 					// add tags to resultMap
 					for (int tag : tags) {
