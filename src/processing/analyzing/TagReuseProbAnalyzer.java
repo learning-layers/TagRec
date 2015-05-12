@@ -108,7 +108,14 @@ public class TagReuseProbAnalyzer {
 				double sum = entry.getValue().getSum();
 				double count = entry.getValue().getCount();
 				if (sum > 0.0) {
-					bw.write(entry.getKey() + ";" + sum / (normVal != -1 ? normVal : count) + "\n");
+					if (normalize) {
+						//bw.write(entry.getKey() + ";" + sum / normVal + "\n");
+						for (int i = 1; i < sum; i++) {
+							bw.write(entry.getKey() + "\n");	
+						}
+					} else {
+						bw.write(entry.getKey() + ";" + sum / count + "\n");
+					}
 				}
 			}		
 			bw.close();

@@ -109,8 +109,8 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 
-		//getTrainTestSize(path);
-		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, true);
+		getTrainTestSize(path);
+		TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, true);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
 		//try { getStatistics("bib_core/vedran/bib_bibtex_2_perc_1", false); } catch (Exception e) { e.printStackTrace(); }
