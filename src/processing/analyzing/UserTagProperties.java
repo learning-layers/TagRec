@@ -9,6 +9,8 @@ import common.CooccurenceMatrix;
 
 public class UserTagProperties {
 
+	private final static double TIME_CONST = 86400.0;
+	
 	private Map<Integer, Integer> tagCounts = null;
 	private Map<Integer, Integer> tagRecencies = null;
 	private Map<Integer, Integer> tagContextSim = null;
@@ -20,9 +22,8 @@ public class UserTagProperties {
 		this.tagContextSim = new LinkedHashMap<Integer, Integer>();
 		this.tagReuseProb = new LinkedHashMap<Integer, Integer>();
 		
-		// TODO: check for zero days
 		for (Bookmark bookmark : userBookmarks) {
-			int currentRecency = (int) Math.round((Long.parseLong(testBookmark.getTimestamp()) - Long.parseLong(bookmark.getTimestamp())) / 86400.0);
+			int currentRecency = (int) Math.round((Long.parseLong(testBookmark.getTimestamp()) - Long.parseLong(bookmark.getTimestamp())) / TIME_CONST);
 			for (int tag : bookmark.getTags()) {
 				Integer count = this.tagCounts.get(tag);
 				Integer recency = this.tagRecencies.get(tag);

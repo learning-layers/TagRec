@@ -88,11 +88,11 @@ public class TagReuseProbAnalyzer {
 		// sort and write
 		Map<Integer, ReuseProbValue> sortedTagFrequencies = new TreeMap<Integer, ReuseProbValue>(tagFrequencies);
 		Map<Integer, ReuseProbValue> sortedTagRecencies = new TreeMap<Integer, ReuseProbValue>(tagRecencies);		
-		writeMap(filename + "_Frequency", sortedTagFrequencies, true);
+		writeMap(filename + "_Frequency", sortedTagFrequencies, false);
 		writeMap(filename + "_Recency", sortedTagRecencies, true);
 		if (this.tagMatrix != null) {
 			Map<Integer, ReuseProbValue> sortedTagContextSim = new TreeMap<Integer, ReuseProbValue>(tagContextSim);
-			writeMap(filename + "_ContextSim", sortedTagContextSim, true);
+			writeMap(filename + "_ContextSim", sortedTagContextSim, false);
 		}
 	}
 	
@@ -120,7 +120,12 @@ public class TagReuseProbAnalyzer {
 	private double getMapNormalizeValue(Map<Integer, ReuseProbValue> map) {
 		double sum = 0.0;
 		for (Map.Entry<Integer, ReuseProbValue> entry : map.entrySet()) {
-			sum += entry.getValue().getSum();
+			if (entry.getValue().getSum() > sum) {
+				//sum = entry.getValue().getSum();
+				if (entry.getValue().getSum() > sum) {
+					sum = entry.getValue().getSum();
+				}
+			}
 		}
 		return sum;
 	}
