@@ -9,7 +9,7 @@ import common.CooccurenceMatrix;
 
 public class UserTagProperties {
 
-	private final static double TIME_CONST = 86400.0;
+	private final static double TIME_CONST = 1.0;//86400.0;
 	
 	private Map<Integer, Integer> tagCounts = null;
 	private Map<Integer, Integer> tagRecencies = null;

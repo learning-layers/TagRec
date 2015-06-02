@@ -88,15 +88,16 @@ public class TagReuseProbAnalyzer {
 		// sort and write
 		Map<Integer, ReuseProbValue> sortedTagFrequencies = new TreeMap<Integer, ReuseProbValue>(tagFrequencies);
 		Map<Integer, ReuseProbValue> sortedTagRecencies = new TreeMap<Integer, ReuseProbValue>(tagRecencies);		
-		writeMap(filename + "_Frequency", sortedTagFrequencies, false);
-		writeMap(filename + "_Recency", sortedTagRecencies, true);
+		writeMap(filename + "_Frequency", sortedTagFrequencies, false, false);
+		writeMap(filename + "_Recency", sortedTagRecencies, true, false);
+		writeMap(filename + "_Recency_power", sortedTagRecencies, true, true);
 		if (this.tagMatrix != null) {
 			Map<Integer, ReuseProbValue> sortedTagContextSim = new TreeMap<Integer, ReuseProbValue>(tagContextSim);
-			writeMap(filename + "_ContextSim", sortedTagContextSim, false);
+			writeMap(filename + "_ContextSim", sortedTagContextSim, false, false);
 		}
 	}
 	
-	private void writeMap(String filename, Map<Integer, ReuseProbValue> map, boolean normalize) {
+	private void writeMap(String filename, Map<Integer, ReuseProbValue> map, boolean normalize, boolean powerlaw) {
 		try {
 			FileWriter writer = new FileWriter(new File("./data/csv/" + filename + ".txt"));
 			BufferedWriter bw = new BufferedWriter(writer);
@@ -109,9 +110,12 @@ public class TagReuseProbAnalyzer {
 				double count = entry.getValue().getCount();
 				if (sum > 0.0) {
 					if (normalize) {
-						//bw.write(entry.getKey() + ";" + sum / normVal + "\n");
-						for (int i = 1; i < sum; i++) {
-							bw.write(entry.getKey() + "\n");	
+						if (powerlaw) {
+							for (int i = 1; i < sum; i++) {
+								bw.write(entry.getKey() + "\n");	
+							}
+						} else {
+							bw.write(entry.getKey() + ";" + sum / normVal + "\n");
 						}
 					} else {
 						bw.write(entry.getKey() + ";" + sum / count + "\n");

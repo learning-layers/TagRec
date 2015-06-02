@@ -87,8 +87,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "cul";
-	private final static String SUBDIR = "/bll";
+	private final static String DATASET = "del";
+	private final static String SUBDIR = "/ipm3";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -126,10 +126,10 @@ public class Pipeline {
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE);
+		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
-		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE);
+		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE, false);
 		
 		// Test the GIRP and GIRPTM algorithms
 		//startRecCalculator(dir, path, true);
@@ -213,10 +213,10 @@ public class Pipeline {
 		} else if (op.equals("fr")) {
 			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("bll_c")) {
-			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.NONE);
+			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.NONE, true);
 		} else if (op.equals("bll_c_ac")) {
 			if (!narrowFolksonomy) {
-				startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.USER_TO_RESOURCE);
+				startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.USER_TO_RESOURCE, true);
 			}
 		} else if (op.equals("girptm")) {
 			startRecCalculator(sampleDir, samplePath, !narrowFolksonomy);
@@ -286,11 +286,11 @@ public class Pipeline {
 		startBaselineCalculator(sampleDir, samplePath, 1, true);		// MP
 		startModelCalculator(sampleDir, samplePath, 1, -5, all);		// MPur
 		startRecCalculator(sampleDir, samplePath, all);					// GIRPTM
-		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.NONE);				// BLL
-		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.USER_TO_RESOURCE);	// BLLac
-		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, false);			// 3L		
-		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, true, false);				// 3LTtop
-		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, true);				// 3LTtag
+		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.NONE, true);				// BLL
+		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.USER_TO_RESOURCE, true);	// BLLac
+		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, false);				// 3L		
+		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, true, false);					// 3LTtop
+		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, true);					// 3LTtag
 		startCfTagCalculator(sampleDir, samplePath, 1, 20, -5, false);	// CFur
 		startFolkRankCalculator(sampleDir, samplePath, 1);				// APR+FR
 		startLdaCalculator(sampleDir, samplePath, 1000, 1, all);		// LDA
@@ -324,7 +324,7 @@ public class Pipeline {
 		evaluate(sampleDir, samplePath, "userlayerstopicbll_5_5", null, true, false, reader);
 	}
 
-	private static void startActCalculator(String sampleDir, String sampleName, int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type) {
+	private static void startActCalculator(String sampleDir, String sampleName, int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type, boolean allMetrics) {
 		getTrainTestSize(sampleName);
 		List<Integer> dValues = getBetaValues(dUpperBound);
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
@@ -334,11 +334,11 @@ public class Pipeline {
 		for (int i = 1; i <= sampleCount; i++) {
 			for (int dVal : dValues) {
 				reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, dVal, 5, type);
-				writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader, null);
+				writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, allMetrics ? reader : null, null);
 				if (all) {
 					for (int betaVal : betaValues) {
 						reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal, type);
-						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, 10, null, reader, null);
+						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, 10, null, allMetrics ? reader : null, null);
 					}
 					//reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, false, true, dVal, 5, type);
 					//writeMetrics(sampleDir, sampleName, "bll_r" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader);
