@@ -131,6 +131,11 @@ public class BookmarkReader {
 				
 				// TODO ----------------------
 				// extend common/Bookmark class with fields for title (= lineParts[6]) and description (= lineParts[7])
+				if (lineParts.length > 6) { // is there a rating?
+					try {
+						userData.setTitle(lineParts[5].replace("\"", ""));
+					} catch (Exception e) { /* do nothing */ }
+				}
 			}
 			processUserData(userID, userData, tags, categories, wikiID); // last user
 			br.close();

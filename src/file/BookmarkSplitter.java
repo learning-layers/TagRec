@@ -220,6 +220,13 @@ public class BookmarkSplitter {
 				bw.write("\"");
 				if (bookmark.getRating() != -2) {
 					bw.write(";\"" + bookmark.getRating() + "\"");
+				} else {
+					bw.write("\"\"");
+				}
+				if (bookmark.getTitle() != null) {
+					bw.write(";\"" + bookmark.getTitle() + "\"");
+				} else {
+					bw.write("\"\"");
 				}
 				bw.write("\n");
 			}

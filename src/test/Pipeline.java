@@ -87,8 +87,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "del";
-	private final static String SUBDIR = "/ipm3";
+	private final static String DATASET = "twitter";
+	private final static String SUBDIR = "";//"/ipm3";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -113,14 +113,14 @@ public class Pipeline {
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
-		//try { getStatistics("bib_core/vedran/bib_bibtex_2_perc_1", false); } catch (Exception e) { e.printStackTrace(); }
+		//try { getStatistics("twitter_core/seedUserTweets", false); } catch (Exception e) { e.printStackTrace(); }
 		
 		//JSONProcessor.writeJSONOutput("bib_core/vedran/bib_bibtex_2_perc_1");
 		
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(DATASET + "_core/twitter", DATASET + "_core/" + DATASET + "_sample", 1, 0, true);
+		//BookmarkSplitter.splitSample("twitter_core/seedUserTweets", "twitter_core/twitter_sample", 1, 0, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/core1/ml_sample", 1, 1000, true, true);
 		

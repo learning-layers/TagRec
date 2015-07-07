@@ -37,17 +37,21 @@ public class Bookmark implements Comparable<Bookmark> {
 	private String timestamp;
 	private List<Integer> tags;
 	
-	private double rating;
 	private List<Integer> categories;
+	
+	private double rating;
+	private String title;
 	
 	public Bookmark(int userID, int wikiID, String timestamp) {
 		this.userID = userID;
 		this.resID = wikiID;
 		this.timestamp = timestamp;
 		
-		this.rating = -2.0;
 		this.categories = new ArrayList<Integer>();
 		this.tags = new ArrayList<Integer>();
+		
+		this.rating = -2.0;
+		this.title = null;
 	}
 	
 	@Override
@@ -97,6 +101,14 @@ public class Bookmark implements Comparable<Bookmark> {
 	
 	public void setRating(double rating) {
 		this.rating = rating;
+	}
+	
+	public String getTitle() {
+		return this.title;
+	}
+	
+	public void setTitle(String title) {
+		this.title = title;
 	}
 	
 	public List<Integer> getCategories() {	
