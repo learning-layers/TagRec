@@ -39,6 +39,10 @@ public class ThreeLTCalculator {
 	private List<Map<Integer, Double>> userCounts;
 	private List<Map<Integer, Double>> resCounts;
 	
+	public List<Map<Integer, Double>> getUserMaps() {
+		return this.userCounts;
+	}
+	
 	public ThreeLTCalculator(BookmarkReader reader, int trainSize, int dValue, int beta, boolean userBased, boolean resBased, boolean bookmarkBLL, CalculationType cType) {
 		this.reader = reader;
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
@@ -172,6 +176,30 @@ public class ThreeLTCalculator {
 		}		
 		return returnMap;
 	}
+	
+	public Map<Integer, Double> getCollectiveRankedTagList(List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL) {
+		Map<Integer, Double> collectiveTagMap = new LinkedHashMap<Integer, Double>();
+		for (int id = 0; id < this.reader.getUsers().size(); id++) {
+			Map<Integer, Double> tagMap = getRankedTagList(id, -1, testCats, testTimestamp, limit, tagBLL, topicBLL, false);
+			for (Map.Entry<Integer, Double> entry : tagMap.entrySet()) {
+				Double val = collectiveTagMap.get(entry.getKey());
+				collectiveTagMap.put(entry.getKey(), val == null ? entry.getValue() : val.doubleValue() + entry.getValue());
+			}
+		}
+		
+		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(collectiveTagMap));
+		sortedResultMap.putAll(collectiveTagMap);
+		Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>();
+		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
+			if (returnMap.size() < limit) {
+				returnMap.put(entry.getKey(), entry.getValue());
+			} else {
+				break;
+			}
+		}
+		
+		return returnMap;
+	}
 
 	private Map<Integer, Double> getResultMap(List<Bookmark> bookmarks, List<Integer> testCats, Map<Integer, Double> userTagMap, Map<Integer, Double> userCatMap, double testTimestamp, boolean topicBLL) {
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
@@ -211,7 +239,10 @@ public class ThreeLTCalculator {
 		// normalize and return
 		double denom = 0.0;
 		for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
-			Double val = Math.log(entry.getValue());
+			double val = 0.0;
+			if (entry.getValue() != 0.0) {
+				val = Math.log(entry.getValue());
+			}
 			denom += Math.exp(val);
 			entry.setValue(val);
 		}

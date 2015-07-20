@@ -282,6 +282,36 @@ public class BLLCalculator {
 		return maps;
 	}
 	
+	
+	public static Map<Integer, Double> getSortedArtifactMapForUser(int userID, BookmarkReader reader, List<Bookmark> userLines, List<Bookmark> testLines, boolean resource,
+			List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize) {
+		
+		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize);
+		if (artifactMaps != null && userID < artifactMaps.size()) {
+			Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(artifactMaps.get(userID)));
+			sortedResultMap.putAll(artifactMaps.get(userID));		
+			return sortedResultMap;
+		}
+		return new LinkedHashMap<Integer, Double>();
+	}
+	
+	public static Map<Integer, Double> getCollectiveArtifactMap(BookmarkReader reader, List<Bookmark> userLines, List<Bookmark> testLines, boolean resource,
+		List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize) {
+		
+		Map<Integer, Double> collectiveArtifactMap = new LinkedHashMap<Integer, Double>();
+		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize);
+		for (Map<Integer, Double> map : artifactMaps) {
+			for (Map.Entry<Integer, Double> entry : map.entrySet()) {
+				Double val = collectiveArtifactMap.get(entry.getKey());
+				collectiveArtifactMap.put(entry.getKey(), val != null ? val.doubleValue() + entry.getValue() : entry.getValue());
+			}
+		}
+		
+		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(collectiveArtifactMap));
+		sortedResultMap.putAll(collectiveArtifactMap);		
+		return sortedResultMap;
+	}
+	
 	private static Map<Integer, Double> addActValue(Bookmark data, Map<Integer, Double> actValues, long baselineTimestamp, boolean resource, double dVal) {
 		if (!data.getTimestamp().isEmpty()) {
 			Double newAct = 0.0;

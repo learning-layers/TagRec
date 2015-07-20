@@ -88,7 +88,7 @@ public class Pipeline {
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
 	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "";//"/ipm3";
+	private final static String SUBDIR = "";///core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -113,14 +113,14 @@ public class Pipeline {
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
-		//try { getStatistics("twitter_core/seedUserTweets", false); } catch (Exception e) { e.printStackTrace(); }
+		//try { getStatistics("twitter_core/tag_rec_format_tweet_wtext", false); } catch (Exception e) { e.printStackTrace(); }
 		
 		//JSONProcessor.writeJSONOutput("bib_core/vedran/bib_bibtex_2_perc_1");
 		
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample("twitter_core/seedUserTweets", "twitter_core/twitter_sample", 1, 0, true);
+		//BookmarkSplitter.splitSample("twitter_core/tag_rec_format_tweet_wotext", "twitter_core/twitter_sample", 1, 0, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/core1/ml_sample", 1, 1000, true, true);
 		
@@ -132,7 +132,7 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE, false);
 		
 		// Test the GIRP and GIRPTM algorithms
-		//startRecCalculator(dir, path, true);
+		//startRecCalculator(dir, path, false);
 		
 		// Test the MP_u, MP_r and MP_u_r algorithms
 		//startModelCalculator(dir, path, 1, -5, true);
@@ -174,6 +174,7 @@ public class Pipeline {
 			
 		// Engine Testing
 		//startEngineTest(path);
+		//startKnowBrainTest("ml_group2");
 		
 		// Commandline Arguments
 		if (args.length < 3) {
@@ -484,6 +485,25 @@ public class Pipeline {
 		System.out.println("LD - Users for resource (Tags): " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null /* or Algorithm.USERTAGCB */, EntityType.USER)); // CBtags
 		System.out.println("Users for user: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.USER)); // CF
 		System.out.println("Users MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.USER)); // MP
+	}
+	
+	private static void startKnowBrainTest(String path) {
+		EngineInterface recEngine = new TagRecommenderEvalEngine();
+		try {
+			recEngine.loadFile(path);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		// topics:t286,t40,t508 for 3Layers
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.THREELcoll, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.THREELcoll, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.BLLcoll, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.BLLcoll, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.THREEL, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.THREEL, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.BLL, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.BLL, null));
 	}
 	
 	// Helpers

@@ -33,7 +33,6 @@ import java.util.TreeMap;
 import common.CalculationType;
 import common.DoubleMapComparator;
 
-// TODO: integrate Tag-Filtering!
 // TODO: make it work in online setting! (caching + LDA topic calculation)
 public class ThreeLayersEngine implements EngineInterface {
 
@@ -61,6 +60,7 @@ public class ThreeLayersEngine implements EngineInterface {
 		if (filterOwnEntities == null) {
 			filterOwnEntities = true;
 		}
+		List<Integer> filterTags = new ArrayList<Integer>();
 		
 		Map<Integer, Double> tagIDs = new LinkedHashMap<>();
 		Map<String, Double> tagMap = new LinkedHashMap<>();
@@ -72,6 +72,7 @@ public class ThreeLayersEngine implements EngineInterface {
 			if (user != null) {
 				userID = this.reader.getUsers().indexOf(user);
 			}
+			filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource, this.calculator.getUserMaps().get(userID));
 			int resID = -1;
 			if (resource != null) {
 				resID = this.reader.getResources().indexOf(resource);
@@ -93,6 +94,8 @@ public class ThreeLayersEngine implements EngineInterface {
 				tagIDs = this.calculator.getRankedTagList(userID, -1, topicIDs, System.currentTimeMillis() / 1000.0, count, false, false, false); // not sorted
 			}
 		}
+		
+		// TODO: finish filtering
 		
 		// fill up with MP tags
 		if (tagIDs.size() < count) {
