@@ -4,14 +4,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import common.Bookmark;
 import common.Utilities;
-
 import file.BookmarkReader;
 import file.postprocessing.CatDescFiltering;
 
@@ -20,7 +18,7 @@ public class TensorProcessor {
 	private static Set<String> entries;
 	
 	public static void writeFiles(String filename, int trainSize, int testSize, boolean tagRec, Integer minBookmarks, Integer maxBookmarks, CatDescFiltering filter) {
-		entries = new HashSet<String>();
+		entries = new LinkedHashSet<String>();
 		//filename += "_res";
 
 		BookmarkReader reader = new BookmarkReader(trainSize, false);

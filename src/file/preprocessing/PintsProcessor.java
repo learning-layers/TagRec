@@ -8,8 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +44,7 @@ public class PintsProcessor {
 				}
 				Set<String> tags = tagMap.get(userHash + "_" + resID);
 				if (tags == null) {
-					tags = new HashSet<String>();
+					tags = new LinkedHashSet<String>();
 					tagMap.put(userHash + "_" + resID, tags);
 					timestamps.add(timestamp);
 					if (timestamps.size() % 100000 == 0) {

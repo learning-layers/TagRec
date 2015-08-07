@@ -10,11 +10,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +31,7 @@ public class BibsonomyProcessor {
 			BufferedWriter bw = new BufferedWriter(writer);
 			String line = null;
 			String resID = "", userHash = "", timestamp = "";
-			Set<String> tags = new HashSet<String>();
+			Set<String> tags = new LinkedHashSet<String>();
 			
 			while ((line = br.readLine()) != null) {
 				String[] lineParts = line.split("\t");
@@ -129,7 +128,7 @@ public class BibsonomyProcessor {
 					tag = lineParts[1].toLowerCase();
 					Set<String> tags = tagMap.get(userHash + "_" + resID);
 					if (tags == null) {
-						tags = new HashSet<String>();
+						tags = new LinkedHashSet<String>();
 						tagMap.put(userHash + "_" + resID, tags);
 						timestamps.add(timestamp);
 						bookmarks.add(bookmark);

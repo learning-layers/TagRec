@@ -3,6 +3,7 @@ package engine;
 import java.util.List;
 import java.util.Map;
 
+// TODO: check for duplicates (user-resource combinations)!
 public class EntityRecommenderEngine implements EngineInterface {
 
 	private EngineInterface tagRecommender;
