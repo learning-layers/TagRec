@@ -500,10 +500,11 @@ public class Pipeline {
 		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.THREELcoll, null));
 		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.BLLcoll, null));
 		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.BLLcoll, null));
-		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.THREEL, null));
-		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.THREEL, null));
-		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.BLL, null));
-		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.BLL, null));
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.MP, null));
+		//System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.THREEL, null));
+		//System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.THREEL, null));
+		//System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t3"), 10, false, Algorithm.BLL, null));
+		//System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("14", null, Arrays.asList("t848","t655","t448","t40","t53","t997","t508","t268"), 10, false, Algorithm.BLL, null));
 	}
 	
 	// Helpers

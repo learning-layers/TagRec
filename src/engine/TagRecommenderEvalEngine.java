@@ -31,14 +31,14 @@ import file.BookmarkReader;
 
 public class TagRecommenderEvalEngine implements EngineInterface {
 
-	//private EngineInterface lmEngine;
+	private EngineInterface mpEngine;
 	private EngineInterface bllEngine;
 	private EngineInterface threelEngine;	
 	//private Random random;
 	private BufferedWriter bw;
 	
 	public TagRecommenderEvalEngine() {
-		//this.lmEngine = null;
+		this.mpEngine = null;
 		this.bllEngine = null;
 		this.threelEngine = null;
 		//this.random = new Random();
@@ -55,8 +55,8 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 	@Override
 	public void loadFile(String filename) throws Exception {
 		//this.lmEngine = null;
-		this.bllEngine = null;
-		this.threelEngine = null;
+		//this.bllEngine = null;
+		//this.threelEngine = null;
 		
 		/* old
 		BookmarkReader reader = new BookmarkReader(0, false);
@@ -79,6 +79,8 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 			this.bllEngine = new BaseLevelLearningCollectiveEngine();
 			this.bllEngine.loadFile(filename);
 		//}
+			this.mpEngine = new MostPopularCollectiveEngine();
+			this.mpEngine.loadFile(filename);
 	}
 
 	@Override
@@ -113,7 +115,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 					algorithmString = "3Lcoll";
 				}
 			}
-		} else {
+		} else if (algorithm == Algorithm.BLLcoll || algorithm == Algorithm.BLL) {
 			if (this.bllEngine != null) {
 				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
 				if (algorithm == Algorithm.BLL) {
@@ -121,6 +123,11 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 				} else {
 					algorithmString = "BLLcoll";
 				}
+			}
+		} else {
+			if (this.mpEngine != null) {
+				returnMap = this.mpEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
+				algorithmString = "MP";
 			}
 		}
 		if (this.bw != null) {
