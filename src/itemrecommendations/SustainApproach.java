@@ -199,7 +199,7 @@ public class SustainApproach {
 		
 		GVector workingLambda = (GVector) lambda.clone();
 
-		
+		//Start training with each resource in the list
 		for (Integer resource : list){
 			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
 				
@@ -223,14 +223,19 @@ public class SustainApproach {
 			
 			double maxActivation = 0;
 			GVector bestCluster = new GVector(0);
+			
+			// create new vector with all extracted topics f.i. 500  
 			GVector minDistance = new GVector(this.numberOfTopics);
 			minDistance.zero();
-			Double totalActivation = 0.0;
+		    Double totalActivation = 0.0;
 			int index = 0;
 			int bestIndex=0;
+			
 			for (GVector c : clusterList){
 				//fixme_changed
-				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, workingLambda, r);
+				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, workingLambda, r, topics);
+				
+				// activation Pair -> left=activation, right = distanceVector
 				if (activationPair.getLeft()>maxActivation){
 					bestCluster = c;							
 					minDistance= new GVector(activationPair.getRight());
@@ -241,11 +246,6 @@ public class SustainApproach {
 				index++;
 			}
 			
-			//System.out.println("max activation before Hemmung: "+maxActivation);
-			// equation 6 Hemmung
-		 	maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation; 
-			//System.out.println("max activation nach Hemmung: "+maxActivation);
-			
 			
 			if (maxActivation<=tau){
 				// input forms a new cluster
@@ -254,6 +254,12 @@ public class SustainApproach {
 				clusterList.add(index, bestCluster);
 				bestIndex = index;
 			}
+			
+			//System.out.println("max activation before Hemmung: "+maxActivation);
+			// equation 6 Hemmung
+		 	maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation; 
+			//System.out.println("max activation nach Hemmung: "+maxActivation);
+		
 			
 			GVector deltaLambda = new GVector(lambda.getSize());
 			deltaLambda.zero();
@@ -266,7 +272,7 @@ public class SustainApproach {
 			}
 			//GVector.add = adds the two vectors elements
 			lambda.add(deltaLambda); 
-			// FIXME: try if hemmung fits here 
+		 
 			//maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
 			// equation 12
 			GVector deltaBestCluster = new GVector(bestCluster.getSize());
@@ -283,20 +289,25 @@ public class SustainApproach {
 		    if (minUserActivation>maxActivation)
 		    	minUserActivation = maxActivation;
 		}
-		//if (clusterList.size()>3)
+		//if (clusterList.size()>1)
 			System.out.println(clusterList.size()+"cluster for user "+userId+" with "+list.size()+" resources and activation "+minUserActivation+" to "+maxUserActivation);
 		
 		this.userLambdaList.put(userId, lambda);
 		this.userClusterList.put(userId, clusterList);
 	}
 	
-	private Pair<Double, GVector> calculateActivation(GVector input, GVector cluster, GVector lambda, double r){
+	
+	private Pair<Double, GVector> calculateActivation(GVector input, GVector cluster, GVector lambda, double r, Set<Integer> topics){
 		// Calculate distance for every cluster # eq 4	 
 		GVector distance = new GVector(input.getSize());
 		distance.sub(input, cluster);
 		
+		// * 0.5 is removed, since we do not map 2 values for each topic, but only one 
 		for (int i =0; i<distance.getSize(); i++){
-			// * 0.5 is removed, since we do not map 2 values for each topic, but only one 
+			// distance is set to 1 for all topics that not used by the current resource
+			if (input.getElement(i)==0){
+				distance.setElement(i, 1);
+			}	
 			distance.setElement(i, Math.abs(distance.getElement(i)));
 		}
 		
@@ -304,9 +315,11 @@ public class SustainApproach {
 		double denom=0;
 		// Calculate cluster activation # eq 5	 
 		for (int i =0; i<lambda.getSize(); i++){
-			double lambdaR = Math.pow(lambda.getElement(i), r);
-			denom = denom+lambdaR;
-			numerator= numerator+lambdaR*Math.exp((-lambda.getElement(i)*distance.getElement(i)));
+			if (topics.contains(i)){
+				double lambdaR = Math.pow(lambda.getElement(i), r);
+				denom = denom+lambdaR;
+				numerator= numerator+lambdaR*Math.exp((-lambda.getElement(i)*distance.getElement(i)));
+			}
 		}
 		
 		return new ImmutablePair<Double, GVector>((numerator/denom), distance);
@@ -396,7 +409,7 @@ public class SustainApproach {
 		double totalActivation = 0.0;
 		
 		for (GVector c : this.userClusterList.get(userId)){
-			Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, this.userLambdaList.get(userId), r);
+			Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, this.userLambdaList.get(userId), r, topics);
 			if (activationPair.getLeft()>maxActivation){
 				maxActivation = activationPair.getLeft();
 			}

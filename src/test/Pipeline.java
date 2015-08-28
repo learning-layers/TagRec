@@ -124,8 +124,8 @@ public class Pipeline {
 		
 		// initially beta was set to 1
 		//beta from paper
-		//double beta = 6.396;
-		double beta =0.9;
+		double beta = 6.396;
+		//double beta =0.9;
 		// initially r was set to 2
 		double r = 2.845; 
 		//double [] rs = {2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.5, 4};
@@ -137,7 +137,7 @@ public class Pipeline {
 		double learning_rate=0.0936;
 		// tau according to paper = 0.5
 		double tau_cluster=0.9;
-		double [] taus_cluster={0.85};
+		double [] taus_cluster={0.5};
 		// number of resources predicted for a user
 		int sampleSize = 20;
 		// number of resources considered for prediction prefiltered with CF
