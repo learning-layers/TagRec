@@ -219,15 +219,15 @@ public class BookmarkSplitter {
 				}
 				bw.write("\"");
 				if (bookmark.getRating() != -2) {
-					bw.write(";\"" + bookmark.getRating() + "\"");
+					bw.write(";\"" + (int)bookmark.getRating() + "\"");
 				} else {
-					bw.write("\"\"");
+					bw.write(";\"\"");
 				}
 				if (bookmark.getTitle() != null) {
 					bw.write(";\"" + bookmark.getTitle() + "\"");
-				} else {
-					bw.write("\"\"");
-				}
+				} /*else {
+					bw.write(";\"\"");
+				}*/
 				bw.write("\n");
 			}
 			

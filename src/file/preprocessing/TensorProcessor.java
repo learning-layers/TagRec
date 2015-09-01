@@ -61,7 +61,11 @@ public class TensorProcessor {
 							bw.write(data.getUserID() + "\t" + data.getResourceID() + "\t" + tag + "\n");
 						}
 					} else {
-						bw.write(data.getUserID() + "\t" + (reader == null ? data.getResourceID() : reader.getResources().get(data.getResourceID())) + "\n");
+						String ratingString = "";
+						if (data.getRating() != -2) {
+							ratingString = "\t" + (int)data.getRating();
+						}
+						bw.write(data.getUserID() + "\t" + (reader == null ? data.getResourceID() : reader.getResources().get(data.getResourceID())) + ratingString + "\n");
 					}
 					entries.add(data.getUserID() + "_" + data.getResourceID());
 				}

@@ -87,8 +87,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "";///core1";
+	private final static String DATASET = "ml";
+	private final static String SUBDIR = "/resource";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -109,6 +109,10 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 		
+		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
+		//getTrainTestSize(path);
+		//TensorProcessor.writeFiles(path, TRAIN_SIZE, TEST_SIZE, false, null, null, null);
+		
 		//getTrainTestSize(path);
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
 		
@@ -120,9 +124,9 @@ public class Pipeline {
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample("twitter_core/tag_rec_format_tweet_wotext", "twitter_core/twitter_sample", 1, 0, true);
+		//BookmarkSplitter.splitSample("ml_core/resource/movielens", "ml_core/resource/ml_sample", 1, 20, false);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
-		//createLdaSamples("ml_core/core1/ml_sample", 1, 1000, true, true);
+		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
@@ -253,7 +257,7 @@ public class Pipeline {
 		} else if (op.equals("process_lastfm")) {	
 			LastFMProcessor.processFile("user_taggedartists-timestamps.dat", args[2]);
 		} else if (op.equals("process_ml")) {
-			MovielensProcessor.processFile("tags.dat", args[2]);	
+			MovielensProcessor.processFile("tags.dat", args[2], "ratings.dat");	
 		} else if (op.equals("process_del")) {
 			PintsProcessor.processFile(sampleDir, "delicious", args[2]);	
 		} else if (op.equals("process_flickr")) {
