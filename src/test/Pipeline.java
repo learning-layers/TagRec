@@ -87,8 +87,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "ml";
-	private final static String SUBDIR = "/resource";
+	private final static String DATASET = "dc09";
+	private final static String SUBDIR = "/original";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -109,6 +109,7 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 		
+		//BibsonomyProcessor.processUnsortedFile("dc09_core/train_full/", "tas", "dc09_sample_train");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
 		//getTrainTestSize(path);
 		//TensorProcessor.writeFiles(path, TRAIN_SIZE, TEST_SIZE, false, null, null, null);
@@ -117,14 +118,14 @@ public class Pipeline {
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
-		//try { getStatistics("twitter_core/tag_rec_format_tweet_wtext", false); } catch (Exception e) { e.printStackTrace(); }
+		//try { getStatistics("dc09_core/dc09_sample", false); } catch (Exception e) { e.printStackTrace(); }
 		
 		//JSONProcessor.writeJSONOutput("bib_core/vedran/bib_bibtex_2_perc_1");
 		
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample("ml_core/resource/movielens", "ml_core/resource/ml_sample", 1, 20, false);
+		//BookmarkSplitter.splitSample("dc09_core/dc09_original", "dc09_core/dc_sample", 1, 0, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
@@ -207,7 +208,7 @@ public class Pipeline {
 			return;
 		}
 		String subdir = "/core1";
-		sampleDir += subdir;
+		//sampleDir += subdir;
 		samplePath = sampleDir + "/" + args[2];
 
 		boolean narrowFolksonomy = args[1].equals("flickr");
@@ -251,7 +252,7 @@ public class Pipeline {
 		} else if (op.equals("percentage_sample")) {
 			BookmarkSplitter.drawUserPercentageSample(samplePath, 3);
 		} else if (op.equals("process_bibsonomy")) {
-			BibsonomyProcessor.processUnsortedFile("tas", args[2]);
+			BibsonomyProcessor.processUnsortedFile(sampleDir, "tas", args[2]);
 		} else if (op.equals("process_citeulike")) {	
 			CiteULikeProcessor.processFile("current", args[2]);
 		} else if (op.equals("process_lastfm")) {	
