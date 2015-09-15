@@ -240,7 +240,7 @@ public class BookmarkSplitter {
 		return false;
 	}
 	
-	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec) {		
+	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart) {		
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
@@ -249,7 +249,7 @@ public class BookmarkSplitter {
 			if (percentage > 0) {
 				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec);
 			} else {
-				splitter.leaveLastOutSplit(sampleName, false); // TODO check cold-start
+				splitter.leaveLastOutSplit(sampleName, coldStart); // TODO check cold-start
 			}
 		}
 	}

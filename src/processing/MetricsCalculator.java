@@ -69,7 +69,7 @@ public class MetricsCalculator {
 			this.bookmarkReader = bookmarkReader;
 		}
 		BufferedWriter bw = null;
-		// TODO: Enable if you need data for statistical tests
+		//TODO: Enable if you need data for statistical tests
 		if ((recommTags && (k == 5 || k == 10)) || (!recommTags && k == 20)) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);

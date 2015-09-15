@@ -206,10 +206,10 @@ public class Pipeline {
 			System.out.println("Dataset not available");
 			return;
 		}
-		String subdir = "/core1";
+		String subdir = "/bll";
 		sampleDir += subdir;
 		samplePath = sampleDir + "/" + args[2];
-
+		
 		boolean narrowFolksonomy = args[1].equals("flickr");
 		if (op.equals("cf")) {
 			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
@@ -245,9 +245,10 @@ public class Pipeline {
 		} else if (op.equals("core")) {
 			BookmarkSplitter.calculateCore(samplePath, samplePath, 3, 3, 3);
 		} else if (op.equals("split_l1o")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, true);
+			// TODO: cold-start users!
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, true, true);
 		} else if (op.equals("split_8020")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false);
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false, true);
 		} else if (op.equals("percentage_sample")) {
 			BookmarkSplitter.drawUserPercentageSample(samplePath, 3);
 		} else if (op.equals("process_bibsonomy")) {
@@ -599,6 +600,8 @@ public class Pipeline {
 		System.out.println("Avg. users/posts per resource: " + avgBookmarksPerResource);
 		
 		if (writeAll) {
+			// TODO: write user distribution
+			
 			try {
 				getTrainTestSize(dataset);
 				FileWriter userWriter = new FileWriter(new File("./data/metrics/" + dataset + "_userStats.txt"));
