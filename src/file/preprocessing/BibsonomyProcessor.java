@@ -16,7 +16,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
+
+import common.Bookmark;
+import common.DBManager;
 
 public class BibsonomyProcessor {
 
@@ -66,8 +70,11 @@ public class BibsonomyProcessor {
 	}
 	
 	public static boolean processUnsortedFile(String dir, String inputFile, String outputFile) {
-		readBookmarkFile(dir);
-		readBibtexFile(dir);
+		DBManager manager = new DBManager("bibsonomy");
+		//readBookmarkFile(dir);
+		//readBibtexFile(dir);
+		bookmarkFile = readDatabaseTable(manager, "bookmark", "url_hash");
+		bibtexFile = readDatabaseTable(manager, "bibtex", "simhash1");
 		int lineCount = 0;
 		
 		Map<String, Integer> resources = new LinkedHashMap<String, Integer>();
@@ -99,6 +106,8 @@ public class BibsonomyProcessor {
 				if (type.equals("1")) {
 					bookmark = getBookmark(lineParts[2]);
 					if (bookmark == null) {
+						//bookmark = new BibBookmark();
+						//bookmark.urlHash = lineParts[2];
 						continue;
 					}
 					resHash = bookmark.urlHash;// + "1";
@@ -112,6 +121,8 @@ public class BibsonomyProcessor {
 				} else if (type.equals("2")) {
 					bookmark = getBibtex(lineParts[2]);
 					if (bookmark == null) {
+						//bookmark = new BibBookmark();
+						//bookmark.urlHash = lineParts[2];
 						continue;
 					}
 					resHash = bookmark.urlHash;// + "2";
@@ -177,7 +188,7 @@ public class BibsonomyProcessor {
 			
 			bw.write("\"" + userHash + "\";\"" + resID + "\";\"" + processTimestamp(timestamp) + "\";\"" + tagString + "\";\"\";\"\"");
 			if (bookmark != null) {
-				bw.write(";\"" + bookmark.url + "\";\"" + bookmark.desc + (bookmark.extDesc != "" ? (" " + bookmark.extDesc) : "")+ "\"");
+				bw.write(";\"" + bookmark.title + "\";\"" + bookmark.desc + (bookmark.extDesc != "" ? (" " + bookmark.extDesc) : "")+ "\"");
 			}
 			bw.write("\n");
 			return true;
@@ -193,6 +204,15 @@ public class BibsonomyProcessor {
 	
 	private static Map<String, BibBookmark> bookmarkFile;
 	
+	private static Map<String, BibBookmark> readDatabaseTable(DBManager manager, String tableName, String urlFieldName) {
+		Map<String, BibBookmark> bMap = new LinkedHashMap<String, BibBookmark>();
+		List<BibBookmark> bookmarks = manager.getBibBookmarks(tableName, "content_id", urlFieldName);
+		for (BibBookmark b : bookmarks) {
+			bMap.put(b.id, b);
+		}
+		return bMap;
+	}
+	
 	private static void readBookmarkFile(String dir) {
 		bookmarkFile = new LinkedHashMap<String, BibBookmark>();
 		String line = null;
@@ -205,7 +225,7 @@ public class BibsonomyProcessor {
 				if (lineParts.length >= 2) {
 					bookmark.urlHash = lineParts[1];
 					if (lineParts.length >= 3) {
-						bookmark.url = lineParts[2].replace("\n", "").replace(";", "").replace("\r", "");
+						bookmark.title = lineParts[2].replace("\n", "").replace(";", "").replace("\r", "");
 						if (lineParts.length >= 4) {
 							bookmark.desc = lineParts[3].replace("\n", "").replace(";", "").replace("\r", "");
 							if (lineParts.length >= 5) {
@@ -220,6 +240,7 @@ public class BibsonomyProcessor {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("Bookmark lines: " + bookmarkFile.size());
 	}
 	
 	private static Map<String, BibBookmark> bibtexFile;
@@ -248,10 +269,10 @@ public class BibsonomyProcessor {
 								bookmark.extDesc = "";
 							}
 							if (lineParts.length >= 32) {
-								bookmark.url = lineParts[31].replace("\n", "").replace(";", "").replace("\r", "");
+								bookmark.title = lineParts[31].replace("\n", "").replace(";", "").replace("\r", "");
 							}
-							if (bookmark.url.equals("\\N")) {
-								bookmark.url = "";
+							if (bookmark.title.equals("\\N")) {
+								bookmark.title = "";
 							}
 						}
 					}
@@ -262,7 +283,8 @@ public class BibsonomyProcessor {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Bibtex lines: " + lineCount);
+		System.out.println("Bibtex lines: " + bibtexFile.size());
+		System.out.println("Bibtex line-count: " + lineCount);
 	}
 	
 	private static BibBookmark getBookmark(String resID) {

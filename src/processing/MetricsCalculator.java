@@ -66,7 +66,7 @@ public class MetricsCalculator {
 	public MetricsCalculator(PredictionFileReader reader, String outputFile, int k, BookmarkReader bookmarkReader, boolean recommTags) {
 		this.reader = reader;
 		if (recommTags) { // TODO: check
-			this.bookmarkReader = bookmarkReader;
+			this.bookmarkReader = null;//bookmarkReader;
 		}
 		BufferedWriter bw = null;
 		//TODO: Enable if you need data for statistical tests

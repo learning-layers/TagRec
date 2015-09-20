@@ -51,6 +51,7 @@ import processing.MetricsCalculator;
 import processing.GIRPTMCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.TagReuseProbAnalyzer;
+import processing.analyzing.UserTagDistribution;
 import engine.Algorithm;
 import engine.BaseLevelLearningEngine;
 import engine.EntityRecommenderEngine;
@@ -88,7 +89,7 @@ public class Pipeline {
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
 	private final static String DATASET = "dc09";
-	private final static String SUBDIR = "/original";
+	private final static String SUBDIR = "/";//"/l1o";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -109,23 +110,23 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 		
-		//BibsonomyProcessor.processUnsortedFile("dc09_core/train_full/", "tas", "dc09_sample_train");
+		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
 		//getTrainTestSize(path);
-		//TensorProcessor.writeFiles(path, TRAIN_SIZE, TEST_SIZE, false, null, null, null);
+		//TensorProcessor.writeFiles(path, TRAIN_SIZE, TEST_SIZE, true, null, null, null);
 		
 		//getTrainTestSize(path);
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
-		//try { getStatistics("dc09_core/dc09_sample", false); } catch (Exception e) { e.printStackTrace(); }
+		//try { getStatistics(path, false); } catch (Exception e) { e.printStackTrace(); }
 		
 		//JSONProcessor.writeJSONOutput("bib_core/vedran/bib_bibtex_2_perc_1");
 		
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample("dc09_core/dc09_original", "dc09_core/dc_sample", 1, 0, true);
+		//BookmarkSplitter.splitSample(path, path + "1", 1, 0, true, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
@@ -134,10 +135,10 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
-		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE, false);
+		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
 		
 		// Test the GIRP and GIRPTM algorithms
-		//startRecCalculator(dir, path, false);
+		//startRecCalculator(dir, path, true);
 		
 		// Test the MP_u, MP_r and MP_u_r algorithms
 		//startModelCalculator(dir, path, 1, -5, true);
@@ -209,6 +210,7 @@ public class Pipeline {
 		}
 		String subdir = "/bll";
 		sampleDir += subdir;
+		samplePath += (sampleDir + "/" + args[2]);
 		
 		boolean narrowFolksonomy = args[1].equals("flickr");
 		if (op.equals("cf")) {
@@ -282,6 +284,8 @@ public class Pipeline {
 			startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 		} else if (op.equals("tag_all")) {
 			startAllTagRecommenderApproaches(sampleDir, samplePath, !narrowFolksonomy);
+		} else if (op.equals("stats")) {
+			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
 		} else {
 			System.out.println("Unknown operation");
 		}
@@ -599,9 +603,9 @@ public class Pipeline {
 		double avgBookmarksPerResource = (double)bookmarks / resources;
 		System.out.println("Avg. users/posts per resource: " + avgBookmarksPerResource);
 		
-		if (writeAll) {
-			// TODO: write user distribution
-			
+		// TODO: write user distribution
+		UserTagDistribution.calculate(reader, dataset);
+		if (writeAll) {		
 			try {
 				getTrainTestSize(dataset);
 				FileWriter userWriter = new FileWriter(new File("./data/metrics/" + dataset + "_userStats.txt"));

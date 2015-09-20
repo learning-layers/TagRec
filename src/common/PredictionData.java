@@ -66,7 +66,8 @@ public class PredictionData {
 	public double getPrecision(boolean recommTags) {
 		if (this.predictionData.size() != 0) {
 			//return this.numFoundRelevantDocs / (recommTags ? this.predictionData.size() : this.k);
-			return this.numFoundRelevantDocs / this.k;
+			//TODO: use this.k
+			return this.numFoundRelevantDocs / this.predictionData.size();//this.k;
 		}
 		return 0.0;
 	}
