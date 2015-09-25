@@ -74,7 +74,7 @@ public class SustainApproach {
 		rankedResourseCalculator = new BM25Calculator(this.reader, this.trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		
 		this.numberOfTopics = this.reader.getCategories().size();
-	
+		this.resourceListPerUser = new HashMap<Integer, List<Integer>>();
 		//go through all users - matrix user-resource
 		// Set is ordered per user? TODO: ask Dominik, Set can not be ordered linkedHashSet can. Is there a method to get sorted resources? 
 		//this.userResourceTrainList = Utilities.getUserResourceLists(this.trainList);
@@ -111,11 +111,13 @@ public class SustainApproach {
 		    if (resourceList.size()>=trainingRecency && trainingRecency!=0)
 		    	resourceList = resourceList.subList(resourceList.size()-trainingRecency, resourceList.size()); 
 			
+		    this.resourceListPerUser.put(userId, resourceList);
 		    train(userId, resourceList, r, tau, learningRate, beta);
 		}
 		
 		
 		this.writeUserLambdas(this.sampleName);
+		this.writeUserStats(this.sampleName);
 		
 		
 		LinkedList<int[]> sortedResourcesPerUser = new LinkedList<int[]>();
@@ -174,49 +176,84 @@ public class SustainApproach {
 			return false;
 	}
 
+	private boolean writeUserStats(String filename) {
+		
+		//List<String> resourceList = this.reader.getResources();
+		//Map<Integer, List<Integer>> resourcesOfTestUsers = this.reader.getResourcesOfTestUsers(trainSize);
+		
+		try {
+			FileWriter writer = new FileWriter(new File("./data/metrics/" + filename + "_userstats.txt"));
+			BufferedWriter bw = new BufferedWriter(writer);
+			
+//			String header = "userId|number of cluster|number of resources\n";
+//			bw.write(header);
 
+			for (Entry<Integer, GVector> entry : this.userLambdaList.entrySet()) {
+				//String resultString = (this.reader.getUsers().get(userID) + "-XYZ|");
+				int userId = entry.getKey();
+				
+				
+				String resultString = userId + "|";
+				
+				double lambdas = 0.0;
+								
+				for (int c=0; c<entry.getValue().getSize(); c++) {
+					lambdas += entry.getValue().getElement(c);
+				}
+				
+				double entropy = 0.0;
+				
+				for (int c=0; c<entry.getValue().getSize(); c++) {
+					double fraction = entry.getValue().getElement(c)/lambdas;
+					entropy += fraction* Math.log(1/fraction);
+				}
+				
+				//Entropy, number of Cluster, number of Resources
+				resultString += String.valueOf(entropy)+"|"+this.userClusterList.get(userId).size()+
+						"|"+this.resourceListPerUser.get(userId).size()+"\n";
+				bw.write(resultString);
+			
+			}
+			
+			bw.flush();
+			bw.close();
+			writer.close();
+						
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+}
+	
+	
 	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta){
-		//LinkedList<Integer> topics = new LinkedList<Integer>();
 		ArrayList<GVector> clusterList = new ArrayList<GVector>();
 		
-		//double[] array = new double[this.numberOfTopics];
-		//Arrays.fill(array,1);
-		//GVector lambda = new GVector(array);
-		GVector lambda = new GVector(this.numberOfTopics);
-		lambda.zero();
-		
-		//clusterList.add(c0);
-		//GVector bestCluster = new GVector(0);
+		double[] array = new double[this.numberOfTopics];
+		Arrays.fill(array,1);
+		GVector lambda = new GVector(array);
+	
 		
 		double maxUserActivation = 0.0;
 		double minUserActivation = 1.0;
+	
 		
-		// set lambda of all usertopics to 1		
-		for (Integer resource : list){
-			 for (Integer t : this.resTopicTrainList.get(resource).keySet())
-				 lambda.setElement(t, 1);
-		} 
-		
-		GVector workingLambda = (GVector) lambda.clone();
-
 		//Start training with each resource in the list
 		for (Integer resource : list){
 			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
 				
-			// Vector, write 1 for every existing topic
+			// Vector, write 1 for every existing topic ->Paul 1000
 			GVector currentResource = new GVector(this.numberOfTopics);
 			currentResource.zero();
 			for (Integer t : topics){
 				currentResource.setElement(t, 1);
-			/*	double e = lambda.getElement(t); 
-				if ( e==0)
-					lambda.setElement(t, 1);*/
-				
 			}	
 			
 			if (clusterList.size()==0){
 				clusterList.add(currentResource);
-				continue;
+				//continue;
 			}
 			
 			
@@ -233,7 +270,7 @@ public class SustainApproach {
 			
 			for (GVector c : clusterList){
 				//fixme_changed
-				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, workingLambda, r, topics);
+				Pair<Double, GVector> activationPair = this.calculateActivation(currentResource, c, lambda, r, topics);
 				
 				// activation Pair -> left=activation, right = distanceVector
 				if (activationPair.getLeft()>maxActivation){
@@ -247,11 +284,13 @@ public class SustainApproach {
 			}
 			
 			
+			//maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
+			
 			if (maxActivation<=tau){
 				// input forms a new cluster
 				bestCluster = currentResource;
-				//clusterList.add(bestCluster);
-				clusterList.add(index, bestCluster);
+				clusterList.add(bestCluster);
+				//clusterList.add(index, bestCluster);
 				bestIndex = index;
 			}
 			
@@ -275,14 +314,16 @@ public class SustainApproach {
 		 
 			//maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
 			// equation 12
+			
+			// FIXME: error!
 			GVector deltaBestCluster = new GVector(bestCluster.getSize());
 			//  delta_winCluster <- n*(I-Cluster[WinCluster,]) # eq 12 
-			deltaBestCluster.sub(currentResource,deltaBestCluster);
+			deltaBestCluster.sub(currentResource, bestCluster);
 		    deltaBestCluster.scale(learningRate);
-		    
-		    //??? why adding the cluster? 
+		  		  
 		    bestCluster.add(deltaBestCluster);
-		    clusterList.set(bestIndex, deltaBestCluster);
+		    clusterList.set(bestIndex, bestCluster);
+		    //clusterList.add(bestCluster);
 		    
 		    if (maxUserActivation<maxActivation)
 		    	maxUserActivation = maxActivation;
@@ -290,7 +331,7 @@ public class SustainApproach {
 		    	minUserActivation = maxActivation;
 		}
 		//if (clusterList.size()>1)
-			System.out.println(clusterList.size()+"cluster for user "+userId+" with "+list.size()+" resources and activation "+minUserActivation+" to "+maxUserActivation);
+		System.out.println(clusterList.size()+"cluster for user "+userId+" with "+list.size()+" resources and activation "+minUserActivation+" to "+maxUserActivation);
 		
 		this.userLambdaList.put(userId, lambda);
 		this.userClusterList.put(userId, clusterList);
@@ -304,15 +345,17 @@ public class SustainApproach {
 		
 		// * 0.5 is removed, since we do not map 2 values for each topic, but only one 
 		for (int i =0; i<distance.getSize(); i++){
+			
+			distance.setElement(i, Math.abs(distance.getElement(i)));
 			// distance is set to 1 for all topics that not used by the current resource
 			if (input.getElement(i)==0){
 				distance.setElement(i, 1);
 			}	
-			distance.setElement(i, Math.abs(distance.getElement(i)));
 		}
 		
 		double numerator=0;
 		double denom=0;
+		
 		// Calculate cluster activation # eq 5	 
 		for (int i =0; i<lambda.getSize(); i++){
 			if (topics.contains(i)){
@@ -320,6 +363,7 @@ public class SustainApproach {
 				denom = denom+lambdaR;
 				numerator= numerator+lambdaR*Math.exp((-lambda.getElement(i)*distance.getElement(i)));
 			}
+				
 		}
 		
 		return new ImmutablePair<Double, GVector>((numerator/denom), distance);
@@ -344,10 +388,12 @@ public class SustainApproach {
 				count++;
 			}
 			
-			//resourceActivationMap = this.calculateNormalizedValues(resourceActivationMap);
-			//CFValues = this.calculateNormalizedValues(CFValues);
+			this.calculateNormalizedValues(resourceActivationMap);
+			this.calculateNormalizedValues(CFValues);
 			
 			for ( Entry<Integer, Double> entry : resourceActivationMap.entrySet()){
+				double valueSustain = entry.getValue();
+				double valueCF = CFValues.get(entry.getKey());
 				double activation = entry.getValue()*(1-cfWeight)+CFValues.get(entry.getKey())* cfWeight;	
 				resourceActivationMap.put(entry.getKey(), activation);
 			}
@@ -382,19 +428,34 @@ public class SustainApproach {
 	}
 	
 	
-	
-	private Map<Integer, Double> calculateNormalizedValues(Map<Integer, Double> values) {
+//	
+//	private Map<Integer, Double> calculateNormalizedValues(Map<Integer, Double> values) {
+//		//normalize
+//		double sum =0;
+//		for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+//			 sum += entry.getValue();
+//		}
+//		 for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+//			entry.setValue(1000/sum *entry.getValue());
+//		}
+//		return values;
+//	}
+
+	private void calculateNormalizedValues(Map<Integer, Double> values) {
 		//normalize
 		double sum =0;
 		for (Map.Entry<Integer, Double> entry : values.entrySet()) {
 			 sum += entry.getValue();
 		}
 		 for (Map.Entry<Integer, Double> entry : values.entrySet()) {
-			entry.setValue(1000/sum *entry.getValue());
+			entry.setValue(entry.getValue()/sum);
 		}
-		return values;
+		 sum=0;
+		 for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+			 sum += entry.getValue();
+		}
 	}
-
+	
 	private double calculateResourceActivations(int userId, int resource, double beta, double r){
 	
 		Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
@@ -416,7 +477,7 @@ public class SustainApproach {
 			totalActivation+= activationPair.getLeft();
 		}
 		
-		maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
+//		maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
 		return maxActivation;
 	}
 	

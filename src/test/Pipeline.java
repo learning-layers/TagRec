@@ -95,8 +95,8 @@ public class Pipeline {
 	//	String dir = DATASET;
 		
 		List<Pair<String, String>> files = new LinkedList<Pair<String,String>>();
-	//	files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
-	//	files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500"));
+		files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
+		files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500"));
 		files.add(new ImmutablePair<String,String>("delicious", "delicious" + "/" +"del_sample_lda_500"));
 	//	files.add(new ImmutablePair<String,String>("movieLens", "movieLens" + "/" +"ml_sample_lda_500"));
 	//	files.add(new ImmutablePair<String,String>("lastFm", "lastFm"+ "/" +"lastfm_sample_lda_500"));
@@ -123,25 +123,28 @@ public class Pipeline {
 		
 		
 		// initially beta was set to 1
-		//beta from paper
-		double beta = 6.396;
-		//double beta =0.9;
+		//beta from paper 6.396
+		//double beta = 1;
+		double beta =6.396;
 		// initially r was set to 2
-		double r = 2.845; 
+		
+		// r original paper = 9.998; 
+		double r = 9.998; 
 		//double [] rs = {2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.5, 4};
 		
 		//double [] learning_rates={0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 		double [] rs = {9.998};
-		double [] learning_rates={0.4};
-		//double learning_rate=0.7;
-		double learning_rate=0.0936;
+		// from paper: 0.096
+		double [] learning_rates={0.09};
+		double learning_rate=0.09;
+		//double learning_rate=0.0936;
 		// tau according to paper = 0.5
-		double tau_cluster=0.9;
+		double tau_cluster=0.5;
 		double [] taus_cluster={0.5};
 		// number of resources predicted for a user
 		int sampleSize = 20;
 		// number of resources considered for prediction prefiltered with CF
-        int candidateNumber = 0;
+        int candidateNumber = 100;
 		// number of recent resources considered for training
         int trainingRecency = 0;
         
@@ -151,7 +154,7 @@ public class Pipeline {
         // E1: 0,5,10,20
         // E2: int []trainingRecencies = {0, 20, 25, 30};
         int []trainingRecencies = {0};
-        double [] CFWeights = {0.0};
+        double [] CFWeights = {0.5}; //best 0.35
         
         for (int cn =0; cn<candidateNumbers.length; cn++){
         	for (int tr=0; tr<trainingRecencies.length; tr++){
