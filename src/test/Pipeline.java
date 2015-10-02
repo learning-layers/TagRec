@@ -95,8 +95,8 @@ public class Pipeline {
 	//	String dir = DATASET;
 		
 		List<Pair<String, String>> files = new LinkedList<Pair<String,String>>();
-		files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
-		files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500"));
+	//	files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
+	//	files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500"));
 		files.add(new ImmutablePair<String,String>("delicious", "delicious" + "/" +"del_sample_lda_500"));
 	//	files.add(new ImmutablePair<String,String>("movieLens", "movieLens" + "/" +"ml_sample_lda_500"));
 	//	files.add(new ImmutablePair<String,String>("lastFm", "lastFm"+ "/" +"lastfm_sample_lda_500"));
@@ -126,6 +126,7 @@ public class Pipeline {
 		//beta from paper 6.396
 		//double beta = 1;
 		double beta =6.396;
+		double [] betas = {6.396};
 		// initially r was set to 2
 		
 		// r original paper = 9.998; 
@@ -162,8 +163,11 @@ public class Pipeline {
         			for (int rc =0; rc<rs.length; rc++){
         				for (int lrc = 0; lrc<learning_rates.length; lrc++){
         					for (int cfc = 0; cfc<CFWeights.length; cfc++){
-        						for (int tauc = 0; tauc<taus_cluster.length; tauc++)
-        						startSustainApproach(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], beta, learning_rates[lrc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, CFWeights[cfc]);
+        						for (int tauc = 0; tauc<taus_cluster.length; tauc++){
+        							for (int b = 0; b<betas.length; b++)
+        								startSustainApproach(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, CFWeights[cfc]);
+        					
+        						}
         					}	
         				}
         			}

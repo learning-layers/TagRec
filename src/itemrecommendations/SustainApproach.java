@@ -44,7 +44,7 @@ public class SustainApproach {
 	List<Integer> user;
 	private int numberOfTopics;
 	private List<Bookmark> trainList;
-	double lambda;
+	//double lambda;
 	BM25Calculator rankedResourseCalculator;
 	
 	//listId = userId, Set= resourceIds
@@ -251,11 +251,11 @@ public class SustainApproach {
 				currentResource.setElement(t, 1);
 			}	
 			
-			if (clusterList.size()==0){
-				clusterList.add(currentResource);
-				//continue;
-			}
-			
+//			if (clusterList.size()==0){
+//				clusterList.add(currentResource);
+//				//continue;
+//			}
+//			
 			
 			
 			double maxActivation = 0;
@@ -296,7 +296,7 @@ public class SustainApproach {
 			
 			//System.out.println("max activation before Hemmung: "+maxActivation);
 			// equation 6 Hemmung
-		 	maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation; 
+		// 	maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation; 
 			//System.out.println("max activation nach Hemmung: "+maxActivation);
 		
 			
@@ -477,7 +477,8 @@ public class SustainApproach {
 			totalActivation+= activationPair.getLeft();
 		}
 		
-//		maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
+		//TODO: Think about whether this should be included or not
+		//maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
 		return maxActivation;
 	}
 	
