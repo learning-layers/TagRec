@@ -66,7 +66,7 @@ public class BookmarkSplitter {
 	public void splitUserPercentage(String filename, int percentage, boolean usePercentage, int count) {
 		for (int i = 1; i <= count; i++) {
 			List<Bookmark> lines = getUserPercentage(percentage, usePercentage);
-			writeSample(this.reader, lines, filename + "_" + percentage + "_perc_" + i, null, false);
+			writeSample(this.reader, lines, filename /*+ "_" + percentage + "_perc_" */ + i, null, false);
 		}
 	}
 	
@@ -86,7 +86,7 @@ public class BookmarkSplitter {
 	}
 	
 	// puts the last bookmark of each user into the testset
-	public void leaveLastOutSplit(String filename, boolean coldStart) {
+	public void leaveLastOutSplit(String filename, boolean coldStart, boolean realNames) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
 		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		int currentUser = -1, userIndex = 1, userSize = -1;
@@ -107,10 +107,10 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeSample(this.reader, trainLines, filename + "_train", null, false);
-		writeSample(this.reader, testLines, filename + "_test", null, false);
+		writeSample(this.reader, trainLines, filename + "_train", null, realNames);
+		writeSample(this.reader, testLines, filename + "_test", null, realNames);
 		trainLines.addAll(testLines);
-		writeSample(this.reader, trainLines, filename, null, false);
+		writeSample(this.reader, trainLines, filename, null, realNames);
 	}
 	
 	// puts one bookmark at random of each user into the testset
@@ -240,7 +240,7 @@ public class BookmarkSplitter {
 		return false;
 	}
 	
-	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart) {		
+	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart, boolean realNames) {		
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
@@ -249,17 +249,17 @@ public class BookmarkSplitter {
 			if (percentage > 0) {
 				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec);
 			} else {
-				splitter.leaveLastOutSplit(sampleName, coldStart); // TODO check cold-start
+				splitter.leaveLastOutSplit(sampleName, coldStart, realNames);
 			}
 		}
 	}
 	
-	public static void drawUserPercentageSample(String filename, int percentage) {
+	public static void drawUserPercentageSample(String filename, int percentage, int count) {
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);		
 		BookmarkSplitter splitter = new BookmarkSplitter(reader);
 		Collections.sort(reader.getBookmarks());
-		splitter.splitUserPercentage(filename, percentage, true, 1);
+		splitter.splitUserPercentage(filename, percentage, true, count);
 	}
 	
 	public static void calculateCore(String filename, String sampleName, int userLevel, int resLevel, int tagLevel) {

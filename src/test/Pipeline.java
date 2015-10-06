@@ -88,8 +88,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "dc09";
-	private final static String SUBDIR = "/";//"/l1o";
+	private final static String DATASET = "twitter";
+	private final static String SUBDIR = "/";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -126,7 +126,7 @@ public class Pipeline {
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(path, path + "1", 1, 0, true, true);
+		//BookmarkSplitter.splitSample(dir + "tag_rec_format_tweet_wotext", dir + "twitter_sample", 1, 0, true, false, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
@@ -247,12 +247,17 @@ public class Pipeline {
 		} else if (op.equals("core")) {
 			BookmarkSplitter.calculateCore(samplePath, samplePath, 3, 3, 3);
 		} else if (op.equals("split_l1o")) {
-			// TODO: cold-start users!
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, true, true);
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, true, false, true);
 		} else if (op.equals("split_8020")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false, true);
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false, false, true);
 		} else if (op.equals("percentage_sample")) {
-			BookmarkSplitter.drawUserPercentageSample(samplePath, 3);
+			BookmarkSplitter.drawUserPercentageSample(samplePath, 3, 1);
+		} else if (op.equals("percentage_sample_splits")) {
+			sampleCount = 4;
+			BookmarkSplitter.drawUserPercentageSample(samplePath, 3, sampleCount);
+			for (int i = 1; i <= sampleCount; i++) {
+				BookmarkSplitter.splitSample(samplePath + i, samplePath + i, 1, 0, true, true, true);
+			}
 		} else if (op.equals("process_bibsonomy")) {
 			BibsonomyProcessor.processUnsortedFile(sampleDir, "tas", args[2]);
 		} else if (op.equals("process_citeulike")) {	
@@ -284,6 +289,11 @@ public class Pipeline {
 			startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 		} else if (op.equals("tag_all")) {
 			startAllTagRecommenderApproaches(sampleDir, samplePath, !narrowFolksonomy);
+		} else if (op.equals("tag_samples")) {
+			startSampleTagRecommenderApproaches(sampleDir, samplePath + "1", !narrowFolksonomy);
+			startSampleTagRecommenderApproaches(sampleDir, samplePath + "2", !narrowFolksonomy);
+			startSampleTagRecommenderApproaches(sampleDir, samplePath + "3", !narrowFolksonomy);
+			startSampleTagRecommenderApproaches(sampleDir, samplePath + "4", !narrowFolksonomy);
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
 		} else {
@@ -304,6 +314,13 @@ public class Pipeline {
 		startCfTagCalculator(sampleDir, samplePath, 1, 20, -5, false);	// CFur
 		startFolkRankCalculator(sampleDir, samplePath, 1);				// APR+FR
 		startLdaCalculator(sampleDir, samplePath, 1000, 1, all);		// LDA
+	}
+	
+	private static void startSampleTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
+		startModelCalculator(sampleDir, samplePath, 1, -5, all);											// MPur
+		startRecCalculator(sampleDir, samplePath, all);														// GIRPTM
+		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.USER_TO_RESOURCE, false);	// BLLac
+		startFolkRankCalculator(sampleDir, samplePath, 1);													// APR+FR
 	}
 	
 	private static void evaluateAllTagRecommenderApproaches(String sampleDir, String samplePath) {
