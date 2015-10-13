@@ -92,7 +92,7 @@ public class CoreFiltering {
 		}
 		
 		System.out.println("Kept lines: " + keepData.size());
-		this.reader.setTestLines(keepData);
+		this.reader.setBookmarks(keepData);
 		return this.reader;
 	}
 }

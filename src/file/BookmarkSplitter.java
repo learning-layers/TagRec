@@ -263,7 +263,7 @@ public class BookmarkSplitter {
 	}
 	
 	public static void calculateCore(String filename, String sampleName, int userLevel, int resLevel, int tagLevel) {
-		String resultfile = sampleName + "_core_u" + userLevel + "_r" + resLevel + "_t" + tagLevel;
+		String resultfile = sampleName;// + "_core_u" + userLevel + "_r" + resLevel + "_t" + tagLevel;
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);		
 		
@@ -278,7 +278,7 @@ public class BookmarkSplitter {
 				int size = reader.getBookmarks().size();
 				CoreFiltering filtering = new CoreFiltering(reader);
 				reader = filtering.filterOrphansIterative(userLevel, resLevel, tagLevel);
-				String coreResultfile = resultfile + "_c" + ++i;
+				String coreResultfile = resultfile;// + "_c" + ++i;
 				writeSample(reader, reader.getBookmarks(), coreResultfile, null, false);
 				if (reader.getBookmarks().size() >= size) {
 					return;

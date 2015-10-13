@@ -250,6 +250,10 @@ public class BookmarkReader {
 		return this.userLines;
 	}
 	
+	public void setBookmarks(List<Bookmark> userLines) {
+		this.userLines = userLines;
+	}
+	
 	public List<Bookmark> getTestLines() {
 		return this.testLines;
 	}

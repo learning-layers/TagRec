@@ -252,6 +252,16 @@ public class Pipeline {
 			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false, false, true);
 		} else if (op.equals("percentage_sample")) {
 			BookmarkSplitter.drawUserPercentageSample(samplePath, 3, 1);
+		} else if (op.equals("core_sample_splits")) {
+			sampleCount = 4;
+			for (int i = 1; i <= sampleCount; i++) {
+				if (!narrowFolksonomy) {
+					BookmarkSplitter.calculateCore(samplePath + i, samplePath + "_c3" + i, 3, 3, 3);
+				} else {
+					BookmarkSplitter.calculateCore(samplePath + i, samplePath + "_c3" + i, 3, 1, 3);
+				}
+				BookmarkSplitter.splitSample(samplePath + "_c3" + i, samplePath + "_c3" + i, 1, 0, true, true, true);
+			}
 		} else if (op.equals("percentage_sample_splits")) {
 			sampleCount = 4;
 			BookmarkSplitter.drawUserPercentageSample(samplePath, 3, sampleCount);
