@@ -49,6 +49,8 @@ import processing.MPurCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.GIRPTMCalculator;
+import processing.ProcessFrequecyAndRecency;
+import processing.SocialCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.TagReuseProbAnalyzer;
 import processing.analyzing.UserTagDistribution;
@@ -108,7 +110,9 @@ public class Pipeline {
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
-		String path = dir + "/" + DATASET + "_sample";
+		String path = dir + /*"/" +*/ DATASET + "_sample";
+		String networkFilePath = "./data/csv/"+ dir + "follow_nw.csv";
+		String userInfoPath = "./data/csv/" + dir + "user.info";
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -133,6 +137,9 @@ public class Pipeline {
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
+		
+		// Test Social Recommender
+		startSocialRcommendation(dir, path, networkFilePath, userInfoPath);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
@@ -384,6 +391,13 @@ public class Pipeline {
 		}
 	}
 
+	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename, String userInfoPath){
+	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, userInfoPath, TRAIN_SIZE, TEST_SIZE);
+	    ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
+	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
+	    calculator.predictSample(TRAIN_SIZE, TEST_SIZE);
+	}
+	
 	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
