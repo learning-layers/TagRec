@@ -110,7 +110,8 @@ public class Pipeline {
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
-		String path = dir + /*"/" +*/ DATASET + "_sample";
+		//String path = dir + /*"/" +*/ DATASET + "_sample";
+		String path = dir + DATASET + "_sample_3"; 
 		String networkFilePath = "./data/csv/"+ dir + "follow_nw.csv";
 		String userInfoPath = "./data/csv/" + dir + "user.info";
 		
@@ -395,7 +396,7 @@ public class Pipeline {
 	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, userInfoPath, TRAIN_SIZE, TEST_SIZE);
 	    ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
 	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
-	    calculator.predictSample(TRAIN_SIZE, TEST_SIZE);
+	    calculator.predictSample();
 	}
 	
 	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {

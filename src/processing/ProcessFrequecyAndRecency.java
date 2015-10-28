@@ -19,7 +19,7 @@ public class ProcessFrequecyAndRecency {
 		
 	}
 	
-    public void ProcessTagAnalytics(HashMap<Integer, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap) {
+    public void ProcessTagAnalytics(HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimestampMap) {
 
         // frequency
         HashMap< Integer, Integer> tagFrequency = getTagFrequency(userTagTimestampMap);
@@ -63,11 +63,11 @@ public class ProcessFrequecyAndRecency {
      * @param userTagTimestampMap  user map to tag to list of timestamps of tag usage. 
      * @return a map of timestamp list lenght to number of times its occuring in the dataset.
      */
-    private HashMap<Integer, Integer> getTagFrequency(HashMap<Integer, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap){
+    private HashMap<Integer, Integer> getTagFrequency(HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimestampMap){
     
         HashMap<Integer, Integer> hashMapInteger = new HashMap<Integer, Integer>();
-        for (Integer user : userTagTimestampMap.keySet()){
-            for (Integer tag : userTagTimestampMap.get(user).keySet()){
+        for (String user : userTagTimestampMap.keySet()){
+            for (String tag : userTagTimestampMap.get(user).keySet()){
                 List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
                 Integer timestampListLen = timestampList.size();
                 if (!hashMapInteger.containsKey(timestampListLen)) {
@@ -86,13 +86,13 @@ public class ProcessFrequecyAndRecency {
      * @param userTagTimestampMap user map to tag to list of timestamps of tag usage.
      * @return the duration count between the 2 consecutive use of hastags.
      */
-    private HashMap<Integer, Integer> getRecencyInDuration(HashMap<Integer, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap){
+    private HashMap<Integer, Integer> getRecencyInDuration(HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimestampMap){
         
         
         // TODO: assume that the timestamp are sorted by most recent first (decreasing order of timestamp)
         HashMap<Integer, Integer> durationCountMap = new HashMap<Integer, Integer>();
-        for (Integer user : userTagTimestampMap.keySet()){
-            for (Integer tag : userTagTimestampMap.get(user).keySet()){
+        for (String user : userTagTimestampMap.keySet()){
+            for (String tag : userTagTimestampMap.get(user).keySet()){
                 List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
                 Long lastTimestamp = new Long(0);
                 for (Long currentTimestamp : timestampList){
@@ -120,10 +120,10 @@ public class ProcessFrequecyAndRecency {
      * @param userTagTimestampMap
      * @return
      */
-    private HashMap<Integer, Integer> getUserUniqueTagCount(HashMap<Integer, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap){        
+    private HashMap<Integer, Integer> getUserUniqueTagCount(HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimestampMap){        
         
         HashMap<Integer, Integer> userUniqueTagCount = new HashMap<Integer, Integer>();
-        for (Integer user : userTagTimestampMap.keySet()){
+        for (String user : userTagTimestampMap.keySet()){
             int numberUniqueTags = userTagTimestampMap.get(user).size();
             if (!userUniqueTagCount.containsKey(numberUniqueTags)){
                 userUniqueTagCount.put(numberUniqueTags, 0);
@@ -140,12 +140,12 @@ public class ProcessFrequecyAndRecency {
      * @param userTagTimestampMap
      * @return
      */
-    private HashMap<Integer, Integer> getUserTagCount(HashMap<Integer, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap){
+    private HashMap<Integer, Integer> getUserTagCount(HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimestampMap){
         
         HashMap<Integer, Integer> userTotalTagCountMap = new HashMap<Integer, Integer>();
-        for (Integer user : userTagTimestampMap.keySet()){
+        for (String user : userTagTimestampMap.keySet()){
             int userTotalTagCount = 0;
-            for (Integer tag : userTagTimestampMap.get(user).keySet()){
+            for (String tag : userTagTimestampMap.get(user).keySet()){
                 List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
                 int lenTimestampList = timestampList.size();
                 userTotalTagCount = userTotalTagCount + lenTimestampList;
@@ -158,14 +158,14 @@ public class ProcessFrequecyAndRecency {
         return userTotalTagCountMap;
     }
     
-    private HashMap<Integer, Integer> getTagTagCount(HashMap<Integer, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap){
+    private HashMap<Integer, Integer> getTagTagCount(HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimestampMap){
 
         /*
          * Count of tags in the system. Some tags are frequent the others.
          * */
-        HashMap<Integer, Integer> tagTagCount = new HashMap<Integer, Integer>();
-        for (Integer user : userTagTimestampMap.keySet()){
-            for (Integer tag : userTagTimestampMap.get(user).keySet()){
+        HashMap<String, Integer> tagTagCount = new HashMap<String, Integer>();
+        for (String user : userTagTimestampMap.keySet()){
+            for (String tag : userTagTimestampMap.get(user).keySet()){
                 List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
                 if (!tagTagCount.containsKey(tag)){
                     tagTagCount.put(tag, 0);
@@ -177,7 +177,7 @@ public class ProcessFrequecyAndRecency {
         }
         // get the count of tags that are used particular number of time.
         HashMap<Integer, Integer> tagCountCountMap = new HashMap<Integer, Integer>();
-        for (Integer tag : tagTagCount.keySet()){
+        for (String tag : tagTagCount.keySet()){
             Integer count = tagTagCount.get(tag);
             if (!tagCountCountMap.containsKey(count)){
                 tagCountCountMap.put(count, 0);
@@ -189,14 +189,14 @@ public class ProcessFrequecyAndRecency {
         return tagCountCountMap;
     }
     
-    private HashMap<Integer, Integer> getTagUserCount(HashMap<Integer, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap){
+    private HashMap<Integer, Integer> getTagUserCount(HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimestampMap){
 
         /**
          * Some tags have more users then the others.
          * */
-        HashMap<Integer, Integer> tagUserCount = new HashMap<Integer, Integer>();
-        for (Integer user : userTagTimestampMap.keySet()){
-            for (Integer tag : userTagTimestampMap.get(user).keySet()){
+        HashMap<String, Integer> tagUserCount = new HashMap<String, Integer>();
+        for (String user : userTagTimestampMap.keySet()){
+            for (String tag : userTagTimestampMap.get(user).keySet()){
                 if(!tagUserCount.containsKey(tag)){
                     tagUserCount.put(tag, 0);
                 }else{
@@ -206,7 +206,7 @@ public class ProcessFrequecyAndRecency {
             }
         }
         HashMap<Integer, Integer> tagUserCountCount = new HashMap<Integer, Integer>(); 
-        for (Integer tag : tagUserCount.keySet()){
+        for (String tag : tagUserCount.keySet()){
             Integer count = tagUserCount.get(tag);
             if (!tagUserCountCount.containsKey(count)){
                 tagUserCountCount.put(count, 0);
