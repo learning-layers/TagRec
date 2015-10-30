@@ -110,8 +110,8 @@ public class Pipeline {
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
-		//String path = dir + /*"/" +*/ DATASET + "_sample";
-		String path = dir + DATASET + "_sample_3"; 
+		//String path = dir + "/" + DATASET + "_sample";
+		String path = dir + DATASET + "_sample"; 
 		String networkFilePath = "./data/csv/"+ dir + "follow_nw.csv";
 		String userInfoPath = "./data/csv/" + dir + "user.info";
 		
@@ -131,7 +131,7 @@ public class Pipeline {
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(dir + "tag_rec_format_tweet_wotext", dir + "twitter_sample", 1, 0, true, false, true);
+		//BookmarkSplitter.splitSample(dir + "twitter_sample_2", dir + "twitter_sample", 1, 0, true, false, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		

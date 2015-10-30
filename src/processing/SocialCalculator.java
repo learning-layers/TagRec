@@ -12,7 +12,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+
 import common.Bookmark;
+import common.DoubleMapComparator;
+import common.DoubleMapComparatorKeyString;
 import file.BookmarkReader;
 import file.PredictionFileWriter;
 
@@ -194,7 +198,6 @@ public class SocialCalculator {
         String user = this.users.get(userID);
         List<String> friendList = network.get(user);
         HashMap <String, Integer> tagRank = new HashMap<String, Integer>();
-        
         if (friendList == null){
         	return rankedList;
         }
@@ -219,10 +222,10 @@ public class SocialCalculator {
         		}
         	}
         }
-        LinkedHashMap linkedHashMap = sortHashMapByValuesD(tagRank);
-        System.out.println(linkedHashMap);
-       
-        return rankedList;
+        
+        Map<String, Double> sortedResultMap = new TreeMap<String, Double>(new DoubleMapComparatorKeyString(rankedList));
+		sortedResultMap.putAll(sortedResultMap);
+		return rankedList;
     }
     
     public LinkedHashMap sortHashMapByValuesD(HashMap passedMap) {
@@ -258,6 +261,25 @@ public class SocialCalculator {
     
     private List<Map<String, Double>> startActCreation(int sampleSize) {
         List<Map<String, Double>> results = new ArrayList<Map<String, Double>>();
+        for (Map<String, Double> map : results) {
+			double denom = 0.0;
+			if (map != null) {
+				for (Map.Entry<String, Double> entry : map.entrySet()) {
+					if (entry != null) {
+						double actVal = Math.log(entry.getValue());
+						denom += Math.exp(actVal);
+						entry.setValue(actVal);
+					}
+				}
+				//denomList.add(denom);
+				for (Map.Entry<String, Double> entry : map.entrySet()) {
+						if (entry != null) {
+							double actVal = Math.exp(entry.getValue());
+							entry.setValue(actVal / denom);
+						}
+				}
+			}
+		}
         for (int i = trainSize; i < sampleSize; i++) { // the test-set
             Bookmark data = reader.getBookmarks().get(i);
             Map<String, Double> map = getRankedTagList(data.getUserID(), data.getTimestampAsLong());
