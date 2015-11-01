@@ -131,7 +131,7 @@ public class Pipeline {
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(dir + "twitter_sample_2", dir + "twitter_sample", 1, 0, true, false, true);
+		//BookmarkSplitter.splitSample(dir + "twitter_sample_3", dir + "twitter_sample", 1, 0, true, false, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
@@ -140,7 +140,7 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test Social Recommender
-		startSocialRcommendation(dir, path, networkFilePath, userInfoPath);
+		startSocialRcommendation(dir, path, null, networkFilePath, userInfoPath);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
@@ -392,11 +392,12 @@ public class Pipeline {
 		}
 	}
 
-	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename, String userInfoPath){
-	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, userInfoPath, TRAIN_SIZE, TEST_SIZE);
-	    ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
-	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
-	    calculator.predictSample();
+	private static void startSocialRcommendation(String sampleDir, String sampleName, String extraTrainFilename, String networkFilename, String userInfoPath){
+		getTrainTestSize(sampleName);
+		SocialCalculator calculator = new SocialCalculator(sampleName, extraTrainFilename, networkFilename, userInfoPath, TRAIN_SIZE, TEST_SIZE);
+		BookmarkReader reader = calculator.predictSample();
+		/*ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
+	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());*/
 	}
 	
 	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {
