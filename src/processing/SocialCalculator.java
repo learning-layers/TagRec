@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.google.common.primitives.Ints;
+
 import common.Bookmark;
 import common.DoubleMapComparator;
 import common.DoubleMapComparatorKeyString;
@@ -27,45 +29,35 @@ import file.PredictionFileWriter;
 public class SocialCalculator {
 
     private BookmarkReader reader;
-    private HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimes ;
+    private HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimes ;
     private HashMap<String, List<String>> network;
     private List<String> users;
-    private List<String> tags;
     private int sampleSize;
     private int trainSize;
-    private String userInfoPath;
     private List<String> idNameMap;
-    private HashMap<String, Integer> nameIdMap;
-    private HashMap<String, String> twitterIdScreenNameMap;
-    private HashMap<String, String> twitterScreenNameIdMap;
     
-    public SocialCalculator(String tweetFilename, String networkFilename, String userInfoPath, int trainSize, int sampleSize) {
+    /**
+     * @param tweetFilename
+     * @param networkFilename
+     * @param userInfoPath
+     * @param trainSize
+     * @param sampleSize
+     */
+    public SocialCalculator(String tweetFilename, String networkFilename, int trainSize, int sampleSize) {
         this.sampleSize = sampleSize;
         this.trainSize = trainSize;
-        this.userInfoPath = userInfoPath;
         reader = new BookmarkReader(trainSize, false);
         reader.readFile(tweetFilename);
         List<Bookmark> bookmarkList = reader.getBookmarks();
         this.users = reader.getUsers();
-        this.tags = reader.getTags();
         this.sampleSize = bookmarkList.size();
         this.trainSize =  (int) ((int)bookmarkList.size() * 0.9);
         this.userTagTimes = getUserTagTime(bookmarkList.subList(0, this.trainSize));
         this.idNameMap = reader.getUsers();
-        this.nameIdMap = this.getNameIdMap(idNameMap);
         this.network = getNetwork(networkFilename, getNameIdMap(idNameMap));
-        this.twitterIdScreenNameMap = getTwitterIdScreenNameMap(userInfoPath);
-        this.twitterScreenNameIdMap = getTwitterScreenNameIdMap(userInfoPath);
-        /*
-         * Agenda:
-         * 
-         * >> read the twitter list of bookmarks and create a bookmark list out of it
-         * 
-         * >> in case of bookmarks they are mapped to the integer values mapped to screen anem and tags
-         * */
     }
     
-    public HashMap<String, HashMap<String, ArrayList<Long>>> getUserTagTimes(){
+    public HashMap<String, HashMap<Integer, ArrayList<Long>>> getUserTagTimes(){
     	return userTagTimes;
     }
     
@@ -82,62 +74,14 @@ public class SocialCalculator {
         return nameIdMap;
     }
     
-    
-    private HashMap<String, String> getTwitterScreenNameIdMap(String userInfoPath){
-    	HashMap<String, String> twitterScreenNameIdMap = new HashMap<String, String>();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(new File(userInfoPath)));
-            String line = "";
-            while((line=br.readLine())!=null){
-                String[] tokens = line.split("\t");
-                String id = tokens[0];
-                String name = tokens[1];
-                twitterScreenNameIdMap.put(name, id);
-            }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return twitterScreenNameIdMap;
-    }
-    
-    /**
-     * Takes a filename with userinformation that maps the username to the twitter ids.
-     * @param userInfoMapPath
-     * @return
-     */
-    private HashMap<String, String> getTwitterIdScreenNameMap(String userInfoMapPath){
-        HashMap<String, String> twitterIdNameMap = new HashMap<String, String>();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(new File(userInfoMapPath)));
-            String line = "";
-            while((line=br.readLine())!=null){
-                String[] tokens = line.split("\t");
-                String id = tokens[0];
-                String name = tokens[1];
-                twitterIdNameMap.put(id, name);
-            }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return twitterIdNameMap;
-    }   
-    
     /**
      * 
      * The user tags and their timeline information.
      * @param bookmarkList
      * @return
      */
-    private HashMap<String, HashMap<String, ArrayList<Long>>> getUserTagTime(List<Bookmark> bookmarkList){
-        HashMap<String, HashMap<String, ArrayList<Long>>> userTagTimes = new HashMap<String, HashMap<String,ArrayList<Long>>>();
+    private HashMap<String, HashMap<Integer, ArrayList<Long>>> getUserTagTime(List<Bookmark> bookmarkList){
+        HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimes = new HashMap<String, HashMap<Integer,ArrayList<Long>>>();
         for(Bookmark bookmark : bookmarkList){
             List<Integer> taglist = bookmark.getTags();
             Integer userId = bookmark.getUserID();
@@ -147,19 +91,17 @@ public class SocialCalculator {
             String timestamp = bookmark.getTimestamp();
             Long timestampLong = bookmark.getTimestampAsLong();
             if (!userTagTimes.containsKey(userName)){
-                userTagTimes.put(userName, new HashMap<String, ArrayList<Long>>());
+                userTagTimes.put(userName, new HashMap<Integer, ArrayList<Long>>());
             }
             for (Integer tag : taglist){
-            	String tagName = this.tags.get(tag);
             	if (!userTagTimes.get(userName).containsKey(tag)){
-                    userTagTimes.get(userName).put(tagName, new ArrayList<Long>());
+                    userTagTimes.get(userName).put(tag, new ArrayList<Long>());
                 }
-                userTagTimes.get(userName).get(tagName).add(timestampLong);
+                userTagTimes.get(userName).get(tag).add(timestampLong);
             }
         }
         return userTagTimes;
     }
-    
     
     /**
      * 
@@ -193,18 +135,23 @@ public class SocialCalculator {
         return network;
     }
     
-    private Map<String, Double> getRankedTagList(int userID, Long timesString){
-        Map<String, Double> rankedList = new HashMap<String, Double>();
+    /**
+     * @param userID
+     * @param timesString
+     * @return
+     */
+    private Map<Integer, Double> getRankedTagList(int userID, Long timesString){
+        Map<Integer, Double> rankedList = new HashMap<Integer, Double>();
         String user = this.users.get(userID);
         List<String> friendList = network.get(user);
-        HashMap <String, Integer> tagRank = new HashMap<String, Integer>();
+        HashMap <Integer, Integer> tagRank = new HashMap<Integer, Integer>();
         if (friendList == null){
         	return rankedList;
         }
         for(String friend : friendList){
-        	HashMap<String, ArrayList<Long>> tagTimestampMap = userTagTimes.get(friend);
+        	HashMap<Integer, ArrayList<Long>> tagTimestampMap = userTagTimes.get(friend);
         	if (tagTimestampMap != null){
-        		for (String tag : tagTimestampMap.keySet()){
+        		for (Integer tag : tagTimestampMap.keySet()){
         			ArrayList<Long> timestampList = tagTimestampMap.get(tag);
                 
         			// is there a timestamp less than the given timestamp
@@ -223,81 +170,43 @@ public class SocialCalculator {
         	}
         }
         
-        Map<String, Double> sortedResultMap = new TreeMap<String, Double>(new DoubleMapComparatorKeyString(rankedList));
-		sortedResultMap.putAll(sortedResultMap);
-		return rankedList;
+        Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(rankedList));
+		sortedResultMap.putAll(rankedList);
+		return sortedResultMap;
     }
+
     
-    public LinkedHashMap sortHashMapByValuesD(HashMap passedMap) {
-    	   List mapKeys = new ArrayList(passedMap.keySet());
-    	   List mapValues = new ArrayList(passedMap.values());
-    	   Collections.sort(mapValues);
-    	   Collections.sort(mapKeys);
-
-    	   LinkedHashMap sortedMap = new LinkedHashMap();
-
-    	   java.util.Iterator valueIt = mapValues.iterator();
-    	   while (valueIt.hasNext()) {
-    	       Object val = valueIt.next();
-    	       Iterator keyIt = mapKeys.iterator();
-
-    	       while (keyIt.hasNext()) {
-    	           Object key = keyIt.next();
-    	           String comp1 = passedMap.get(key).toString();
-    	           String comp2 = val.toString();
-
-    	           if (comp1.equals(comp2)){
-    	               passedMap.remove(key);
-    	               mapKeys.remove(key);
-    	               sortedMap.put((String)key, (Integer)val);
-    	               break;
-    	           }
-
-    	       }
-
-    	   }
-    	   return sortedMap;
-   }
+    /**
+     * @param sampleSize
+     * @return
+     */
+    private List<Map<Integer, Double>> calculateSocialTagScore(int sampleSize) {
     
-    private List<Map<String, Double>> startActCreation(int sampleSize) {
-        List<Map<String, Double>> results = new ArrayList<Map<String, Double>>();
-        for (Map<String, Double> map : results) {
-			double denom = 0.0;
-			if (map != null) {
-				for (Map.Entry<String, Double> entry : map.entrySet()) {
-					if (entry != null) {
-						double actVal = Math.log(entry.getValue());
-						denom += Math.exp(actVal);
-						entry.setValue(actVal);
-					}
-				}
-				//denomList.add(denom);
-				for (Map.Entry<String, Double> entry : map.entrySet()) {
-						if (entry != null) {
-							double actVal = Math.exp(entry.getValue());
-							entry.setValue(actVal / denom);
-						}
-				}
-			}
-		}
+        List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
         for (int i = trainSize; i < sampleSize; i++) { // the test-set
             Bookmark data = reader.getBookmarks().get(i);
-            Map<String, Double> map = getRankedTagList(data.getUserID(), data.getTimestampAsLong());
+            Map<Integer, Double> map = getRankedTagList(data.getUserID(), data.getTimestampAsLong());
             results.add(map);
         }  
         return results;
     }
     
+    
+    /**
+     * @return
+     */
     public BookmarkReader predictSample() {
-        List<Map<String, Double>> actValues = startActCreation(this.sampleSize);
+    
+        List<Map<Integer, Double>> actValues = calculateSocialTagScore(this.sampleSize);
         // convert tag to int
         List<int[]> predictionValues = new ArrayList<int[]>();
         for (int i = 0; i < actValues.size(); i++) {
-            Map<String, Double> modelVal = actValues.get(i);
-            //predictionValues.add(Ints.toArray(modelVal.keySet()));
+            Map<Integer, Double> modelVal = actValues.get(i);
+            predictionValues.add(Ints.toArray(modelVal.keySet()));
         }
         reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
         PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
+        //writer.writeFile(this.twee + "_social")
         return reader;
     }      
 }

@@ -110,10 +110,8 @@ public class Pipeline {
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
-		//String path = dir + "/" + DATASET + "_sample";
-		String path = dir + DATASET + "_sample"; 
+		String path = dir + DATASET + "_sample";
 		String networkFilePath = "./data/csv/"+ dir + "follow_nw.csv";
-		String userInfoPath = "./data/csv/" + dir + "user.info";
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -131,7 +129,7 @@ public class Pipeline {
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(dir + "twitter_sample_2", dir + "twitter_sample", 1, 0, true, false, true);
+		//BookmarkSplitter.splitSample(dir + "twitter_sample_new", dir + "twitter_sample", 1, 0, true, false, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
@@ -140,7 +138,7 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test Social Recommender
-		startSocialRcommendation(dir, path, networkFilePath, userInfoPath);
+		startSocialRcommendation(dir, path, networkFilePath);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
@@ -392,11 +390,14 @@ public class Pipeline {
 		}
 	}
 
-	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename, String userInfoPath){
-	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, userInfoPath, TRAIN_SIZE, TEST_SIZE);
+	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename){
+	    getTrainTestSize(sampleName);
+	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
 	    ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
 	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
 	    calculator.predictSample();
+	    //writeMetrics(sampleDir, sampleName, "social", 1, 10, null, null, null);
+	    
 	}
 	
 	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {
