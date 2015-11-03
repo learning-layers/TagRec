@@ -235,6 +235,37 @@ public class MetricsCalculator {
 		}
 		*/
 	}
+
+	public static void calculateNDCGMetrics(String filename, int k, String outputFile, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering describer, double r, double tau, double lr) {
+		PredictionFileReader reader = new PredictionFileReader();
+		reader.readFile(filename, k, wikiReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);	
+		String suffix = "";
+		if (describer != null) {
+			suffix += ("_" + (describer.getDescriber() ? "desc" : "cat"));
+		}
+		
+		MetricsCalculator calc = new MetricsCalculator(reader, "./data/metrics/" + outputFile + suffix + "_all", k, wikiReader);
+		nDCGSum += calc.getNDCG();
+	
+		
+		if (outputFile != null) {
+			try {
+				FileWriter writer = new FileWriter(new File("./data/metrics/" + outputFile + "_ndcg20.txt"), true);
+				BufferedWriter bw = new BufferedWriter(writer);
+				bw.write(Double.toString((r)).replace('.', ',') + ";");
+				bw.write(Double.toString((tau)).replace('.', ',') + ";");
+				bw.write(Double.toString((lr)).replace('.', ',') + ";");
+				bw.write(Double.toString((nDCGSum)).replace('.', ',') + ";");
+				bw.write(Double.toString((calc.getRecall())).replace('.', ',') + ";");
+				bw.write(Double.toString((calc.getPrecision())).replace('.', ',') + "\n");
+				bw.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		resetMetrics();
+	}
+
 	
 	public static void writeAverageMetrics(String outputFile, int k, double size, boolean calcTags, boolean endLine, Boolean describer) {
 		try {
