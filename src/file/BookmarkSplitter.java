@@ -86,9 +86,13 @@ public class BookmarkSplitter {
 	}
 	
 	// puts the last bookmark of each user into the testset
-	public void leaveLastOutSplit(String filename, boolean coldStart, boolean realNames) {
+	public void leaveLastOutSplit(String filename, boolean coldStart, boolean realNames, String userWhiteList) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
 		List<Bookmark> testLines = new ArrayList<Bookmark>();
+		List<String> testUsers = null;
+		if (userWhiteList != null) {
+			testUsers = Utilities.readFileToStringList("data/csv/" + userWhiteList);
+		}
 		int currentUser = -1, userIndex = 1, userSize = -1;
 		for (Bookmark data : this.reader.getBookmarks()) {
 			if (currentUser != data.getUserID())  { // new user
@@ -97,7 +101,8 @@ public class BookmarkSplitter {
 				userIndex = 1;
 			}
 			if (userIndex++ == userSize) {
-				if (coldStart || userSize > 1) {
+				// check if user has enough lines and if user is in the whitelist
+				if ((coldStart || userSize > 1) && (testUsers == null || testUsers.contains(this.reader.getUsers().get(data.getUserID())))) {
 					testLines.add(data);
 				} else {
 					trainLines.add(data);
@@ -240,7 +245,7 @@ public class BookmarkSplitter {
 		return false;
 	}
 	
-	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart, boolean realNames) {		
+	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart, boolean realNames, String userWhiteList) {		
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
@@ -249,7 +254,7 @@ public class BookmarkSplitter {
 			if (percentage > 0) {
 				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec);
 			} else {
-				splitter.leaveLastOutSplit(sampleName, coldStart, realNames);
+				splitter.leaveLastOutSplit(sampleName, coldStart, realNames, userWhiteList);
 			}
 		}
 	}

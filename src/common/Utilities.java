@@ -20,8 +20,10 @@
 
 package common;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -189,6 +191,24 @@ public class Utilities {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public static List<String> readFileToStringList(String filename) {
+		List<String> returnList = new ArrayList<String>();
+		
+		try {
+			FileReader reader = new FileReader(new File(filename));
+			BufferedReader br = new BufferedReader(reader);
+			String line = "";
+			while ((line = br.readLine()) != null) {
+				returnList.add(line);
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return returnList;
 	}
 	
 	public static Map<Integer, Double> getRelativeMapFromList(List<Integer> from) {

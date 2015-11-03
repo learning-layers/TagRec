@@ -116,8 +116,8 @@ public class BLLCalculator {
 				resCount = this.resCounts.get(resID);
 				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true, false);	
 
-				double denom = 0.0;
 				/*
+				double denom = 0.0;
 				for (Map.Entry<Integer, Double> entry : associativeValues.entrySet()) {
 					double val = Math.log(entry.getValue());
 					denom += Math.exp(val);
@@ -130,7 +130,7 @@ public class BLLCalculator {
 					Double val = userResultMap.get(entry.getKey());				
 					userResultMap.put(entry.getKey(), val == null ? entry.getValue().doubleValue() : val.doubleValue() + entry.getValue().doubleValue());
 				}
-				denom = 0.0;
+				double denom = 0.0;
 				for (Map.Entry<Integer, Double> entry : userResultMap.entrySet()) {
 					double val = Math.log(entry.getValue());
 					denom += Math.exp(val);
@@ -389,6 +389,8 @@ public class BLLCalculator {
 		}
 		if (cType == CalculationType.USER_TO_RESOURCE) {
 			suffix += "_ac";
+		} else if (cType == CalculationType.USER_TO_RESOURCE_ONLY) {
+			suffix = "_ac";
 		}
 		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);

@@ -49,6 +49,7 @@ import processing.MPurCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.GIRPTMCalculator;
+import processing.RecencyCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.TagReuseProbAnalyzer;
 import processing.analyzing.UserTagDistribution;
@@ -89,7 +90,7 @@ public class Pipeline {
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
 	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "/";
+	private final static String SUBDIR = "/researchers";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -119,29 +120,33 @@ public class Pipeline {
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
-		//try { getStatistics(path, false); } catch (Exception e) { e.printStackTrace(); }
+		//try { getStatistics(dir + "/tweets", false); } catch (Exception e) { e.printStackTrace(); }
 		
 		//JSONProcessor.writeJSONOutput("bib_core/vedran/bib_bibtex_2_perc_1");
 		
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(dir + "tag_rec_format_tweet_wotext", dir + "twitter_sample", 1, 0, true, false, true);
+		//BookmarkSplitter.splitSample(dir + "/tweets", dir + "/twitter_sample", 1, 0, true, false, true, dir + "/white_user.txt");
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
+		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.NONE, false);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
-		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
+
+		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.USER_TO_RESOURCE_ONLY, false);
+		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.USER_TO_RESOURCE, false);
+		
+		//startRecCalculator(dir, path);
 		
 		// Test the GIRP and GIRPTM algorithms
-		//startRecCalculator(dir, path, true);
+		//startGirpCalculator(dir, path, false);
 		
 		// Test the MP_u, MP_r and MP_u_r algorithms
-		//startModelCalculator(dir, path, 1, -5, true);
+		//startModelCalculator(dir, path, 1, -5, false);
 		
 		// Test the MP algorithm
 		//startBaselineCalculator(dir, path, 1, true);
@@ -204,15 +209,17 @@ public class Pipeline {
 			sampleDir = "lastfm_core";
 		} else if (args[1].equals("del")) {
 			sampleDir = "del_core";
+		} else if (args[1].equals("twitter")) {
+			sampleDir = "twitter_core";
 		} else {
 			System.out.println("Dataset not available");
 			return;
 		}
-		String subdir = "/bll";
+		String subdir = "/";
 		sampleDir += subdir;
 		samplePath += (sampleDir + "/" + args[2]);
 		
-		boolean narrowFolksonomy = args[1].equals("flickr");
+		boolean narrowFolksonomy = args[1].equals("flickr") || args[1].equals("twitter");
 		if (op.equals("cf")) {
 			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
 		} else if (op.equals("cfr")) {
@@ -226,7 +233,7 @@ public class Pipeline {
 				startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.USER_TO_RESOURCE, true);
 			}
 		} else if (op.equals("girptm")) {
-			startRecCalculator(sampleDir, samplePath, !narrowFolksonomy);
+			startGirpCalculator(sampleDir, samplePath, !narrowFolksonomy);
 		} else if (op.equals("mp_ur")) {
 			startModelCalculator(sampleDir, samplePath, sampleCount, -5, !narrowFolksonomy);
 		} else if (op.equals("mp")) {
@@ -247,9 +254,9 @@ public class Pipeline {
 		} else if (op.equals("core")) {
 			BookmarkSplitter.calculateCore(samplePath, samplePath, 3, 3, 3);
 		} else if (op.equals("split_l1o")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, true, false, true);
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 0, true, false, true, null);
 		} else if (op.equals("split_8020")) {
-			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false, false, true);
+			BookmarkSplitter.splitSample(samplePath, samplePath, sampleCount, 20, false, false, true, null);
 		} else if (op.equals("percentage_sample")) {
 			BookmarkSplitter.drawUserPercentageSample(samplePath, 3, 1);
 		} else if (op.equals("core_sample_splits")) {
@@ -260,13 +267,13 @@ public class Pipeline {
 				} else {
 					BookmarkSplitter.calculateCore(samplePath + i, samplePath + "_c3" + i, 3, 1, 3);
 				}
-				BookmarkSplitter.splitSample(samplePath + "_c3" + i, samplePath + "_c3" + i, 1, 0, true, true, true);
+				BookmarkSplitter.splitSample(samplePath + "_c3" + i, samplePath + "_c3" + i, 1, 0, true, true, true, null);
 			}
 		} else if (op.equals("percentage_sample_splits")) {
 			sampleCount = 4;
 			BookmarkSplitter.drawUserPercentageSample(samplePath, 3, sampleCount);
 			for (int i = 1; i <= sampleCount; i++) {
-				BookmarkSplitter.splitSample(samplePath + i, samplePath + i, 1, 0, true, true, true);
+				BookmarkSplitter.splitSample(samplePath + i, samplePath + i, 1, 0, true, true, true, null);
 			}
 		} else if (op.equals("process_bibsonomy")) {
 			BibsonomyProcessor.processUnsortedFile(sampleDir, "tas", args[2]);
@@ -315,7 +322,7 @@ public class Pipeline {
 	private static void startAllTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
 		startBaselineCalculator(sampleDir, samplePath, 1, true);		// MP
 		startModelCalculator(sampleDir, samplePath, 1, -5, all);		// MPur
-		startRecCalculator(sampleDir, samplePath, all);					// GIRPTM
+		startGirpCalculator(sampleDir, samplePath, all);					// GIRPTM
 		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.NONE, true);				// BLL
 		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.USER_TO_RESOURCE, true);	// BLLac
 		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, false);				// 3L		
@@ -328,7 +335,7 @@ public class Pipeline {
 	
 	private static void startSampleTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
 		startModelCalculator(sampleDir, samplePath, 1, -5, all);											// MPur
-		startRecCalculator(sampleDir, samplePath, all);														// GIRPTM
+		startGirpCalculator(sampleDir, samplePath, all);														// GIRPTM
 		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.USER_TO_RESOURCE, false);	// BLLac
 		startFolkRankCalculator(sampleDir, samplePath, 1);													// APR+FR
 	}
@@ -371,7 +378,11 @@ public class Pipeline {
 		for (int i = 1; i <= sampleCount; i++) {
 			for (int dVal : dValues) {
 				reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, dVal, 5, type);
-				writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, allMetrics ? reader : null, null);
+				if (type == CalculationType.USER_TO_RESOURCE_ONLY) {
+					writeMetrics(sampleDir, sampleName, "ac_5_5", sampleCount, 10, null, allMetrics ? reader : null, null);
+				} else {
+					writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, allMetrics ? reader : null, null);
+				}
 				if (all) {
 					for (int betaVal : betaValues) {
 						reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal, type);
@@ -384,7 +395,7 @@ public class Pipeline {
 		}
 	}
 
-	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {
+	private static void startGirpCalculator(String sampleDir, String sampleName, boolean all) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
 		reader = GIRPTMCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false);
@@ -393,6 +404,13 @@ public class Pipeline {
 			reader = GIRPTMCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true);
 			writeMetrics(sampleDir, sampleName, "girptm", 1, 10, null, reader, null);
 		}
+	}
+	
+	private static void startRecCalculator(String sampleDir, String sampleName) {
+		getTrainTestSize(sampleName);
+		BookmarkReader reader = null;
+		reader = RecencyCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE);
+		writeMetrics(sampleDir, sampleName, "rec", 1, 10, null, reader, null);
 	}
 
 	private static void startModelCalculator(String sampleDir, String sampleName, int sampleCount, int betaUpperBound, boolean all) {
