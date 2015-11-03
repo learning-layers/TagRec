@@ -12,10 +12,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
-
 import com.google.common.primitives.Ints;
-
 import common.Bookmark;
 import common.DoubleMapComparator;
 import common.DoubleMapComparatorKeyString;
@@ -28,38 +27,30 @@ import file.PredictionFileWriter;
  */
 public class SocialCalculator {
 
+    private String filename;
     private BookmarkReader reader;
     private HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimes ;
     private HashMap<String, List<String>> network;
     private List<String> users;
-    private int sampleSize;
     private int trainSize;
     private List<String> idNameMap;
     
-    /**
-     * @param tweetFilename
-     * @param networkFilename
-     * @param userInfoPath
-     * @param trainSize
-     * @param sampleSize
-     */
-    public SocialCalculator(String tweetFilename, String networkFilename, int trainSize, int sampleSize) {
-        this.sampleSize = sampleSize;
+    public SocialCalculator(String userTweetFilename, String networkFilename, int trainSize, int testSize) {
+        this.filename = userTweetFilename;
         this.trainSize = trainSize;
         reader = new BookmarkReader(trainSize, false);
-        reader.readFile(tweetFilename);
-        List<Bookmark> bookmarkList = reader.getBookmarks();
+        reader.readFile(userTweetFilename);
         this.users = reader.getUsers();
-        this.sampleSize = bookmarkList.size();
-        this.trainSize =  (int) ((int)bookmarkList.size() * 0.9);
-        this.userTagTimes = getUserTagTime(bookmarkList.subList(0, this.trainSize));
         this.idNameMap = reader.getUsers();
+        // initialise the predictor with the basic training dataset
+        this.addBookmarks(reader.getBookmarks().subList(0, this.trainSize));
         this.network = getNetwork(networkFilename, getNameIdMap(idNameMap));
     }
     
     public HashMap<String, HashMap<Integer, ArrayList<Long>>> getUserTagTimes(){
     	return userTagTimes;
     }
+    
     
     /**
      * Takes a list of username string with user id as index of the list.
@@ -75,13 +66,15 @@ public class SocialCalculator {
     }
     
     /**
-     * 
      * The user tags and their timeline information.
      * @param bookmarkList
      * @return
      */
-    private HashMap<String, HashMap<Integer, ArrayList<Long>>> getUserTagTime(List<Bookmark> bookmarkList){
-        HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimes = new HashMap<String, HashMap<Integer,ArrayList<Long>>>();
+    private void addBookmarks(List<Bookmark> bookmarkList){
+    	
+    	if (this.userTagTimes == null){
+        	this.userTagTimes = new HashMap<String, HashMap<Integer,ArrayList<Long>>>();
+        }
         for(Bookmark bookmark : bookmarkList){
             List<Integer> taglist = bookmark.getTags();
             Integer userId = bookmark.getUserID();
@@ -100,11 +93,9 @@ public class SocialCalculator {
                 userTagTimes.get(userName).get(tag).add(timestampLong);
             }
         }
-        return userTagTimes;
     }
     
     /**
-     * 
      * @param filepath
      * @param nameIdMap
      * @return HashMap name and friends as 
@@ -144,7 +135,7 @@ public class SocialCalculator {
         Map<Integer, Double> rankedList = new HashMap<Integer, Double>();
         String user = this.users.get(userID);
         List<String> friendList = network.get(user);
-        HashMap <Integer, Integer> tagRank = new HashMap<Integer, Integer>();
+        HashMap <Integer, Double> tagRank = new HashMap<Integer, Double>();
         if (friendList == null){
         	return rankedList;
         }
@@ -153,7 +144,6 @@ public class SocialCalculator {
         	if (tagTimestampMap != null){
         		for (Integer tag : tagTimestampMap.keySet()){
         			ArrayList<Long> timestampList = tagTimestampMap.get(tag);
-                
         			// is there a timestamp less than the given timestamp
         			for (Long timestampLong : timestampList){
         				if(timesString > timestampLong ){
@@ -161,7 +151,7 @@ public class SocialCalculator {
         					if (tagRank.containsKey(tag)){
         						tagRank.put(tag, tagRank.get(tag)+1);
         					}else{
-        						tagRank.put(tag, 1);
+        						tagRank.put(tag, 1.0);
         					}
         				}
         			}
@@ -169,35 +159,34 @@ public class SocialCalculator {
         		}
         	}
         }
-        
-        Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(rankedList));
-		sortedResultMap.putAll(rankedList);
+
+        Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(tagRank));
+		sortedResultMap.putAll(tagRank);
 		return sortedResultMap;
     }
-
+  
     
     /**
      * @param sampleSize
      * @return
      */
-    private List<Map<Integer, Double>> calculateSocialTagScore(int sampleSize) {
-    
+    private List<Map<Integer, Double>> calculateSocialTagScore() {
+        
         List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
-        for (int i = trainSize; i < sampleSize; i++) { // the test-set
+        
+        for (int i = trainSize; i < reader.getBookmarks().size(); i++) { // the test-set
             Bookmark data = reader.getBookmarks().get(i);
             Map<Integer, Double> map = getRankedTagList(data.getUserID(), data.getTimestampAsLong());
             results.add(map);
-        }  
+        }
         return results;
     }
-    
-    
+        
     /**
      * @return
      */
     public BookmarkReader predictSample() {
-    
-        List<Map<Integer, Double>> actValues = calculateSocialTagScore(this.sampleSize);
+        List<Map<Integer, Double>> actValues = calculateSocialTagScore();
         // convert tag to int
         List<int[]> predictionValues = new ArrayList<int[]>();
         for (int i = 0; i < actValues.size(); i++) {
@@ -206,7 +195,6 @@ public class SocialCalculator {
         }
         reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
         PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
-        //writer.writeFile(this.twee + "_social")
         return reader;
     }      
 }
