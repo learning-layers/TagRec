@@ -120,7 +120,7 @@ public class Pipeline {
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(dir + "twitter_sample_1", dir + "twitter_sample", 1, 0, true, false, true);
+		//BookmarkSplitter.splitSample(dir + "twitter_sample_filter", dir + "twitter_sample", 1, 0, true, false, true);
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
@@ -387,8 +387,7 @@ public class Pipeline {
 	    ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
 	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
 	    calculator.predictSample();
-	    //writeMetrics(sampleDir, sampleName, "social", 1, 10, null, null, null);
-	    
+	    writeMetrics(sampleDir, sampleName, "social", 1, 10, null, null, null);
 	}
 	
 	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {

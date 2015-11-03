@@ -15,6 +15,13 @@ import java.util.List;
  */
 public class ProcessFrequecyAndRecency {
     
+    
+    private static final int MINUTE = 0;
+    private static final int HOUR = 1;
+    private static final int DAY = 2;
+    private static final int FIFTEEN_DAYS = 3;
+    private static final int MONTH = 4;
+    
 	public ProcessFrequecyAndRecency(){
 		
 	}
@@ -41,7 +48,6 @@ public class ProcessFrequecyAndRecency {
     }
     
     private void saveHashMap(HashMap<Integer, Integer> saveHashMap, String filename){
-    	
     	File file = new File(filename);
     	try {
     		if (!file.exists()){
@@ -87,20 +93,19 @@ public class ProcessFrequecyAndRecency {
      * @return the duration count between the 2 consecutive use of hastags.
      */
     private HashMap<Integer, Integer> getRecencyInDuration(HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap){
-        
-        
-        // TODO: assume that the timestamp are sorted by most recent first (decreasing order of timestamp)
         HashMap<Integer, Integer> durationCountMap = new HashMap<Integer, Integer>();
         for (String user : userTagTimestampMap.keySet()){
             for (Integer tag : userTagTimestampMap.get(user).keySet()){
-                List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
                 Long lastTimestamp = new Long(0);
+                List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
                 for (Long currentTimestamp : timestampList){
                     if (lastTimestamp == 0){
+                        lastTimestamp = currentTimestamp;
                         continue;
                     }else{
-                        int duration = (int)(lastTimestamp - currentTimestamp);
-                        duration = getDurationAtGranularity(duration, 0); 
+                        int duration = (int)(currentTimestamp - lastTimestamp);
+                        duration = getDurationAtGranularity(duration, HOUR); 
+                        duration++;
                         if (!durationCountMap.containsKey(duration)){
                             durationCountMap.put(duration, 0);
                         }else{
@@ -232,21 +237,27 @@ public class ProcessFrequecyAndRecency {
     }
     
     private int getDurationAtGranularity(int duration, int granularityLevel){
-        int granularity = 0;
-        int millisInHour = 24 * 60 * 60 * 1000;
+        
+        int time_count = 0;
+        int millisInMinute = 60 * 1000;
+        int millisInHour = 60 * 60 * 1000;
         int millisInDay = 24 * 60 * 60 * 1000;
-        int millisInWeek = 24 * 60 * 60 * 1000;
+        int millisInWeek = 7 * 24 * 60 * 60 * 1000;
+        int millisInFifteenDays = 15 * 24 * 60 * 60 * 1000;
         switch(granularityLevel){
-            case 0:
-                granularity = duration / millisInHour;
+            case MINUTE:
+                time_count = duration / millisInMinute;
                 break;
-            case 1:
-                granularity = duration / millisInDay;
+            case HOUR:
+                time_count = duration / millisInHour;
                 break;
-            case 2:
-                granularity = duration / millisInWeek;
+            case DAY:
+                time_count = duration / millisInDay;
+                break;
+            case FIFTEEN_DAYS:
+                time_count = duration / millisInFifteenDays;
                 break;
         }
-        return granularity;
+        return time_count;
     }
 }

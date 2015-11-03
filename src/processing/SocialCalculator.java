@@ -195,6 +195,7 @@ public class SocialCalculator {
         }
         reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
         PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
+        writer.writeFile(this.filename + "_social");
         return reader;
     }      
 }
