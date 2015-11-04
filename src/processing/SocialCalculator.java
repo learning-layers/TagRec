@@ -29,6 +29,7 @@ public class SocialCalculator {
 
     private String filename;
     private BookmarkReader reader;
+    
     private HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimes ;
     private HashMap<String, List<String>> network;
     private List<String> users;
@@ -146,13 +147,18 @@ public class SocialCalculator {
         			ArrayList<Long> timestampList = tagTimestampMap.get(tag);
         			// is there a timestamp less than the given timestamp
         			for (Long timestampLong : timestampList){
+        			    
+        			    
         				if(timesString > timestampLong ){
+        				    long duration = timesString - timestampLong;
         					
-        					if (tagRank.containsKey(tag)){
-        						tagRank.put(tag, tagRank.get(tag)+1);
-        					}else{
-        						tagRank.put(tag, 1.0);
-        					}
+        				    if (duration < (5*24*60*60)){        				    
+        				        if (tagRank.containsKey(tag)){
+        						    tagRank.put(tag, tagRank.get(tag)+1);
+        					    }else{
+        					        tagRank.put(tag, 1.0);
+        					    }
+        				    }
         				}
         			}
                 
@@ -173,7 +179,6 @@ public class SocialCalculator {
     private List<Map<Integer, Double>> calculateSocialTagScore() {
         
         List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
-        
         for (int i = trainSize; i < reader.getBookmarks().size(); i++) { // the test-set
             Bookmark data = reader.getBookmarks().get(i);
             Map<Integer, Double> map = getRankedTagList(data.getUserID(), data.getTimestampAsLong());

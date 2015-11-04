@@ -102,7 +102,7 @@ public class Pipeline {
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + DATASET + "_sample";
-		String networkFilePath = "./data/csv/"+ dir + "follow_nw.csv";
+		String networkFileName = "./data/csv/"+ dir + "follow_nw.csv";
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -129,7 +129,7 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test Social Recommender
-		startSocialRcommendation(dir, path, networkFilePath);
+		//startSocialRcommendation(dir, path, networkFilePath);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
@@ -201,11 +201,14 @@ public class Pipeline {
 			sampleDir = "lastfm_core";
 		} else if (args[1].equals("del")) {
 			sampleDir = "del_core";
-		} else {
+		} else if (args[1].equals("twitter")){
+		    sampleDir = "twitter_core";
+		} 
+		else {
 			System.out.println("Dataset not available");
 			return;
 		}
-		String subdir = "/bll";
+		String subdir = "/";
 		sampleDir += subdir;
 		samplePath += (sampleDir + "/" + args[2]);
 		
@@ -303,9 +306,12 @@ public class Pipeline {
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "4", !narrowFolksonomy);
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
-		} else {
+		} else if(op.equals("social")) {
+		    startSocialRcommendation(dir, path, networkFileName);
+		}else {
 			System.out.println("Unknown operation");
 		}
+		
 	}
 
 	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------	
@@ -384,8 +390,8 @@ public class Pipeline {
 	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename){
 	    getTrainTestSize(sampleName);
 	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
-	    ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
-	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
+	    //ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
+	    //processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
 	    calculator.predictSample();
 	    writeMetrics(sampleDir, sampleName, "social", 1, 10, null, null, null);
 	}
