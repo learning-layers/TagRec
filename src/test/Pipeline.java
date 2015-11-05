@@ -129,7 +129,7 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test Social Recommender
-		//startSocialRcommendation(dir, path, networkFilePath);
+		//startSocialRcommendation(dir, path, networkFileName);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
