@@ -45,7 +45,7 @@ import processing.MPCalculator;
 import processing.MPurCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
-import processing.ProcessFrequencyAndRecency;
+import processing.ProcessFrequencyRecency;
 import processing.SocialCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.UserTagDistribution;
@@ -392,7 +392,7 @@ public class Pipeline {
 	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename){
 	    getTrainTestSize(sampleName);
 	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
-	    ProcessFrequencyAndRecency processFrequencyRecency = new ProcessFrequencyAndRecency();
+	    ProcessFrequencyRecency processFrequencyRecency = new ProcessFrequencyRecency();
 	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
 	    for (double i=0.1; i<=1.0; i=i+0.1 ){
 	        for (double j=0; j<=1.0; j=j+0.1){

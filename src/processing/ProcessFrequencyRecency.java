@@ -13,7 +13,7 @@ import java.util.List;
  * @author spujari
  *
  */
-public class ProcessFrequencyAndRecency {
+public class ProcessFrequencyRecency {
     
     
     private static final int MINUTE = 0;
@@ -22,7 +22,7 @@ public class ProcessFrequencyAndRecency {
     private static final int FIFTEEN_DAYS = 3;
     private static final int MONTH = 4;
     
-	public ProcessFrequencyAndRecency(){
+	public ProcessFrequencyRecency(){
 		
 	}
 	
