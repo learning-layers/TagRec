@@ -12,7 +12,5 @@ public class TestSpearCalculator {
 	public static void main(String[] args) {
 		
 		SpearCalculator.calculateScores("spear/spear_test_data", "", 250);
-	}
-	
-	
+	}	
 }

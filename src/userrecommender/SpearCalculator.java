@@ -1,5 +1,9 @@
 package userrecommender;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -20,7 +24,7 @@ public class SpearCalculator {
 
 	private static BookmarkReader reader = new BookmarkReader(0, false);
 
-	public static void calculateScores(String inputDataFileName, String outputDirectory, int numberOfIterations) {
+	public static void calculateScores(String inputDataFileName, String outputFileName, int numberOfIterations) {
 
 		reader.readFile(inputDataFileName);
 		LinkedList<Integer> userList = getUsers();
@@ -41,14 +45,44 @@ public class SpearCalculator {
 		Map<Integer, Double> sortedResourceScores = new TreeMap<Integer, Double>(new DoubleMapComparator(result.getQualityResult()));
 		sortedResourceScores.putAll(result.getQualityResult());
 		
-		//TODO write in output directory
-		
-		for (Map.Entry<Integer, Double> entry : sortedExpertiseScores.entrySet()) {
-			System.out.println ("Experts results:  User with ID : " + entry.getKey() + "  got the score => " +entry.getValue());
+		try {
+			FileWriter writerUsers = new FileWriter(new File("./data/results/spear/" + outputFileName + "_users.txt"));
+			BufferedWriter bwUsers = new BufferedWriter(writerUsers);
+			String userResults = "User | Expertise Score";
+			userResults += "\n";
+			userResults += "---------------------------";
+			userResults += "\n";
+			for (Map.Entry<Integer, Double> entry : sortedExpertiseScores.entrySet()) {
+				userResults +=  entry.getKey() + " | " + entry.getValue();
+				//System.out.println ("Experts results:  User with ID : " + entry.getKey() + "  got the score => " +entry.getValue());
+				userResults += "\n";
+			}
+			bwUsers.write(userResults);
+			bwUsers.flush();
+			bwUsers.close();
+			writerUsers.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
-		for (Map.Entry<Integer, Double>  entry : sortedResourceScores.entrySet()) {
-			System.out.println ("Resource results:  Resource with ID : " + entry.getKey() + "  got the score => " +entry.getValue());
+		try {
+			FileWriter writerResources = new FileWriter(new File("./data/results/spear/" + outputFileName + "_resources.txt"));
+			BufferedWriter bwResources = new BufferedWriter(writerResources);
+			String resourceResults = "Resource | Quality Score";
+			resourceResults += "\n";
+			resourceResults += "---------------------------";
+			resourceResults += "\n";
+			for (Map.Entry<Integer, Double>  entry : sortedResourceScores.entrySet()) {
+				resourceResults +=  entry.getKey() + " | " +entry.getValue();
+				resourceResults += "\n";
+				//System.out.println ("Resource results:  Resource with ID : " + entry.getKey() + "  got the score => " +entry.getValue());
+			}
+			bwResources.write(resourceResults);
+			bwResources.flush();
+			bwResources.close();
+			writerResources.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

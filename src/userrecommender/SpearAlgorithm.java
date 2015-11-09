@@ -1,6 +1,6 @@
 package userrecommender;
 
-
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -89,6 +89,7 @@ class SpearAlgorithm {
 			resourceQualityVector = userExpertiseVector.times(matrix);
 			userExpertiseVector.timesEquals(1. / getColumnSum (userExpertiseVector));   	// normalise
 			resourceQualityVector.timesEquals(1. / getColumnSum(resourceQualityVector));  	// normalise
+			System.out.println("iteration:  " + i +  "  time:  " + Calendar.getInstance().getTime() );
 		}
 
 		expertiseResult = new HashMap<Integer, Double>();
@@ -164,8 +165,6 @@ class SpearAlgorithm {
 				}
 				currentProcessedUsers += 1;
 			}
-
 		}
 	}
-
 }
