@@ -26,6 +26,7 @@ import itemrecommendations.HuangCalculator;
 import itemrecommendations.MPResourceCalculator;
 import itemrecommendations.SustainCalculator;
 import itemrecommendations.ZhengCalculator;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
 import processing.BLLCalculator;
 import processing.CFTagRecommender;
 import processing.ContentBasedCalculator;
@@ -43,7 +45,7 @@ import processing.MPCalculator;
 import processing.MPurCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
-import processing.ProcessFrequecyAndRecency;
+import processing.ProcessFrequencyAndRecency;
 import processing.SocialCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.UserTagDistribution;
@@ -390,10 +392,15 @@ public class Pipeline {
 	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename){
 	    getTrainTestSize(sampleName);
 	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
-	    //ProcessFrequecyAndRecency processFrequencyRecency = new ProcessFrequecyAndRecency();
-	    //processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
-	    calculator.predictSample();
-	    writeMetrics(sampleDir, sampleName, "social", 1, 10, null, null, null);
+	    ProcessFrequencyAndRecency processFrequencyRecency = new ProcessFrequencyAndRecency();
+	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
+	    for (double i=0.1; i<=1.0; i=i+0.1 ){
+	        for (double j=0; j<=1.0; j=j+0.1){
+	            calculator.predictSample(i, j);
+	            writeMetrics(sampleDir, sampleName, "social"+ i + "_" + j, 1, 10, null, null, null);
+	        }
+	    }   
+	    
 	}
 	
 	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {

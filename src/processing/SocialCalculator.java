@@ -43,7 +43,6 @@ public class SocialCalculator {
         reader = new BookmarkReader(trainSize, false);
         reader.readFile(userTweetFilename);
         this.users = reader.getUsers();
-        
         this.idNameMap = reader.getUsers();
         // initialise the predictor with the basic training dataset
         List<Bookmark> socialTestList = reader.getBookmarks().subList(0, this.trainSize);
@@ -63,7 +62,6 @@ public class SocialCalculator {
     public HashMap<String, HashMap<Integer, ArrayList<Long>>> getUserTagTimes(){
     	return userTagTimes;
     }
-    
     
     /**
      * Takes a list of username string with user id as index of the list.
@@ -144,7 +142,7 @@ public class SocialCalculator {
      * @param timesString
      * @return
      */
-    private Map<Integer, Double> getRankedTagList(int userID, Long timesString, double alpha){
+    private Map<Integer, Double> getRankedTagList(int userID, Long timesString, double beta, double exponentSocial){
         Map<Integer, Double> rankedList = new HashMap<Integer, Double>();
         String user = this.users.get(userID);
         List<String> friendList = network.get(user);
@@ -166,7 +164,7 @@ public class SocialCalculator {
         					
         				    //if (duration < (5*24*60*60)){        				    
         				        if (tagRank.containsKey(tag)){
-        						    tagRank.put(tag, tagRank.get(tag)+ Math.pow(duration,(-0.5)));
+        						    tagRank.put(tag, tagRank.get(tag)+ Math.pow(duration,(-1)*(exponentSocial)));
         					    }else{
         					        tagRank.put(tag, Math.pow(duration,(-0.5)));
         					    }
@@ -212,7 +210,7 @@ public class SocialCalculator {
         
         for (Map.Entry<Integer, Double> entry : tagRank.entrySet()) {
             Double val = resultMap.get(entry.getKey());    
-            resultMap.put(entry.getKey(), val == null ? (alpha) * entry.getValue().doubleValue() : (1-alpha) * val.doubleValue() + (alpha) * entry.getValue().doubleValue());
+            resultMap.put(entry.getKey(), val == null ? (beta) * entry.getValue().doubleValue() : (1-beta) * val.doubleValue() + (beta) * entry.getValue().doubleValue());
         }
         sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
 		sortedResultMap.putAll(resultMap);
@@ -222,32 +220,28 @@ public class SocialCalculator {
 		}
 		return sortedResultMap;
     }
-  
     
     /**
      * @param sampleSize
      * @return
      */
-    private List<Map<Integer, Double>> calculateSocialTagScore(double alpha) {
+    private List<Map<Integer, Double>> calculateSocialTagScore(double beta, double exponentSocial) {
         
         List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
         for (int i = trainSize; i < reader.getBookmarks().size(); i++) { // the test-set
             Bookmark data = reader.getBookmarks().get(i);
-            Map<Integer, Double> map = getRankedTagList(data.getUserID(), data.getTimestampAsLong(), alpha);
+            Map<Integer, Double> map = getRankedTagList(data.getUserID(), data.getTimestampAsLong(), beta, exponentSocial);
             results.add(map);
         }
-        
-        
-        
         return results;
     }
         
     /**
      * @return
      */
-    public BookmarkReader predictSample() {
-        List<Map<Integer, Double>> actValues = calculateSocialTagScore(0.5);
-        // convert tag to int
+    public BookmarkReader predictSample(double exponentSocial, double beta) {
+        
+        List<Map<Integer, Double>> actValues = calculateSocialTagScore(beta, exponentSocial);
         List<int[]> predictionValues = new ArrayList<int[]>();
         for (int i = 0; i < actValues.size(); i++) {
             Map<Integer, Double> modelVal = actValues.get(i);
@@ -255,7 +249,7 @@ public class SocialCalculator {
         }
         reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
         PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
-        writer.writeFile(this.filename + "_social");
+        writer.writeFile(this.filename + "_social" + exponentSocial + "_" + beta);
         return reader;
     }      
 }
