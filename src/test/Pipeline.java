@@ -132,7 +132,7 @@ public class Pipeline {
 		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test Social Recommender
-		//startSocialRcommendation(dir, path, networkFileName);
+		startSocialRecommendation(dir, path, networkFileName);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
@@ -310,7 +310,7 @@ public class Pipeline {
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
 		} else if(op.equals("social")) {
-		    startSocialRcommendation(dir, path, networkFileName);
+		    startSocialRecommendation(dir, path, networkFileName);
 		    analysisSocial(dir, path, networkFileName, "all");
 		}else {
 			System.out.println("Unknown operation");
@@ -391,7 +391,7 @@ public class Pipeline {
 		}
 	}
 
-	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename){
+	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename){
 	    double beta = 0.5;
 	    double exponentSocial = 0.5;
 	    String[] algos = {"social_freq", "social", "hybrid"};
