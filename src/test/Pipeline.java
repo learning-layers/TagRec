@@ -137,23 +137,32 @@ public class Pipeline {
 		
 		//double [] learning_rates={0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 		// first run
-		double [] rs = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,9.1,9.2,9.3,9.4,9.5,9.6,9.7,9.8,9.9,9.91,9.92,9.93,9.94,9.95,9.96,9.97,9.98,9.99,9.991,9.992,9.993,9.994,9.995,9.996,9.997,9.998,9.999,10.0};
-		
+		//double [] rs = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,9.1,9.2,9.3,9.4,9.5,9.6,9.7,9.8,9.9,9.91,9.92,9.93,9.94,9.95,9.96,9.97,9.98,9.99,9.991,9.992,9.993,9.994,	9.995,10.0};
+		double [] rs = {1.0,3.0,5.0,7.0,9.0,9.998,11.0,13.0,15.0,17.0,19.0,21.0};
+		//double [] rs = {9.0, 9.998};
+		//double [] rs = {19};
 	//	double [] rs = {9.998};
-		//double [] rs = {9.998};
 		// from paper: 0.096
 		
 		//first run
-		double [] learning_rates={0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.0725,0.075,0.0775,0.08,0.0825,0.085,0.0875,0.09,0.091,0.092,0.093,0.094,0.095,0.096,0.097,0.098,0.099,0.1};
+		double [] learning_rates = new double[5];
+		learning_rates[4]= 0.096;
+		for (int i=6; i<=9; i++){
+			learning_rates[i-6] = Math.pow(10,(double)(i)/3.0-4.0);
+		}
+		
 		//double [] learning_rates={0.096};
-		//double [] learning_rates={0.09};
+		//double [] learning_rates={1, 0.5, 0.1};
+		//double [] learning_rates={0.096};
+		//double[] gamma = {0.125,0.375,0.625,0.875};
+		double[] gamma = {0.0};
 		double learning_rate=0.09;
 		//double learning_rate=0.0936;
 		// tau according to paper = 0.5
 		double tau_cluster=0.5;
 		// first run
-		double [] taus_cluster={0.35,0.357,0.4,0.425,0.45,0.475,0.5,0.525,0.55,0.575,0.6,0.625,0.65};
-		//double [] taus_cluster={0.5};
+		double [] taus_cluster={0.7,0.75};//,0.8,0.85,0.9};
+		//double [] taus_cluster={0.15};
 		//double [] taus_cluster={0.5};
 		// number of resources predicted for a user
 		int sampleSize = 20;
@@ -168,18 +177,22 @@ public class Pipeline {
         // E1: 0,5,10,20
         // E2: int []trainingRecencies = {0, 20, 25, 30};
         int []trainingRecencies = {0};
-        double [] CFWeights = {0.5}; //best 0.35
+        double [] alpha = {1};
+  //      double [] alpha = {0.0, 0.05,0.1,0.15,0.2,0.25,0.3, 0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1};
+        //double [] CFWeights = {0.0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7,0.8,0.9}; //best 0.35
         
         for (int cn =0; cn<candidateNumbers.length; cn++){
         	for (int tr=0; tr<trainingRecencies.length; tr++){
         		for (Pair<String, String> file : files){
         			for (int rc =0; rc<rs.length; rc++){
         				for (int lrc = 0; lrc<learning_rates.length; lrc++){
-        					for (int cfc = 0; cfc<CFWeights.length; cfc++){
+        					for (int cfc = 0; cfc<alpha.length; cfc++){
         						for (int tauc = 0; tauc<taus_cluster.length; tauc++){
         							for (int b = 0; b<betas.length; b++){
-        						//		startSustainApproach(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, CFWeights[cfc]);
-        								startParameterEstimation(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, CFWeights[cfc]);
+        								for (int gc = 0; gc<gamma.length; gc++){
+        								//startSustainApproach(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], gamma[gc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, CFWeights[cfc]);
+        								System.out.println("r "+rs[rc]+"lr "+learning_rates[lrc]+"tau "+taus_cluster[tauc]);
+        								startParameterEstimation(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], gamma[gc],trainingRecencies[tr], candidateNumbers[cn], sampleSize, alpha[cfc]);
           						
         							}
         						}	
@@ -363,7 +376,7 @@ public class Pipeline {
 			if (args.length>3)
 				trainingRecency = Integer.valueOf(args[3]);
 			startSustainApproach(sampleDir, samplePath, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, 0.4);
-		}
+		}}
 	}
 
 	// helper methods ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -694,25 +707,25 @@ public class Pipeline {
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
 	}
 	
-	private static void startParameterEstimation(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
+	private static void startParameterEstimation(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
 		BookmarkReader reader = null;
 		getTrainTestSize(sampleName);
 		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
-		reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
+		reader = sustain.predictResources(r, tau, beta, learning_rate, gamma,trainingRecency, candidateNumber, sampleSize, cfWeight);
 				
-		String dir = sampleDir + "/" + "sust_param" + "_" + "_metrics";
+		String dir = sampleDir + "/" + "sust_param" + "_" + "metrics";
 		String inputFile = sampleName + "_" + "sustain";
 		String outputFile = sampleName + "_" + "sust_param";
-		MetricsCalculator.calculateNDCGMetrics(inputFile, 20, dir, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, r, tau, learning_rate);
+		MetricsCalculator.calculateNDCGMetrics(inputFile, 20, dir, reader, MIN_USER_BOOKMARKS, MAX_USER_BOOKMARKS, MIN_RESOURCE_BOOKMARKS, MAX_RESOURCE_BOOKMARKS, null, r, tau, learning_rate, gamma, cfWeight, sustain.getMinCluster(), sustain.getMaxCluster(), sustain.getMinResources(), sustain.getMaxResources());
 	}
 	
 	
-	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
 		BookmarkReader reader = null;
 		getTrainTestSize(sampleName);
 		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
 		//for (int i = 1; i <= size; i++) {
-		reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
+		reader = sustain.predictResources(r, tau, beta, learning_rate, gamma,trainingRecency, candidateNumber, sampleSize, cfWeight);
 		//}
 		
 		// todo check whether size is needed as a parameter
@@ -721,6 +734,20 @@ public class Pipeline {
 		writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, null, reader);
 	}
 	
+	//FIXME: uncomment predictResources
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
+		BookmarkReader reader = null;
+		getTrainTestSize(sampleName);
+		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
+//		for (int i = 1; i <= size; i++) {
+//			reader = sustain.predictResources(r, tau, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, cfWeight);
+//		}
+//		
+		// todo check whether size is needed as a parameter
+		//writeMetricsForResources(sampleDir, sampleName, "sustain", size, 20, null, reader);
+		String prefix = "sustain";
+		writeMetricsForResources(sampleDir, sampleName, prefix, 1, 20, null, reader);
+	}
 	
 	private static void writeMetricsForResources(String sampleDir, String sampleName, String prefix, int sampleCount, int k, String posfix, BookmarkReader reader) {
 		String topicString = ((posfix == null || posfix == "0") ? "_" : "_" + posfix);

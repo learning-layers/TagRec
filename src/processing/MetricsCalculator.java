@@ -27,13 +27,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.vecmath.GVector;
 
 import common.Bookmark;
 import common.PredictionData;
 import common.Utilities;
-
 import file.PredictionFileReader;
 import file.BookmarkReader;
 import file.postprocessing.CatDescFiltering;
@@ -236,7 +238,7 @@ public class MetricsCalculator {
 		*/
 	}
 
-	public static void calculateNDCGMetrics(String filename, int k, String outputFile, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering describer, double r, double tau, double lr) {
+public static void calculateNDCGMetrics(String filename, int k, String outputFile, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering describer, double r, double tau, double lr, double gamma, double cfWeight, int minCluster, int maxCluster, int minRes, int maxRes) {
 		PredictionFileReader reader = new PredictionFileReader();
 		reader.readFile(filename, k, wikiReader, minBookmarks, maxBookmarks, minResBookmarks, maxResBookmarks, describer);	
 		String suffix = "";
@@ -255,9 +257,15 @@ public class MetricsCalculator {
 				bw.write(Double.toString((r)).replace('.', ',') + ";");
 				bw.write(Double.toString((tau)).replace('.', ',') + ";");
 				bw.write(Double.toString((lr)).replace('.', ',') + ";");
+				bw.write(Double.toString((gamma)).replace('.', ',') + ";");
+				bw.write(Double.toString((cfWeight)).replace('.', ',') + ";");
 				bw.write(Double.toString((nDCGSum)).replace('.', ',') + ";");
 				bw.write(Double.toString((calc.getRecall())).replace('.', ',') + ";");
-				bw.write(Double.toString((calc.getPrecision())).replace('.', ',') + "\n");
+				bw.write(Double.toString((calc.getPrecision())).replace('.', ',') + ";");
+				bw.write(Double.toString((minCluster)).replace('.', ',') + ";");
+				bw.write(Double.toString((maxCluster)).replace('.', ',') + ";");
+				bw.write(Double.toString((minRes)).replace('.', ',') + ";");
+				bw.write(Double.toString((maxRes)).replace('.', ',') + "\n");
 				bw.close();
 			} catch (Exception e) {
 				e.printStackTrace();

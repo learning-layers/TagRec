@@ -55,14 +55,24 @@ public class SustainApproach {
 	private List<Map<Integer, Integer>> resTopicTrainList;
 
 	private Map<Integer, ArrayList<GVector>> userClusterList;
+	private Map<Integer, Double> userLearningRateList;
 	private Map<Integer, GVector> userLambdaList;
 	private String sampleName;
 	private int trainSize;
 	private List<Integer> uniqueUserList;
 	private Map<Integer, List<Integer>> resourceListPerUser;
 	
+	private int maxCluster;
+	private int minCluster;
+	private int maxResources;
+	private int minResources;
+	
 	public SustainApproach(String sampleName, int trainSize){
 		
+		this.maxCluster = 0;
+		this.maxResources = 0;
+		this.minResources = trainSize;
+		this.minCluster = trainSize;
 		
 		this.trainSize = trainSize;
 		this.sampleName = sampleName;
@@ -72,7 +82,7 @@ public class SustainApproach {
 	//	this.testList = this.reader.getBookmarks().subList(trainSize, trainSize + testSize);
 	
 		rankedResourseCalculator = new BM25Calculator(this.reader, this.trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
-		
+		this.userLearningRateList = new HashMap<Integer, Double>();
 		this.numberOfTopics = this.reader.getCategories().size();
 		this.resourceListPerUser = new HashMap<Integer, List<Integer>>();
 		//go through all users - matrix user-resource
@@ -102,7 +112,26 @@ public class SustainApproach {
 	}
 	
 	
-	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
+	
+	public int getMaxCluster() {
+		return maxCluster;
+	}
+
+	public int getMinCluster() {
+		return minCluster;
+	}
+
+	public int getMaxResources() {
+		return maxResources;
+	}
+
+	public int getMinResources() {
+		return minResources;
+	}
+
+
+
+	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
 		
 		// for every user
 		for (Integer userId : this.uniqueUserList) {
@@ -112,7 +141,7 @@ public class SustainApproach {
 		    	resourceList = resourceList.subList(resourceList.size()-trainingRecency, resourceList.size()); 
 			
 		    this.resourceListPerUser.put(userId, resourceList);
-		    train(userId, resourceList, r, tau, learningRate, beta);
+		    train(userId, resourceList, r, tau, learningRate, beta, gamma);
 		}
 		
 		
@@ -122,9 +151,11 @@ public class SustainApproach {
 		
 		LinkedList<int[]> sortedResourcesPerUser = new LinkedList<int[]>();
 		for (Integer userId : this.uniqueUserList) {
-			if (userId%100 ==0)
-				System.out.println("user "+userId+" of "+this.uniqueUserList.size());
-			sortedResourcesPerUser.add(predict(userId,  r, tau, learningRate, beta, candidateNumber, sampleSize, cfWeight));
+//			if (userId%100 ==0)
+//				System.out.println("user "+userId+" of "+this.uniqueUserList.size());
+			//FIXME: change back learningRate
+			//sortedResourcesPerUser.add(predict(userId,  r, tau, learningRate, beta, candidateNumber, sampleSize, cfWeight));
+			sortedResourcesPerUser.add(predict(userId,  r, tau, this.userLearningRateList.get(userId), beta, candidateNumber, sampleSize, cfWeight));
 		}
 		
 		PredictionFileWriter writer = new PredictionFileWriter(reader, sortedResourcesPerUser);
@@ -147,7 +178,7 @@ public class SustainApproach {
 		
 				for (Entry<Integer, GVector> entry : this.userLambdaList.entrySet()) {
 					//String resultString = (this.reader.getUsers().get(userID) + "-XYZ|");
-					String resultString = entry.getKey() + "| ";
+					String resultString = reader.getUsers().get(entry.getKey()) + "| ";
 					
 					String resultingLambdas = "";
 									
@@ -193,7 +224,7 @@ public class SustainApproach {
 				int userId = entry.getKey();
 				
 				
-				String resultString = userId + "|";
+				String resultString = reader.getUsers().get(userId) + ";";
 				
 				double lambdas = 0.0;
 								
@@ -209,8 +240,8 @@ public class SustainApproach {
 				}
 				
 				//Entropy, number of Cluster, number of Resources
-				resultString += String.valueOf(entropy)+"|"+this.userClusterList.get(userId).size()+
-						"|"+this.resourceListPerUser.get(userId).size()+"\n";
+				resultString += String.valueOf(entropy)+";"+this.userClusterList.get(userId).size()+
+						";"+this.resourceListPerUser.get(userId).size()+";"+this.userLearningRateList.get(userId)+"\n";
 				bw.write(resultString);
 			
 			}
@@ -228,7 +259,7 @@ public class SustainApproach {
 }
 	
 	
-	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta){
+	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta, double gamma){
 		ArrayList<GVector> clusterList = new ArrayList<GVector>();
 		
 		double[] array = new double[this.numberOfTopics];
@@ -238,10 +269,12 @@ public class SustainApproach {
 		
 		double maxUserActivation = 0.0;
 		double minUserActivation = 1.0;
-	
+	    int resourceCount =0;
 		
 		//Start training with each resource in the list
 		for (Integer resource : list){
+			resourceCount++;
+			learningRate = learningRate*Math.pow(resourceCount,-gamma);
 			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
 				
 			// Vector, write 1 for every existing topic ->Paul 1000
@@ -331,10 +364,22 @@ public class SustainApproach {
 		    	minUserActivation = maxActivation;
 		}
 		//if (clusterList.size()>1)
-		System.out.println(clusterList.size()+"cluster for user "+userId+" with "+list.size()+" resources and activation "+minUserActivation+" to "+maxUserActivation);
+	//	System.out.println(clusterList.size()+"cluster for user "+userId+" with "+list.size()+" resources and activation "+minUserActivation+" to "+maxUserActivation);
+		int numCluster = clusterList.size();
+		if (numCluster<minCluster)
+			minCluster = numCluster;
+		if (numCluster>maxCluster)
+			maxCluster = numCluster;
+		
+		int numResources = list.size();
+		if (numResources<this.minResources)
+			this.minResources=numResources;
+		if (numResources>this.maxResources)
+			this.maxResources=numResources;
 		
 		this.userLambdaList.put(userId, lambda);
 		this.userClusterList.put(userId, clusterList);
+		this.userLearningRateList.put(userId, learningRate);
 	}
 	
 	
@@ -394,7 +439,7 @@ public class SustainApproach {
 			for ( Entry<Integer, Double> entry : resourceActivationMap.entrySet()){
 				double valueSustain = entry.getValue();
 				double valueCF = CFValues.get(entry.getKey());
-				double activation = entry.getValue()*(1-cfWeight)+CFValues.get(entry.getKey())* cfWeight;	
+				double activation = entry.getValue()*cfWeight+CFValues.get(entry.getKey())* (1-cfWeight);	
 				resourceActivationMap.put(entry.getKey(), activation);
 			}
 					
@@ -480,6 +525,7 @@ public class SustainApproach {
 		//TODO: Think about whether this should be included or not
 		//maxActivation = Math.pow(maxActivation, beta)/Math.pow(totalActivation, beta)*maxActivation;
 		return maxActivation;
+		//return totalActivation;
 	}
 	
 	private TreeMap<Integer, Double> calculateCandidateSet(int userId){
