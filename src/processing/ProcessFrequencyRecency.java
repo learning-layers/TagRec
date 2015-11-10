@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,17 +16,6 @@ import java.util.List;
  */
 public class ProcessFrequencyRecency {
     
-    
-    private static final int MINUTE = 0;
-    private static final int HOUR = 1;
-    private static final int DAY = 2;
-    private static final int FIFTEEN_DAYS = 3;
-    private static final int MONTH = 4;
-    
-	public ProcessFrequencyRecency(){
-		
-	}
-	
     public void ProcessTagAnalytics(HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap) {
 
         // frequency
@@ -33,11 +23,13 @@ public class ProcessFrequencyRecency {
         saveHashMap(tagFrequency, "./tagfrequency");
         // recency in duration
         //HashMap< Integer, Integer> tagRecency = getRecencyInDuration(userTagTimestampMap);
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, MINUTE), "./tagrecency" + "_" + MINUTE );
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, HOUR), "./tagrecency" + "_" + HOUR );
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, DAY), "./tagrecency" + "_" + DAY );
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, FIFTEEN_DAYS), "./tagrecency" + "_" + FIFTEEN_DAYS );
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, MONTH), "./tagrecency" + "_" + MONTH);
+
+        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.SECOND), "./tagrecency" + "_" + "Seconds");
+        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MINUTE), "./tagrecency" + "_" + "MINUTE");
+        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.HOUR), "./tagrecency" + "_" + "HOUR" );
+        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "./tagrecency" + "_" + "DAY" );
+        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.FIFTEEN_DAYS), "./tagrecency" + "_" + "FIFTEEN_DAYS");
+        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MONTH), "./tagrecency" + "_" + "MONTH");
         // user unique tag count
         HashMap< Integer, Integer> uniqueTagCount = getUserUniqueTagCount(userTagTimestampMap);
         saveHashMap(uniqueTagCount, "./uniqueTagCount");
@@ -104,13 +96,15 @@ public class ProcessFrequencyRecency {
             for (Integer tag : userTagTimestampMap.get(user).keySet()){
                 Long lastTimestamp = new Long(0);
                 List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
+                Collections.sort(timestampList);
+                
                 for (Long currentTimestamp : timestampList){
                     if (lastTimestamp == 0){
                         lastTimestamp = currentTimestamp;
                         continue;
                     }else{
                         int duration = (int)(currentTimestamp - lastTimestamp);
-                        duration = getDurationAtGranularity(duration, durationType); 
+                        duration = TimeUtil.getDurationAtGranularity(duration, durationType); 
                         duration++;
                         if (!durationCountMap.containsKey(duration)){
                             durationCountMap.put(duration, 0);
@@ -234,41 +228,11 @@ public class ProcessFrequencyRecency {
         /**
          * get the first use of hashtag was external or social.
          * */
-        for (Integer user : userTagTimestampMap.keySet()){
-            for (Integer tag : userTagTimestampMap.get(user).keySet()){
-                List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
+            for (Integer user : userTagTimestampMap.keySet()){
+                for (Integer tag : userTagTimestampMap.get(user).keySet()){
+                    List<Long> timestampList = userTagTimestampMap.get(user).get(tag);
+                }
             }
+            return;
         }
-        return;
     }
-    
-    private int getDurationAtGranularity(int duration, int granularityLevel){
-        
-        int time_count = 0;
-        int millisInMinute = 60;
-        int millisInHour = 60 * 60;
-        int millisInDay = 24 * 60 * 60;
-        int millisInWeek = 7 * 24 * 60 * 60;
-        int millisInFifteenDays = 15 * 24 * 60 * 60;
-        int millisInMonth = 30 * 24 * 60 * 60;
-        
-        switch(granularityLevel){
-            case MINUTE:
-                time_count = duration / millisInMinute;
-                break;
-            case HOUR:
-                time_count = duration / millisInHour;
-                break;
-            case DAY:
-                time_count = duration / millisInDay;
-                break;
-            case FIFTEEN_DAYS:
-                time_count = duration / millisInFifteenDays;
-                break;
-            case MONTH:
-                time_count = duration / millisInMonth;
-                break;
-        }
-        return time_count;
-    }
-}

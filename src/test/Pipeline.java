@@ -46,6 +46,7 @@ import processing.MPurCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.ProcessFrequencyRecency;
+import processing.ProcessFrequencyRecencySocial;
 import processing.SocialCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.UserTagDistribution;
@@ -310,6 +311,7 @@ public class Pipeline {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
 		} else if(op.equals("social")) {
 		    startSocialRcommendation(dir, path, networkFileName);
+		    analysisSocial(dir, path, networkFileName, "all");
 		}else {
 			System.out.println("Unknown operation");
 		}
@@ -390,17 +392,28 @@ public class Pipeline {
 	}
 
 	private static void startSocialRcommendation(String sampleDir, String sampleName, String networkFilename){
+	    double beta = 0.5;
+	    double exponentSocial = 0.5;
+	    String[] algos = {"social_freq", "social", "hybrid"};
 	    getTrainTestSize(sampleName);
 	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
-	    ProcessFrequencyRecency processFrequencyRecency = new ProcessFrequencyRecency();
-	    processFrequencyRecency.ProcessTagAnalytics(calculator.getUserTagTimes());
-	    for (double i=0.1; i<=1.0; i=i+0.1 ){
-	        for (double j=0; j<=1.0; j=j+0.1){
-	            calculator.predictSample(i, j);
-	            writeMetrics(sampleDir, sampleName, "social"+ i + "_" + j, 1, 10, null, null, null);
-	        }
-	    }   
-	    
+        for (String algo : algos){
+            String filename = "social"+ beta + "_" + exponentSocial + "_" + algo;
+            calculator.predictSample(beta, exponentSocial, algo);
+            writeMetrics(sampleDir, sampleName, filename, 1, 10, null, null, null);
+        }
+	}
+	
+	private static void analysisSocial(String sampleDir, String sampleName, String networkFilename, String type){
+	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
+        if (type.equals("social")){
+	        new ProcessFrequencyRecencySocial(calculator.getUserTagTimes(), calculator.getNetwork());
+	    }else if(type.equals("personal")){
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(calculator.getUserTagTimes());
+	    }else if(type.equals("all")){
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(calculator.getUserTagTimes());
+	        new ProcessFrequencyRecencySocial(calculator.getUserTagTimes(), calculator.getNetwork());
+	    }
 	}
 	
 	private static void startRecCalculator(String sampleDir, String sampleName, boolean all) {
