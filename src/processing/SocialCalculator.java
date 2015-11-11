@@ -256,71 +256,52 @@ public class SocialCalculator {
         String user = this.users.get(userID);
         List<String> friendList = network.get(user);
         HashMap <Integer, Double> tagRank = new HashMap<Integer, Double>();
-        if (friendList == null){
-            return rankedList;
-        }
-        for(String friend : friendList){
-            HashMap<Integer, ArrayList<Long>> tagTimestampMap = userTagTimes.get(friend);
-            if (tagTimestampMap != null){
-                for (Integer tag : tagTimestampMap.keySet()){
-                    ArrayList<Long> timestampList = tagTimestampMap.get(tag);
-                    for (Long timestampLong : timestampList){
-                        if(timesString > timestampLong ){
-                            long duration = timesString - timestampLong;
-                            if (tagRank.containsKey(tag)){
-                               tagRank.put(tag, tagRank.get(tag)+ Math.pow(duration,(-1)*(exponentSocial)));
-                            }else{
-                               tagRank.put(tag, Math.pow(duration,(-0.5)));
+        if (friendList != null){
+            for(String friend : friendList){
+                HashMap<Integer, ArrayList<Long>> tagTimestampMap = userTagTimes.get(friend);
+                if (tagTimestampMap != null){
+                    for (Integer tag : tagTimestampMap.keySet()){
+                        ArrayList<Long> timestampList = tagTimestampMap.get(tag);
+                        for (Long timestampLong : timestampList){
+                            if(timesString > timestampLong ){
+                                long duration = timesString - timestampLong;
+                                if (tagRank.containsKey(tag)){
+                                   tagRank.put(tag, tagRank.get(tag)+ Math.pow(duration,(-1)*(exponentSocial)));
+                                }else{
+                                   tagRank.put(tag, Math.pow(duration,(-0.5)));
+                                }
                             }
                         }
+                    
                     }
-                
                 }
             }
-        }
-
-        double denom = 0.0;
-        if (tagRank != null) {
-            for (Map.Entry<Integer, Double> entry : tagRank.entrySet()) {
-             if (entry != null) {
-              double actVal = Math.log(entry.getValue());
-              denom += Math.exp(actVal);
-              entry.setValue(actVal);
-             }
+    
+            double denom = 0.0;
+            if (tagRank != null) {
+                for (Map.Entry<Integer, Double> entry : tagRank.entrySet()) {
+                 if (entry != null) {
+                  double actVal = Math.log(entry.getValue());
+                  denom += Math.exp(actVal);
+                  entry.setValue(actVal);
+                 }
+                }
+                for (Map.Entry<Integer, Double> entry : tagRank.entrySet()) {
+                  if (entry != null) {
+                   double actVal = Math.exp(entry.getValue());
+                   entry.setValue(actVal / denom);
+                  }
+                }
             }
-            for (Map.Entry<Integer, Double> entry : tagRank.entrySet()) {
-              if (entry != null) {
-               double actVal = Math.exp(entry.getValue());
-               entry.setValue(actVal / denom);
-              }
-            }
+        
         }
-        
-        
         Map<Integer, Double> resultMap = this.bllMapTagValues.get(userID);
-        
-        
-        Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-        sortedResultMap.putAll(resultMap);
-        if (userID == 0)
-            System.out.println(sortedResultMap);
-        
-        sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(tagRank));
-        sortedResultMap.putAll(tagRank);
-        
-        if (userID == 0)
-            System.out.println(sortedResultMap);
-        
         for (Map.Entry<Integer, Double> entry : tagRank.entrySet()) {
             Double val = resultMap.get(entry.getKey());    
             resultMap.put(entry.getKey(), val == null ? (beta) * entry.getValue().doubleValue() : (1-beta) * val.doubleValue() + (beta) * entry.getValue().doubleValue());
         }
-        sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
+        Map<Integer, Double>sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
         sortedResultMap.putAll(resultMap);
-        if (userID == 0){
-            System.out.println(sortedResultMap);
-            System.out.println("ends >> ");
-        }
         return sortedResultMap;
     }
     

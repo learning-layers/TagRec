@@ -129,7 +129,7 @@ public class Pipeline {
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
+		startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test Social Recommender
 		startSocialRecommendation(dir, path, networkFileName);
@@ -318,7 +318,7 @@ public class Pipeline {
 		
 	}
 
-	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------	
+	// Tag Recommenders methods -----------------------------------------------------------------------------
 	private static void startAllTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
 		startBaselineCalculator(sampleDir, samplePath, 1, true);		// MP
 		startModelCalculator(sampleDir, samplePath, 1, -5, all);		// MPur
@@ -532,7 +532,7 @@ public class Pipeline {
 	}
 	
 	// Engine testing
-	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------------------
 	private static void startEngineTest(String path) {
 		EngineInterface recEngine = new EntityRecommenderEngine();
 		try {
@@ -713,7 +713,12 @@ public class Pipeline {
 		System.out.println("Test-size: " + TEST_SIZE);
 	}
 	
-	// passing the trainSize means that MyMediaLite files will be evaluated
+	/**
+	 * 
+	 * Passing the trainSize means that MyMediaLite files will be evaluated
+	 * 
+	 * 
+	 * */
 	private static void evaluate(String sampleDir, String sampleName, String prefix, String postfix, boolean calcTags, boolean tensor, BookmarkReader reader) {
 		if (reader == null) {
 			getTrainTestSize(sampleName + (postfix != null ? "_" + postfix : ""));
