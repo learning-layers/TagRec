@@ -394,7 +394,7 @@ public class Pipeline {
 	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename){
 	    double beta = 0.5;
 	    double exponentSocial = 0.5;
-	    String[] algos = {"social_freq", "social", "hybrid"};
+	    String[] algos = {"social_freq", "social", "hybrid", "hybrid_freq"};
 	    getTrainTestSize(sampleName);
 	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
         for (String algo : algos){

@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
 import com.google.common.primitives.Ints;
+
 import common.Bookmark;
 import common.DoubleMapComparator;
 import common.DoubleMapComparatorKeyString;
+import common.Utilities;
 import file.BookmarkReader;
 import file.PredictionFileWriter;
 
@@ -35,7 +38,9 @@ public class SocialCalculator {
     private List<String> users;
     private int trainSize;
     private List<String> idNameMap;
-    private List<Map<Integer, Double>> bllMapTagValues;
+    private List<Map<Integer, Double>> resultMapPersonalBLLAllUsers;
+    private List<Map<Integer, Double>> resultMapPersonalFreqAllUsers;
+    
     
     public SocialCalculator(String userTweetFilename, String networkFilename, int trainSize, int testSize) {
         this.filename = userTweetFilename;
@@ -55,8 +60,9 @@ public class SocialCalculator {
         System.out.println("users list size>> " + this.users.size());
         System.out.println("trainList size>> " + trainList.size());
         System.out.println("testList size>> " + testList.size());
-        bllMapTagValues = BLLCalculator.getArtifactMaps(reader, trainList, testList, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
-        System.out.println("bll values list size>> " + bllMapTagValues.size());
+        resultMapPersonalBLLAllUsers = BLLCalculator.getArtifactMaps(reader, trainList, testList, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
+        this.resultMapPersonalFreqAllUsers = Utilities.getNormalizedMaps(this.reader.getBookmarks().subList(0, trainSize), false);
+        System.out.println("bll values list size>> " + resultMapPersonalBLLAllUsers.size());
     }
     
     public HashMap<String, HashMap<Integer, ArrayList<Long>>> getUserTagTimes(){
@@ -251,6 +257,25 @@ public class SocialCalculator {
 
     }
     
+    private Map<Integer, Double> getRankedTagListSocialFrequencyHybrid(int userID, Long timeString, double beta){
+    	
+    	Map<Integer, Double> resultMapSocialFreq = getRankedTagListSocialFrequency(userID, timeString);
+    	
+    	// get frequency based recommendation score
+    	
+    	
+    	// combine two scores
+    	Map<Integer, Double> resultMapPersonalFreq = this.resultMapPersonalFreqAllUsers.get(userID);
+        for (Map.Entry<Integer, Double> entry : resultMapPersonalFreq.entrySet()) {
+            Double val = resultMapSocialFreq.get(entry.getKey());    
+            resultMapSocialFreq.put(entry.getKey(), val == null ? (beta) * entry.getValue().doubleValue() : (1-beta) * val.doubleValue() + (beta) * entry.getValue().doubleValue());
+        }
+        
+        Map<Integer, Double>sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMapSocialFreq));
+        sortedResultMap.putAll(resultMapSocialFreq);
+        return sortedResultMap;
+    } 
+    
     private Map<Integer, Double> getRankedTagListSocialBLLHybrid(int userID, Long timesString, double beta, double exponentSocial){
         Map<Integer, Double> rankedList = new HashMap<Integer, Double>();
         String user = this.users.get(userID);
@@ -295,7 +320,7 @@ public class SocialCalculator {
             }
         
         }
-        Map<Integer, Double> resultMap = this.bllMapTagValues.get(userID);
+        Map<Integer, Double> resultMap = this.resultMapPersonalBLLAllUsers.get(userID);
         for (Map.Entry<Integer, Double> entry : tagRank.entrySet()) {
             Double val = resultMap.get(entry.getKey());    
             resultMap.put(entry.getKey(), val == null ? (beta) * entry.getValue().doubleValue() : (1-beta) * val.doubleValue() + (beta) * entry.getValue().doubleValue());
@@ -321,6 +346,8 @@ public class SocialCalculator {
                 map = getRankedTagListSocial(data.getUserID(), data.getTimestampAsLong(), exponentSocial);
             }else if (algorithm.equals("hybrid")) {
                 map = getRankedTagListSocialBLLHybrid(data.getUserID(), data.getTimestampAsLong(), beta, exponentSocial);
+            }else if (algorithm.equals("hybrid_freq")){
+            	map = getRankedTagListSocialFrequencyHybrid(data.getUserID(), data.getTimestampAsLong(), beta);
             }
             results.add(map);
         }
