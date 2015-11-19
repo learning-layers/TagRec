@@ -49,8 +49,5 @@ public class UserActivity implements Comparable<UserActivity> {
 			result = 1;
 		}
 		return result;
-	}
-
-
-	
+	}	
 }

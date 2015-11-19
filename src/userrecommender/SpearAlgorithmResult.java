@@ -38,8 +38,4 @@ public class SpearAlgorithmResult {
 	public void setQualityResult(Map<Integer, Double> qualityResult) {
 		this.qualityResult = qualityResult;
 	}
-	
-	
-	
-	
 }
