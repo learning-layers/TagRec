@@ -45,11 +45,11 @@ public class Bookmark implements Comparable<Bookmark> {
 	public Bookmark(int userID, int wikiID, String timestamp) {
 		this.userID = userID;
 		this.resID = wikiID;
-		if (timestamp.contains(".")) {
-			this.timestamp = timestamp.substring(0, timestamp.indexOf("."));
-		} else {
+		//if (timestamp.contains(".")) {
+		//	this.timestamp = timestamp.substring(0, timestamp.indexOf("."));
+		//} else {
 			this.timestamp = timestamp;
-		}
+		//}
 		
 		this.categories = new ArrayList<Integer>();
 		this.tags = new ArrayList<Integer>();

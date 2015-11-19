@@ -60,6 +60,8 @@ public class CFResourceCalculator {
 	private List<Map<Integer, Double>> resMaps;
 	private Map<Integer, Double> allResources;
 	
+	private CFResourceCalculator rankedResourceCalculator;
+	
 	public CFResourceCalculator(BookmarkReader reader, int trainSize, boolean predictTags, boolean userBased, boolean resBased, int beta, Similarity sim, Features features) {		
 		this.reader = reader;
 		this.userBased = userBased;
@@ -86,6 +88,7 @@ public class CFResourceCalculator {
 				this.resMaps = Utilities.getUsedEntities(this.trainList, true, null);
 			} else if (features == Features.TOPICS) {
 				this.resMaps = Utilities.getRelativeTopicMaps(this.trainList, true);//Utilities.getResTopics(this.trainList);
+				this.rankedResourceCalculator = new CFResourceCalculator(this.reader, trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 			} else if (features == Features.TAGS) {
 				this.resMaps = Utilities.getRelativeTagMaps(this.trainList, true);//Utilities.getResMaps(this.trainList);
 			} else if (features == Features.TAG_ENTITIES) {
@@ -173,7 +176,14 @@ public class CFResourceCalculator {
 					return Utilities.getSimUsersForResource(resID, this.allUsers, this.userMaps, this.resMaps, resourceUsers, this.sim, sorting);
 				} else {
 					if (userID != -1) {
-						sortedResources = Utilities.getSimResourcesForUser(userID, this.allResources, this.userMaps, this.resMaps, 
+						Map<Integer, Double> candidateSet = new LinkedHashMap<Integer, Double>();								
+						for (Map.Entry<Integer, Double> entry : this.rankedResourceCalculator.getRankedResourcesList(userID, -1, true, false, false, true, false).entrySet()) {
+							if (candidateSet.size() < 100) {
+								candidateSet.put(entry.getKey(), entry.getValue());
+							}
+						}
+						
+						sortedResources = Utilities.getSimResourcesForUser(userID, /*candidateSet*/this.allResources, this.userMaps, this.resMaps, 
 								filterOwnEntities ? userResources : new ArrayList<Integer>(), this.sim, sorting);
 					} else if (resID != -1) {
 						sortedResources = Utilities.getSimResources(-1, resID, null, this.allResources, this.resMaps, this.trainList, this.sim, sorting);

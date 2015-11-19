@@ -89,8 +89,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "/researchers";
+	private final static String DATASET = "cul";
+	private final static String SUBDIR = "/resource";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -110,6 +110,9 @@ public class Pipeline {
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
+		
+		TOPIC_NAME = "lda_500";
+		startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -295,7 +298,7 @@ public class Pipeline {
 			startCfResourceCalculator(sampleDir, samplePath, sampleCount, 20, true, false, false, false, Features.ENTITIES);
 		} else if (op.equals("item_cbt")) {
 			TOPIC_NAME = "lda_500";
-			startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
+			startCfResourceCalculator(sampleDir, samplePath, 1, 20, false, true, false, false, Features.TOPICS);
 		} else if (op.equals("item_zheng")) {
 			startZhengResourceCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("item_huang")) {
@@ -800,7 +803,7 @@ public class Pipeline {
 		}
 		//suffix += features + "_"; 
 		for (int i = 1; i <= size; i++) {
-			getTrainTestSize(sampleName + posfix);
+			getTrainTestSize(sampleName);
 			reader = CFResourceCalculator.predictResources(sampleName + posfix, TRAIN_SIZE, TEST_SIZE, neighborSize, userBased, resBased, allResources, bll, features);
 		}
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, TOPIC_NAME, reader, null);
