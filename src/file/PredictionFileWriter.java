@@ -26,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import common.Bookmark;
 
@@ -145,5 +146,35 @@ public class PredictionFileWriter {
 		}
 		
 		return false;
+	}
+
+	// Statics
+	public static void writeSimplePredictions(List<Set<String>> predictionValues, List<Set<String>> realValues, String filename) {
+		try {
+			FileWriter writer = new FileWriter(new File("./data/results/" + filename + ".txt"));
+			BufferedWriter bw = new BufferedWriter(writer);
+
+			for (int i = 0; i < predictionValues.size(); i++) {
+				String resultString = i + "|";
+				Set<String> predictions = predictionValues.get(i);
+				Set<String> values = realValues.get(i);
+				
+				for (String p : predictions) {
+					resultString += (p + ", ");
+				}
+				resultString += "|";
+				for (String v : values) {
+					resultString += (v + ", ");
+				}				
+				resultString += "\n";
+				
+				bw.write(resultString);
+			}
+			
+			bw.flush();
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

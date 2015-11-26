@@ -31,16 +31,16 @@ import file.BookmarkReader;
 
 public class TagRecommenderEvalEngine implements EngineInterface {
 
-	private EngineInterface mpEngine;
+	//private EngineInterface mpEngine;
 	private EngineInterface bllEngine;
-	private EngineInterface threelEngine;	
+	//private EngineInterface threelEngine;	
 	//private Random random;
 	private BufferedWriter bw;
 	
 	public TagRecommenderEvalEngine() {
-		this.mpEngine = null;
+		//this.mpEngine = null;
 		this.bllEngine = null;
-		this.threelEngine = null;
+		//this.threelEngine = null;
 		//this.random = new Random();
 		this.bw = null;
 		
@@ -58,20 +58,20 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 		//this.bllEngine = null;
 		//this.threelEngine = null;
 		
-		/* old
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
-		if (reader.getCategories().size() > 0) {
-			this.threelEngine = new ThreeLayersEngine();
-			this.threelEngine.loadFile(filename);
-		}
-		if (reader.hasTimestamp()) {
+		//if (reader.getCategories().size() > 0) {
+		//	this.threelEngine = new ThreeLayersEngine();
+		//	this.threelEngine.loadFile(filename);
+		//}
+		//if (reader.hasTimestamp()) {
 			this.bllEngine = new BaseLevelLearningEngine();
 			this.bllEngine.loadFile(filename);
-		}
-		this.lmEngine = new LanguageModelEngine();
-		this.lmEngine.loadFile(filename);
-		*/
+		//}
+		//this.lmEngine = new LanguageModelEngine();
+		//this.lmEngine.loadFile(filename);
+		
+		/* KnowBrain
 		//if (filename.contains("group1") || filename.contains("group3")) {
 			this.threelEngine = new ThreeLayersCollectiveEngine();
 			this.threelEngine.loadFile(filename);
@@ -81,6 +81,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 		//}
 			this.mpEngine = new MostPopularCollectiveEngine();
 			this.mpEngine.loadFile(filename);
+		*/
 	}
 
 	@Override
@@ -88,7 +89,7 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 		Map<String, Double> returnMap = null;
 		String algorithmString = null;
 		
-		/* old
+
 		if (this.bllEngine != null) {
 			if (algorithm == null || algorithm == Algorithm.BLLacMPr) {
 				algorithmString = "BLLacMPr";
@@ -101,11 +102,12 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
 			}
 		}		
-		if (algorithmString == null) {
-			algorithmString = "MPur";
-			returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
-		}
-		*/
+		//if (algorithmString == null) {
+		//	algorithmString = "MPur";
+		//	returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
+		//}
+
+		/* KnowBrain study
 		if (algorithm == null || algorithm == Algorithm.THREELcoll || algorithm == Algorithm.THREEL) {
 			if (this.threelEngine != null) {
 				returnMap = this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
@@ -130,6 +132,8 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 				algorithmString = "MP";
 			}
 		}
+		*/
+		
 		if (this.bw != null) {
 			try {
 				this.bw.write(user + "|" + resource + "|" + topics + "|" + count + "|" + filterOwnEntities + "|" + System.currentTimeMillis() + "|" + algorithmString + "|" + returnMap.keySet() + "\n");

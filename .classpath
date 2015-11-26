@@ -1,16 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="file/reporting/CfEvaluator.java|processing/CfCalculator.java|processing/CfTagCalculator.java|processing/LdaCalculator.java|file/filtering/ResourceFiltering.java|file/filtering/TagFiltering.java|processing/MahoutCalculator.java" kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry exported="true" kind="lib" path="lib/opencsv-2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-14.0-rc1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mallet-deps.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mallet.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javaml-0.1.5.jar"/>
-	<classpathentry kind="lib" path="lib/Jama-1.0.3.jar"/>
-	<classpathentry kind="lib" path="lib/vecmath-1.5.1.jar"/>
-	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.36-bin.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/Jama-1.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/vecmath-1.5.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.36-bin.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/solr-solrj-4.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpmime-4.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/noggit-0.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wstx-asl-3.2.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/zookeeper-3.4.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

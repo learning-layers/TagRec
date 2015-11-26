@@ -45,11 +45,11 @@ public class Bookmark implements Comparable<Bookmark> {
 	public Bookmark(int userID, int wikiID, String timestamp) {
 		this.userID = userID;
 		this.resID = wikiID;
-		//if (timestamp.contains(".")) {
-		//	this.timestamp = timestamp.substring(0, timestamp.indexOf("."));
-		//} else {
+		if (timestamp.contains(".")) {
+			this.timestamp = timestamp.substring(0, timestamp.indexOf("."));
+		} else {
 			this.timestamp = timestamp;
-		//}
+		}
 		
 		this.categories = new ArrayList<Integer>();
 		this.tags = new ArrayList<Integer>();
@@ -286,7 +286,10 @@ public class Bookmark implements Comparable<Bookmark> {
 		for (Bookmark data : trainData) {		
 			if (data.userID == userID) {
 				if (dValue != null) {
-					long timestamp = Long.parseLong(data.getTimestamp());
+					long timestamp = 0;
+					if (!data.getTimestamp().isEmpty()) {
+						timestamp = Long.parseLong(data.getTimestamp());
+					}
 					Double rec = Math.pow(refTimestamp - timestamp + 1.0, dValue.doubleValue() * (-1.0));
 					if (!rec.isInfinite() && !rec.isNaN()) {
 						//resourceMap.put(data.resID, Math.log(rec.doubleValue() + 1.0));

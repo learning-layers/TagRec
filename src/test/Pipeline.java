@@ -39,6 +39,7 @@ import java.util.Map;
 import common.Bookmark;
 import common.CalculationType;
 import common.Features;
+import common.SolrConnector;
 import common.Utilities;
 import processing.BLLCalculator;
 import processing.CFTagRecommender;
@@ -50,6 +51,7 @@ import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.GIRPTMCalculator;
 import processing.RecencyCalculator;
+import processing.SolrHashtagCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.TagReuseProbAnalyzer;
 import processing.analyzing.UserTagDistribution;
@@ -89,8 +91,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "cul";
-	private final static String SUBDIR = "/resource";
+	private final static String DATASET = "twitter";
+	private final static String SUBDIR = "/general";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -111,8 +113,10 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + "/" + DATASET + "_sample";
 		
-		TOPIC_NAME = "lda_500";
-		startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
+		//TOPIC_NAME = "lda_500";
+		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
+		
+		//startSolrHashtagCalculator("twitter_core", "tweets");
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -123,7 +127,6 @@ public class Pipeline {
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
-		//try { getStatistics(dir + "/tweets", false); } catch (Exception e) { e.printStackTrace(); }
 		
 		//JSONProcessor.writeJSONOutput("bib_core/vedran/bib_bibtex_2_perc_1");
 		
@@ -131,6 +134,7 @@ public class Pipeline {
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
 		//BookmarkSplitter.splitSample(dir + "/tweets", dir + "/twitter_sample", 1, 0, true, false, true, dir + "/white_user.txt");
+		//try { getStatistics(dir + "/tweets", false); } catch (Exception e) { e.printStackTrace(); }
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
@@ -187,7 +191,7 @@ public class Pipeline {
 		//startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 			
 		// Engine Testing
-		//startEngineTest(path);
+		//startEngineTest("sss_recomm");
 		//startKnowBrainTest("ml_group2");
 		
 		// Commandline Arguments
@@ -322,6 +326,11 @@ public class Pipeline {
 	}
 
 	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------	
+	private static void startSolrHashtagCalculator(String sampleDir, String sampleName) {
+		SolrHashtagCalculator.predictSample(sampleName);
+		writeMetrics(sampleDir, sampleName, "solrht", 1, 10, null, null, null);
+	}
+	
 	private static void startAllTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
 		startBaselineCalculator(sampleDir, samplePath, 1, true);		// MP
 		startModelCalculator(sampleDir, samplePath, 1, -5, all);		// MPur
@@ -529,18 +538,18 @@ public class Pipeline {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Tags for user and resource: " + recEngine.getEntitiesWithLikelihood("0", "0", null, 10, false, null, EntityType.TAG)); // BLLac+MPr
-		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.TAG)); // BLL
-		System.out.println("Tags for resource: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.TAG)); // MPr
+		System.out.println("Tags for user and resource: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, null, EntityType.TAG)); // BLLac+MPr
+		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", null, null, 10, false, null, EntityType.TAG)); // BLL
+		System.out.println("Tags for resource: " + recEngine.getEntitiesWithLikelihood(null, "http://sss.eu/31116473812357491143/", null, 10, false, null, EntityType.TAG)); // MPr
 		System.out.println("Tags MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.TAG)); // MP
 
-		System.out.println("LD - Resources for user (Tags):" + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, Algorithm.RESOURCETAGCB, EntityType.RESOURCE)); // CBtags
-		System.out.println("Resources for user (CF): " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null /* or Algorithm.RESOURCECF */, EntityType.RESOURCE)); // CF
-		System.out.println("Resources for resource: " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null, EntityType.RESOURCE)); // CF
+		System.out.println("LD - Resources for user (Tags):" + recEngine.getEntitiesWithLikelihood("http://sss.eu/207091058105385/", null, null, 10, false, Algorithm.RESOURCETAGCB, EntityType.RESOURCE)); // CBtags
+		System.out.println("Resources for user (CF): " + recEngine.getEntitiesWithLikelihood("http://sss.eu/207091058105385/", null, null, 10, false, null , EntityType.RESOURCE)); // CF
+		System.out.println("Resources for resource: " + recEngine.getEntitiesWithLikelihood(null, "http://sss.eu/207091332279916/", null, 10, false, null, EntityType.RESOURCE)); // CF
 		System.out.println("Resources MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.RESOURCE)); // MP
 
-		System.out.println("LD - Users for resource (Tags): " + recEngine.getEntitiesWithLikelihood(null, "0", null, 10, false, null /* or Algorithm.USERTAGCB */, EntityType.USER)); // CBtags
-		System.out.println("Users for user: " + recEngine.getEntitiesWithLikelihood("0", null, null, 10, false, null, EntityType.USER)); // CF
+		System.out.println("LD - Users for resource (Tags): " + recEngine.getEntitiesWithLikelihood(null, "http://sss.eu/207091332279916/", null, 10, false, null , EntityType.USER)); // CBtags
+		System.out.println("Users for user: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/207091058105385/", null, null, 10, false, null, EntityType.USER)); // CF
 		System.out.println("Users MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.USER)); // MP
 	}
 	

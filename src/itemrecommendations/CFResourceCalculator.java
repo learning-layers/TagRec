@@ -176,14 +176,14 @@ public class CFResourceCalculator {
 					return Utilities.getSimUsersForResource(resID, this.allUsers, this.userMaps, this.resMaps, resourceUsers, this.sim, sorting);
 				} else {
 					if (userID != -1) {
-						Map<Integer, Double> candidateSet = new LinkedHashMap<Integer, Double>();								
+						/*Map<Integer, Double> candidateSet = new LinkedHashMap<Integer, Double>();								
 						for (Map.Entry<Integer, Double> entry : this.rankedResourceCalculator.getRankedResourcesList(userID, -1, true, false, false, true, false).entrySet()) {
 							if (candidateSet.size() < 100) {
 								candidateSet.put(entry.getKey(), entry.getValue());
 							}
-						}
+						}*/
 						
-						sortedResources = Utilities.getSimResourcesForUser(userID, /*candidateSet*/this.allResources, this.userMaps, this.resMaps, 
+						sortedResources = Utilities.getSimResourcesForUser(userID, this.allResources, this.userMaps, this.resMaps, 
 								filterOwnEntities ? userResources : new ArrayList<Integer>(), this.sim, sorting);
 					} else if (resID != -1) {
 						sortedResources = Utilities.getSimResources(-1, resID, null, this.allResources, this.resMaps, this.trainList, this.sim, sorting);
