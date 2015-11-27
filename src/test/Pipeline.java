@@ -202,6 +202,7 @@ public class Pipeline {
 		String op = args[0];
 		String samplePath = "", sampleDir = "";
 		int sampleCount = 1;
+		String subdir = "/";
 		if (args[1].equals("cul")) {
 			sampleDir = "cul_core";
 		} else if (args[1].equals("flickr")) {
@@ -216,17 +217,20 @@ public class Pipeline {
 			sampleDir = "lastfm_core";
 		} else if (args[1].equals("del")) {
 			sampleDir = "del_core";
-		} else if (args[1].equals("twitter")) {
+		} else if (args[1].equals("twitter_res")) {
 			sampleDir = "twitter_core";
+			subdir = "/researchers";
+		} else if (args[1].equals("twitter_gen")) {
+			sampleDir = "twitter_core";
+			subdir = "/general";
 		} else {
 			System.out.println("Dataset not available");
 			return;
 		}
-		String subdir = "/";
 		sampleDir += subdir;
 		samplePath += (sampleDir + "/" + args[2]);
 		
-		boolean narrowFolksonomy = args[1].equals("flickr") || args[1].equals("twitter");
+		boolean narrowFolksonomy = args[1].equals("flickr") || args[1].contains("twitter");
 		if (op.equals("cf")) {
 			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
 		} else if (op.equals("cfr")) {
@@ -318,6 +322,13 @@ public class Pipeline {
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "2", !narrowFolksonomy);
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "3", !narrowFolksonomy);
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "4", !narrowFolksonomy);
+		} else if (op.equals("twitter")) {
+			startBaselineCalculator(sampleDir, samplePath, sampleCount, true);
+			startModelCalculator(sampleDir, samplePath, sampleCount, -5, !narrowFolksonomy);
+			startGirpCalculator(sampleDir, samplePath, !narrowFolksonomy);
+			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.NONE, true);
+			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
+			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
 		} else {

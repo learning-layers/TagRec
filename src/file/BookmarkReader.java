@@ -83,7 +83,7 @@ public class BookmarkReader {
 			BufferedReader br = new BufferedReader(reader);
 			List<String> categories = new ArrayList<String>(), tags = new ArrayList<String>();
 			Bookmark userData = null;
-			String userID = "", wikiID = "", timestamp = "";
+			String userID = "", resID = "", timestamp = "";
 			String[] lineParts = null;
 			String line;
 			
@@ -93,17 +93,19 @@ public class BookmarkReader {
 					System.out.println("Line too short: " + this.userLines.size());
 					continue;
 				}
-				processUserData(userID, userData, tags, categories, wikiID);			
+				//if (resID != "" && !resourceMap.containsKey(resID)) { // code for filtering tweets
+					processUserData(userID, userData, tags, categories, resID);		
+				//}
 				// reset userdata
 				userID = lineParts[0].replace("\"", "");
-				wikiID = lineParts[1].replace("\"", "");
+				resID = lineParts[1].replace("\"", "");
 				timestamp = lineParts[2].replace("\"", "");
 				userData = new Bookmark(-1, -1, timestamp);
 				categories.clear();
 				tags.clear();
 				for (String tag : lineParts[3].replace("\"", "").split(",")) {
-					if (!tag.isEmpty()) {
-						String stemmedTag = tag.toLowerCase();
+					String stemmedTag = tag.toLowerCase();
+					if (!stemmedTag.isEmpty() && !tags.contains(stemmedTag)) {
 						if (this.stemmer != null) {
 							this.stemmer.setCurrent(stemmedTag);
 							this.stemmer.stem();
@@ -137,7 +139,7 @@ public class BookmarkReader {
 					} catch (Exception e) { /* do nothing */ }
 				}
 			}
-			processUserData(userID, userData, tags, categories, wikiID); // last user
+			processUserData(userID, userData, tags, categories, resID); // last user
 			br.close();
 			return true;
 		} catch (Exception e) {
@@ -147,7 +149,7 @@ public class BookmarkReader {
 		return false;
 	}
 	
-	private void processUserData(String userID, Bookmark userData, List<String> tags, List<String> categories, String wikiID) {
+	private void processUserData(String userID, Bookmark userData, List<String> tags, List<String> categories, String resID) {
 		if (userID != "" /*&& tags.size() > 0 && !userData.getTimestamp().isEmpty()*/) {
 			if (!userData.getTimestamp().isEmpty()) {
 				if (!StringUtils.isNumeric(userData.getTimestamp())) {
@@ -172,16 +174,16 @@ public class BookmarkReader {
 				this.userCounts.set(userIndex, this.userCounts.get(userIndex) + 1);
 			}
 			userData.setUserID(userIndex);
-			Integer resIndex = this.resourceMap.get(wikiID);
+			Integer resIndex = this.resourceMap.get(resID);
 			if (resIndex == null) {
-				this.resources.add(wikiID);
+				this.resources.add(resID);
 				if (doCount) {
 					this.resourceCounts.add(1);
 				} else {
 					this.resourceCounts.add(0);
 				}
 				resIndex = this.resources.size() - 1;
-				this.resourceMap.put(wikiID, resIndex);
+				this.resourceMap.put(resID, resIndex);
 			} else if (doCount) {
 				this.resourceCounts.set(resIndex, this.resourceCounts.get(resIndex) + 1);
 			}
