@@ -30,6 +30,7 @@ import file.PredictionFileWriter;
  */
 public class SocialCalculator {
 
+	private String sampleDir;
     private String filename;
     private BookmarkReader reader;
     
@@ -42,8 +43,9 @@ public class SocialCalculator {
     private List<Map<Integer, Double>> resultMapPersonalFreqAllUsers;
     
     
-    public SocialCalculator(String userTweetFilename, String networkFilename, int trainSize, int testSize) {
-        this.filename = userTweetFilename;
+    public SocialCalculator(String sampleDir, String userTweetFilename, String networkFilename, int trainSize, int testSize) {
+        this.sampleDir = sampleDir;
+    	this.filename = userTweetFilename;
         this.trainSize = trainSize;
         reader = new BookmarkReader(trainSize, false);
         reader.readFile(userTweetFilename);
@@ -147,7 +149,7 @@ public class SocialCalculator {
         return network;
     }
     
-    private Map<Integer, Double> getRankedTagListSocialFrequency(int userID, Long timesString){
+    private Map<Integer, Double> getRankedTagListSocialFrequency(int userID, Long timesString, boolean sort) {
         
         String user = this.users.get(userID);
         List<String> friendList = network.get(user);
@@ -196,9 +198,13 @@ public class SocialCalculator {
             }
         }        
         
-        Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(tagRank));
-        sortedResultMap.putAll(tagRank);
-        return sortedResultMap;
+        if (sort) {
+	        Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(tagRank));
+	        sortedResultMap.putAll(tagRank);
+	        return sortedResultMap;
+        } else {
+        	return tagRank;
+        }
     }
     
     private Map<Integer, Double> getRankedTagListSocial(int userID, Long timesString, double exponentSocial){
@@ -259,7 +265,7 @@ public class SocialCalculator {
     
     private Map<Integer, Double> getRankedTagListSocialFrequencyHybrid(int userID, Long timeString, double beta){
     	
-    	Map<Integer, Double> resultMapSocialFreq = getRankedTagListSocialFrequency(userID, timeString);
+    	Map<Integer, Double> resultMapSocialFreq = getRankedTagListSocialFrequency(userID, timeString, false);
     	
     	// get frequency based recommendation score
     	
@@ -341,7 +347,7 @@ public class SocialCalculator {
             Bookmark data = reader.getBookmarks().get(i);
             Map<Integer, Double> map = new HashMap<Integer, Double>();
             if(algorithm.equals("social_freq")){
-                map = getRankedTagListSocialFrequency(data.getUserID(), data.getTimestampAsLong());
+                map = getRankedTagListSocialFrequency(data.getUserID(), data.getTimestampAsLong(), true);
             }else if(algorithm.equals("social")){
                 map = getRankedTagListSocial(data.getUserID(), data.getTimestampAsLong(), exponentSocial);
             }else if (algorithm.equals("hybrid")) {

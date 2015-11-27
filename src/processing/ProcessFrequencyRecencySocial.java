@@ -13,12 +13,13 @@ import java.util.HashMap;
 
 public class ProcessFrequencyRecencySocial {
     
+	private String sampleDir;
     
-    public ProcessFrequencyRecencySocial(HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTime, HashMap<String, ArrayList<String>> network) {
+    public ProcessFrequencyRecencySocial(String sampleDir, HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTime, HashMap<String, ArrayList<String>> network) {
+        this.sampleDir = sampleDir;
         
-        
-        ArrayList<Integer> durationSeconds = new ArrayList<Integer>();
-        ArrayList<Integer> durationMinutes = new ArrayList<Integer>();
+        //ArrayList<Integer> durationSeconds = new ArrayList<Integer>();
+        //ArrayList<Integer> durationMinutes = new ArrayList<Integer>();
         ArrayList<Integer> durationHours = new ArrayList<Integer>();
         
         for (String user : userTagTime.keySet())
@@ -36,12 +37,12 @@ public class ProcessFrequencyRecencySocial {
                 }
             }
             HashMap<Integer, ArrayList<Long>> allTagTimeMap = getAllTagsHashMap(friendHashMapList);        
-            durationSeconds.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.SECOND));
-            durationMinutes.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.MINUTE));
+            //durationSeconds.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.SECOND));
+            //durationMinutes.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.MINUTE));
             durationHours.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.HOUR));
         }
-        saveDurationList(durationSeconds, "recencySocialSeconds");
-        saveDurationList(durationMinutes, "recencySocialMinutes");
+        //saveDurationList(durationSeconds, "recencySocialSeconds");
+        //saveDurationList(durationMinutes, "recencySocialMinutes");
         saveDurationList(durationHours, "recencySocialHours");
     }
     
@@ -98,7 +99,7 @@ public class ProcessFrequencyRecencySocial {
 
     private void saveDurationList(ArrayList<Integer> durationList, String filename){
         Collections.sort(durationList);
-        File file = new File(filename);
+        File file = new File("./data/metrics/" + this.sampleDir + "/" + filename);
         if (!file.exists()){
             try {
                 file.createNewFile();

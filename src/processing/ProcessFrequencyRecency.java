@@ -16,33 +16,36 @@ import java.util.List;
  */
 public class ProcessFrequencyRecency {
     
-    public void ProcessTagAnalytics(HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap) {
-
+	private String sampleDir;
+	
+    public void ProcessTagAnalytics(String sampleDir, HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap) {
+    	this.sampleDir = sampleDir;
+    	
         // frequency
-        HashMap<Integer, Integer> tagFrequency = getTagFrequency(userTagTimestampMap);
-        saveHashMap(tagFrequency, "./tagfrequency");
+        //HashMap<Integer, Integer> tagFrequency = getTagFrequency(userTagTimestampMap);
+        //saveHashMap(tagFrequency, "./tagfrequency");
         // recency in duration
         //HashMap< Integer, Integer> tagRecency = getRecencyInDuration(userTagTimestampMap);
 
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.SECOND), "./tagrecency" + "_" + "Seconds");
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MINUTE), "./tagrecency" + "_" + "MINUTE");
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.HOUR), "./tagrecency" + "_" + "HOUR" );
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "./tagrecency" + "_" + "DAY" );
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.FIFTEEN_DAYS), "./tagrecency" + "_" + "FIFTEEN_DAYS");
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MONTH), "./tagrecency" + "_" + "MONTH");
+        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.SECOND), "./tagrecency" + "_" + "Seconds");
+        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MINUTE), "./tagrecency" + "_" + "MINUTE");
+        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.HOUR), "recencyHours" );
+        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "./tagrecency" + "_" + "DAY" );
+        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.FIFTEEN_DAYS), "./tagrecency" + "_" + "FIFTEEN_DAYS");
+        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MONTH), "./tagrecency" + "_" + "MONTH");
         // user unique tag count
-        HashMap< Integer, Integer> uniqueTagCount = getUserUniqueTagCount(userTagTimestampMap);
-        saveHashMap(uniqueTagCount, "./uniqueTagCount");
+        //HashMap< Integer, Integer> uniqueTagCount = getUserUniqueTagCount(userTagTimestampMap);
+        //saveHashMap(uniqueTagCount, "./uniqueTagCount");
         // user tag count
-        HashMap< Integer, Integer> userTagCount = getUserTagCount(userTagTimestampMap);
+        //HashMap< Integer, Integer> userTagCount = getUserTagCount(userTagTimestampMap);
       // tag tag count
-        HashMap< Integer, Integer> tagTagCount = getTagTagCount(userTagTimestampMap);
+       // HashMap< Integer, Integer> tagTagCount = getTagTagCount(userTagTimestampMap);
       // tag user count
-        HashMap< Integer, Integer> tagUserCount = getTagUserCount(userTagTimestampMap);        
+        //HashMap< Integer, Integer> tagUserCount = getTagUserCount(userTagTimestampMap);        
     }
     
     private void saveHashMap(HashMap<Integer, Integer> saveHashMap, String filename){
-    	File file = new File(filename);
+    	File file = new File("./data/metrics/" + this.sampleDir + "/" + filename);
     	try {
     		if (!file.exists()){
         		file.createNewFile();

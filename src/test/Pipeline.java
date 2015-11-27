@@ -85,7 +85,7 @@ public class Pipeline {
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
 	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "/";
+	private final static String SUBDIR = "/general/";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -105,7 +105,10 @@ public class Pipeline {
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
 		String path = dir + DATASET + "_sample";
-		String networkFileName = "./data/csv/"+ dir + "follow_nw.csv";
+		String networkFileName = "./data/csv/" + dir + "network.txt";
+		
+		// Test Social Recommender
+		//startSocialRecommendation(dir, path, networkFileName);
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -129,10 +132,8 @@ public class Pipeline {
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
-		
-		// Test Social Recommender
-		startSocialRecommendation(dir, path, networkFileName);
+		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
+	
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, 9, true, CalculationType.USER_TO_RESOURCE, false);
@@ -187,6 +188,7 @@ public class Pipeline {
 			System.out.println("Too few arguments!");
 			return;
 		}
+		String subdir = "/";
 		String op = args[0];
 		String samplePath = "", sampleDir = "";
 		int sampleCount = 1;
@@ -206,12 +208,17 @@ public class Pipeline {
 			sampleDir = "del_core";
 		} else if (args[1].equals("twitter")){
 		    sampleDir = "twitter_core";
+		} else if (args[1].equals("twitter_res")){
+		    sampleDir = "twitter_core";
+		    subdir = "/researchers";
+		} else if (args[1].equals("twitter_gen")){
+		    sampleDir = "twitter_core";
+		    subdir = "/general";
 		} 
 		else {
 			System.out.println("Dataset not available");
 			return;
 		}
-		String subdir = "/";
 		sampleDir += subdir;
 		samplePath += (sampleDir + "/" + args[2]);
 		
@@ -299,7 +306,7 @@ public class Pipeline {
 		} else if (op.equals("item_cirtt")) {
 			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, false, true, false, true);
 		} else if (op.equals("item_sustain")) {
-			startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
+			startSustainApproach(sampleDir, samplePath, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 		} else if (op.equals("tag_all")) {
 			startAllTagRecommenderApproaches(sampleDir, samplePath, !narrowFolksonomy);
 		} else if (op.equals("tag_samples")) {
@@ -309,13 +316,14 @@ public class Pipeline {
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "4", !narrowFolksonomy);
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
-		} else if(op.equals("social")) {
-		    startSocialRecommendation(dir, path, networkFileName);
-		    analysisSocial(dir, path, networkFileName, "all");
-		}else {
+		} else if(op.equals("social_rec")) {
+		    startSocialRecommendation(sampleDir, samplePath, networkFileName);
+		} else if (op.equals("social_analysis")) {
+		    analysisSocial(sampleDir, samplePath, networkFileName, "all");
+		}
+		else {
 			System.out.println("Unknown operation");
 		}
-		
 	}
 
 	// Tag Recommenders methods -----------------------------------------------------------------------------
@@ -391,28 +399,29 @@ public class Pipeline {
 		}
 	}
 
-	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename){
+	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename) {
 	    double beta = 0.5;
 	    double exponentSocial = 0.5;
 	    String[] algos = {"social_freq", "social", "hybrid", "hybrid_freq"};
 	    getTrainTestSize(sampleName);
-	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
+	    SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
         for (String algo : algos){
-            String filename = "social"+ beta + "_" + exponentSocial + "_" + algo;
+            String filename = "social" + beta + "_" + exponentSocial + "_" + algo;
             calculator.predictSample(beta, exponentSocial, algo);
             writeMetrics(sampleDir, sampleName, filename, 1, 10, null, null, null);
         }
 	}
 	
 	private static void analysisSocial(String sampleDir, String sampleName, String networkFilename, String type){
-	    SocialCalculator calculator = new SocialCalculator(sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
+		getTrainTestSize(sampleName);
+		SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
         if (type.equals("social")){
-	        new ProcessFrequencyRecencySocial(calculator.getUserTagTimes(), calculator.getNetwork());
+	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork());
 	    }else if(type.equals("personal")){
-	        new ProcessFrequencyRecency().ProcessTagAnalytics(calculator.getUserTagTimes());
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes());
 	    }else if(type.equals("all")){
-	        new ProcessFrequencyRecency().ProcessTagAnalytics(calculator.getUserTagTimes());
-	        new ProcessFrequencyRecencySocial(calculator.getUserTagTimes(), calculator.getNetwork());
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes());
+	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork());
 	    }
 	}
 	
