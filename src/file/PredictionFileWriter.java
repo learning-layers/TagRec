@@ -158,14 +158,25 @@ public class PredictionFileWriter {
 				String resultString = i + "|";
 				Set<String> predictions = predictionValues.get(i);
 				Set<String> values = realValues.get(i);
+				String temp = "";
 				
 				for (String p : predictions) {
-					resultString += (p + ", ");
+					temp += (p + ", ");
 				}
+				if (!temp.equals("")) {
+					temp = temp.substring(0, temp.length() - 2);
+				}	
+				resultString += temp;
 				resultString += "|";
+				
+				temp = "";
 				for (String v : values) {
-					resultString += (v + ", ");
-				}				
+					temp += (v + ", ");
+				}
+				if (!temp.equals("")) {
+					temp = temp.substring(0, temp.length() - 2);
+				}
+				resultString += temp;
 				resultString += "\n";
 				
 				bw.write(resultString);

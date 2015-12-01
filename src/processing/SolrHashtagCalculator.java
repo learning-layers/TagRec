@@ -17,11 +17,11 @@ public class SolrHashtagCalculator {
 	private final static int LIMIT = 10;
 	
 	// Statics ----------------------------------------------------------------------------------------------------------------------		
-	public static void predictSample(String filename) {		
+	public static void predictSample(String sampleDir, String filename, String solrUrl) {		
 		List<Set<String>> predictionValues = new ArrayList<Set<String>>();
 		List<Set<String>> realValues = new ArrayList<Set<String>>();
-		SolrConnector trainConnector = new SolrConnector(filename/* + "train"*/);
-		SolrConnector testConnector = new SolrConnector(filename/* + "test"*/);
+		SolrConnector trainConnector = new SolrConnector(solrUrl, filename + "_train");
+		SolrConnector testConnector = new SolrConnector(solrUrl, filename + "_test");
 		
 		Map<String, Set<String>> tweets = testConnector.getTweets();
 		for (Map.Entry<String, Set<String>> tweet : tweets.entrySet()) {
@@ -30,6 +30,6 @@ public class SolrHashtagCalculator {
 			realValues.add(tweet.getValue());
 		}
 		
-		PredictionFileWriter.writeSimplePredictions(predictionValues, realValues, filename + "_solrht");
+		PredictionFileWriter.writeSimplePredictions(predictionValues, realValues, sampleDir + "/" + filename + "_solrht");
 	}
 }

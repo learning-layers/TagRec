@@ -8,19 +8,21 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.params.MoreLikeThisParams;
 
 public class SolrConnector {
 	
 	private SolrServer server;
 	
-	public SolrConnector(String core) {
-		this.server = new HttpSolrServer("http://localhost:8983/solr/" + core);
+	public SolrConnector(String solrUrl, String core) {
+		this.server = new HttpSolrServer(solrUrl + "/solr/" + core);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -46,12 +48,23 @@ public class SolrConnector {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Map<String, Double> getTopHashtagsForTweetText(String tweetText, int limit) {
+	public Map<String, Double> getTopHashtagsForTweetText(String tweetText, int limit) {	
 		Map<String, Double> hashtagMap = new LinkedHashMap<String, Double>();
+		String cleanedTweetText = getCleanedTweetText(tweetText);
+		if (cleanedTweetText.isEmpty()) {
+			return hashtagMap;
+		}
 		
 		SolrQuery solrParams = new SolrQuery();
-		solrParams.set("q", "text:" + tweetText);
+		// query version
+		//solrParams.set("q", "text:" + cleanedTweetText);
+		// mlt version
+		solrParams.setQueryType("/mlt");
+		solrParams.set("stream.body", cleanedTweetText);
+		solrParams.set("mlt.fl", "text");
+		// additional parameters
 		solrParams.set("fl", "hashtags,score");
+		solrParams.set("mlt.count", 20);
 		solrParams.set("rows", 20);
 		QueryResponse r = null;
 		try {
@@ -71,10 +84,18 @@ public class SolrConnector {
 					break;
 				}
 			}
-		} catch (SolrServerException e) {
+		} catch (Exception e) {
+			System.out.println("Exception with tweet-text: " + cleanedTweetText);
 			e.printStackTrace();
 		}
 		
 		return hashtagMap;
+	}
+	
+	private String getCleanedTweetText(String tweetText) {
+		if (tweetText != null) {
+			return tweetText.replaceAll("[^a-zA-Z0-9 ]+", "").trim();
+		}
+		return "";
 	}
 }
