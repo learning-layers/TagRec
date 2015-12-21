@@ -160,8 +160,8 @@ public class PredictionFileWriter {
 				Set<String> values = realValues.get(i);
 				String temp = "";
 				
-				for (String p : predictions) {
-					temp += (p + ", ");
+				for (String v : values) {
+					temp += (v + ", ");
 				}
 				if (!temp.equals("")) {
 					temp = temp.substring(0, temp.length() - 2);
@@ -170,8 +170,8 @@ public class PredictionFileWriter {
 				resultString += "|";
 				
 				temp = "";
-				for (String v : values) {
-					temp += (v + ", ");
+				for (String p : predictions) {
+					temp += (p + ", ");
 				}
 				if (!temp.equals("")) {
 					temp = temp.substring(0, temp.length() - 2);

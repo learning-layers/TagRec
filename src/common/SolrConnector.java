@@ -48,10 +48,102 @@ public class SolrConnector {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public Map<String, Set<String>> getUserIDs() {
+		Map<String, Set<String>> tweetIDs = new LinkedHashMap<String, Set<String>>();
+		
+		SolrQuery solrParams = new SolrQuery();
+		solrParams.set("q", "*:*");
+		solrParams.set("fl", "userid,hashtags");
+		solrParams.set("rows", Integer.MAX_VALUE);
+		QueryResponse r = null;
+		try {
+			r = this.server.query(solrParams);
+			SolrDocumentList docs = r.getResults();
+			for (SolrDocument d : docs) {
+				tweetIDs.put((String) d.get("userid"), new HashSet<String>((List<String>) d.get("hashtags")));
+			}
+		} catch (SolrServerException e) {
+			e.printStackTrace();
+		}
+		
+		return tweetIDs;
+	}
+	
+	public String getMostRecentTweetOfUser(String user) {
+		SolrQuery solrParams = new SolrQuery();
+		solrParams.set("q", "userid:" + user);
+		solrParams.set("sort", "timestamp desc");
+		solrParams.set("fl", "id");
+		solrParams.set("rows", 1);
+		QueryResponse r = null;
+		try {
+			r = this.server.query(solrParams);
+			SolrDocumentList docs = r.getResults();
+			for (SolrDocument d : docs) {
+				return (String) d.get("id");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public String getTweetTextOfRecentTweets(String user, int intValue) {
+		String tweetText = "";
+		SolrQuery solrParams = new SolrQuery();
+		solrParams.set("q", "userid:" + user);
+		solrParams.set("sort", "timestamp desc");
+		solrParams.set("fl", "text");
+		solrParams.set("rows", intValue);
+		QueryResponse r = null;
+		try {
+			r = this.server.query(solrParams);
+			SolrDocumentList docs = r.getResults();
+			for (SolrDocument d : docs) {
+				tweetText += ((String) d.get("text") + " ");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+		return tweetText;
+	}
+	
+	public String getTweetTextOfLastHours(String user, int hours) {
+		String tweetText = "";
+		SolrQuery solrParams = new SolrQuery();
+		solrParams.set("q", "userid:" + user);
+		solrParams.set("sort", "timestamp desc");
+		solrParams.set("fl", "text,timestamp");
+		solrParams.set("rows", 100);
+		QueryResponse r = null;
+		try {
+			r = this.server.query(solrParams);
+			SolrDocumentList docs = r.getResults();
+			Long threshold = null;
+			for (SolrDocument d : docs) {
+				String timestampString = (String) d.get("timestamp");
+				Long timestamp = Long.parseLong(timestampString.substring(0, timestampString.indexOf(".")));
+				if (threshold == null) {
+					threshold = timestamp - hours * 60 * 60;
+				}
+				if (timestamp > threshold.longValue()) {
+					tweetText += ((String) d.get("text") + " ");
+				} else {
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+		return tweetText;
+	}
+	
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public Map<String, Double> getTopHashtagsForTweetText(String tweetText, int limit) {	
 		Map<String, Double> hashtagMap = new LinkedHashMap<String, Double>();
-		String cleanedTweetText = getCleanedTweetText(tweetText);
-		if (cleanedTweetText.isEmpty()) {
+		String cleanedTweetText = tweetText;//getCleanedTweetText(tweetText);
+		if (cleanedTweetText == null || cleanedTweetText.isEmpty()) {
 			return hashtagMap;
 		}
 		
@@ -64,8 +156,8 @@ public class SolrConnector {
 		solrParams.set("mlt.fl", "text");
 		// additional parameters
 		solrParams.set("fl", "hashtags,score");
-		solrParams.set("mlt.count", 20);
-		solrParams.set("rows", 20);
+		solrParams.set("mlt.count", 50);
+		solrParams.set("rows", 50);
 		QueryResponse r = null;
 		try {
 			r = this.server.query(solrParams);
@@ -86,6 +178,50 @@ public class SolrConnector {
 			}
 		} catch (Exception e) {
 			System.out.println("Exception with tweet-text: " + cleanedTweetText);
+			e.printStackTrace();
+		}
+		
+		return hashtagMap;
+	}
+	
+	@SuppressWarnings({ "unchecked", "deprecation" })
+	public Map<String, Double> getTopHashtagsForTweetID(String tweetID, int limit) {	
+		Map<String, Double> hashtagMap = new LinkedHashMap<String, Double>();
+		if (tweetID == null || tweetID.isEmpty()) {
+			return hashtagMap;
+		}
+		
+		SolrQuery solrParams = new SolrQuery();
+		// query version
+		//solrParams.set("q", "text:" + cleanedTweetText);
+		// mlt version
+		solrParams.setQueryType("/mlt");
+		solrParams.set("q", "id:" + tweetID);
+		solrParams.set("mlt.fl", "text");
+		// additional parameters
+		solrParams.set("fl", "hashtags,score");
+		solrParams.set("mlt.count", 50);
+		solrParams.set("rows", 50);
+		QueryResponse r = null;
+		try {
+			r = this.server.query(solrParams);
+			SolrDocumentList docs = r.getResults();
+			for (SolrDocument d : docs) {
+				double score = (float) d.get("score");
+				Set<String> hashtags = new HashSet<String>((List<String>) d.get("hashtags"));
+				for (String h : hashtags) {
+					if (hashtagMap.size() < limit) {
+						if (!hashtagMap.containsKey(h)) {
+							hashtagMap.put(h, score);
+						}
+					}
+				}
+				if (hashtagMap.size() >= limit) {
+					break;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Exception with tweet-id: " + tweetID);
 			e.printStackTrace();
 		}
 		

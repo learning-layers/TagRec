@@ -91,8 +91,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "/researchers";
+	private final static String DATASET = "lastfm";
+	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -116,7 +116,7 @@ public class Pipeline {
 		//TOPIC_NAME = "lda_500";
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		
-		//startSolrHashtagCalculator(dir, "http://kti-social:8938", "researcher");
+		//startSolrHashtagCalculator(dir, "http://kti-social:8938", "researcher", true, true, 24);
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -337,9 +337,14 @@ public class Pipeline {
 	}
 
 	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------	
-	private static void startSolrHashtagCalculator(String sampleDir, String solrUrl, String sampleName) {
-		SolrHashtagCalculator.predictSample(sampleDir, sampleName, solrUrl);
-		writeMetrics(sampleDir, sampleDir + "/" + sampleName, "solrht", 1, 10, null, null, null);
+	private static void startSolrHashtagCalculator(String sampleDir, String solrUrl, String sampleName, boolean train, boolean hours, Integer mostRecentTweets) {
+		if (train) {
+			String suffix = SolrHashtagCalculator.predictTrainSample(sampleDir, sampleName, solrUrl, hours, mostRecentTweets);
+			writeMetrics(sampleDir, sampleDir + "/" + sampleName, suffix, 1, 10, null, null, null);
+		} else {
+			String suffix = SolrHashtagCalculator.predictSample(sampleDir, sampleName, solrUrl);
+			writeMetrics(sampleDir, sampleDir + "/" + sampleName, suffix, 1, 10, null, null, null);
+		}
 	}
 	
 	private static void startAllTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
