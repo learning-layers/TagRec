@@ -15,8 +15,8 @@ public class ThreeLayersCollectiveEngine implements EngineInterface {
 	private BookmarkReader reader = null;
 	private ThreeLTCalculator calculator = null;
 	
-	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+	public void loadFile(String path, String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(path, filename);
 		ThreeLTCalculator calculator = new ThreeLTCalculator(reader, reader.getBookmarks().size(), 5, 5, true, false, false, CalculationType.NONE);
 		
 		resetStructures(reader, calculator);

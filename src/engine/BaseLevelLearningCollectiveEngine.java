@@ -13,8 +13,8 @@ public class BaseLevelLearningCollectiveEngine implements EngineInterface {
 	private BookmarkReader reader = null;
 	private final Map<String, Double> collectiveTags = new LinkedHashMap<String, Double>();
 	
-	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+	public void loadFile(String path, String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(path, filename);
 		Map<Integer, Double> collectiveTags = BLLCalculator.getCollectiveArtifactMap(reader, reader.getBookmarks(), null, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
 		
 		// map to strings

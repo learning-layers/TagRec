@@ -78,8 +78,22 @@ public class BookmarkReader {
 	}
 	
 	public boolean readFile(String filename) {	
+		return doReadFile(null, filename);
+	}
+	
+	public boolean readFile(String path, String filename) {
+		return doReadFile(path, filename);
+	}
+	
+	private boolean doReadFile(String path, String filename) {
 		try {
-			FileReader reader = new FileReader(new File("./data/csv/" + filename + ".txt"));
+			String filePath = "";
+			if (path == null) {
+				filePath = "./data/csv/" + filename + ".txt";
+			} else {
+				filePath = path + filename;
+			}
+			FileReader reader = new FileReader(new File(filePath));
 			BufferedReader br = new BufferedReader(reader);
 			List<String> categories = new ArrayList<String>(), tags = new ArrayList<String>();
 			Bookmark userData = null;

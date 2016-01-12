@@ -191,7 +191,7 @@ public class Pipeline {
 		//startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 			
 		// Engine Testing
-		//startEngineTest("sss_recomm");
+		//startEngineTest("C:/", "sss_recomm.txt");
 		//startKnowBrainTest("ml_group2");
 		
 		// Commandline Arguments
@@ -547,10 +547,10 @@ public class Pipeline {
 	
 	// Engine testing
 	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	private static void startEngineTest(String path) {
+	private static void startEngineTest(String path, String filename) {
 		EngineInterface recEngine = new EntityRecommenderEngine();
 		try {
-			recEngine.loadFile(path);
+			recEngine.loadFile(path, filename);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -569,10 +569,10 @@ public class Pipeline {
 		System.out.println("Users MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.USER)); // MP
 	}
 	
-	private static void startKnowBrainTest(String path) {
+	private static void startKnowBrainTest(String path, String filename) {
 		EngineInterface recEngine = new TagRecommenderEvalEngine();
 		try {
-			recEngine.loadFile(path);
+			recEngine.loadFile(path, filename);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import file.BookmarkReader;
 
 public class MostPopularCollectiveEngine implements EngineInterface {
@@ -11,8 +12,8 @@ public class MostPopularCollectiveEngine implements EngineInterface {
 	private BookmarkReader reader;
 	private final Map<String, Double> collectiveTags = new LinkedHashMap<String, Double>();
 	
-	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+	public void loadFile(String path, String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(path, filename);
 		Map<Integer, Double> collectiveTags = EngineUtils.calcTopEntities(reader, EntityType.TAG);
 		
 		// map to strings

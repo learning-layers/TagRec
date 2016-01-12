@@ -10,13 +10,13 @@ public class EntityRecommenderEngine implements EngineInterface {
 	private EngineInterface resourceRecommender;
 	private EngineInterface userRecommender;
 	
-	public void loadFile(String filename) throws Exception {	
+	public void loadFile(String path, String filename) throws Exception {	
 		this.tagRecommender = new TagRecommenderEvalEngine();
-		this.tagRecommender.loadFile(filename);
+		this.tagRecommender.loadFile(path, filename);
 		this.resourceRecommender = new ResourceRecommenderEngine();
-		this.resourceRecommender.loadFile(filename);
+		this.resourceRecommender.loadFile(path, filename);
 		this.userRecommender = new UserRecommenderEngine();
-		this.userRecommender.loadFile(filename);
+		this.userRecommender.loadFile(path, filename);
 	}
 
 	public Map<String, Double> getEntitiesWithLikelihood(String user, String resource, List<String> topics, Integer count, Boolean filterOwnEntities, Algorithm algorithm, EntityType type) {

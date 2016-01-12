@@ -43,30 +43,23 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 		//this.threelEngine = null;
 		//this.random = new Random();
 		this.bw = null;
-		
-		try {
-			FileWriter writer = new FileWriter(new File("./data/tagrec_log.txt"), true);
-			this.bw = new BufferedWriter(writer);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	@Override
-	public void loadFile(String filename) throws Exception {
+	public void loadFile(String path, String filename) throws Exception {
 		//this.lmEngine = null;
 		//this.bllEngine = null;
 		//this.threelEngine = null;
 		
-		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
+		//BookmarkReader reader = new BookmarkReader(0, false);
+		//reader.readFile(filename);
 		//if (reader.getCategories().size() > 0) {
 		//	this.threelEngine = new ThreeLayersEngine();
 		//	this.threelEngine.loadFile(filename);
 		//}
 		//if (reader.hasTimestamp()) {
 			this.bllEngine = new BaseLevelLearningEngine();
-			this.bllEngine.loadFile(filename);
+			this.bllEngine.loadFile(path, filename);
 		//}
 		//this.lmEngine = new LanguageModelEngine();
 		//this.lmEngine.loadFile(filename);
@@ -82,6 +75,19 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 			this.mpEngine = new MostPopularCollectiveEngine();
 			this.mpEngine.loadFile(filename);
 		*/
+			
+		try {
+			String logFile = "";
+			if (path == null) {
+				logFile = "./data/tagrec_log.txt";
+			} else {
+				logFile = path + "tagrec_log.txt";
+			}
+			FileWriter writer = new FileWriter(new File(logFile), true);
+			this.bw = new BufferedWriter(writer);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

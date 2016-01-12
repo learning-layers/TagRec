@@ -45,8 +45,8 @@ public class LanguageModelEngine implements EngineInterface {
 		reader = null;
 	}
 
-	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+	public void loadFile(String path, String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(path, filename);
 		
 		Map<String, Map<Integer, Double>> userMaps = new HashMap<>();
 		Map<String, Map<Integer, Double>> resMaps = new HashMap<>();

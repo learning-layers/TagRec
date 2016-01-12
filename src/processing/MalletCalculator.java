@@ -44,6 +44,7 @@ import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
+import file.BookmarkWriter;
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
@@ -360,14 +361,14 @@ public class MalletCalculator {
 			//probValues.add(Doubles.toArray(ldaVal.values()));
 		}
 		List<Bookmark> userSample = reader.getBookmarks().subList(0, size);		
-		BookmarkSplitter.writeSample(reader, userSample, outputFile, predictionValues, false);
+		BookmarkWriter.writeSample(reader, userSample, outputFile, predictionValues, false);
 		//if (creationTrainSize != null) {
 			List<Bookmark> trainUserSample = reader.getBookmarks().subList(0, trainSize);
 			List<int[]> trainPredictionValues = predictionValues.subList(0, trainSize);
 			List<Bookmark> testUserSample = reader.getBookmarks().subList(trainSize, size);
 			List<int[]> testPredictionValues = predictionValues.subList(trainSize, size);
-			BookmarkSplitter.writeSample(reader, trainUserSample, outputFile + "_train", trainPredictionValues, false);
-			BookmarkSplitter.writeSample(reader, testUserSample, outputFile + "_test", testPredictionValues, false);
+			BookmarkWriter.writeSample(reader, trainUserSample, outputFile + "_train", trainPredictionValues, false);
+			BookmarkWriter.writeSample(reader, testUserSample, outputFile + "_test", testPredictionValues, false);
 		//}
 				
 		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());

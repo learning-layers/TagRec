@@ -48,8 +48,8 @@ public class UserRecommenderEngine implements EngineInterface {
 		this.reader = new BookmarkReader(0, false);
 	}
 	
-	public void loadFile(String filename) throws Exception {
-		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(filename);
+	public void loadFile(String path, String filename) throws Exception {
+		BookmarkReader reader = EngineUtils.getSortedBookmarkReader(path, filename);
 
 		CFResourceCalculator calculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		CFResourceCalculator tagCalculator = new CFResourceCalculator(reader, reader.getBookmarks().size(), false, true, false, 5, Similarity.COSINE, Features.TAGS);

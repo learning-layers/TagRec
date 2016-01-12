@@ -33,21 +33,28 @@ import common.Bookmark;
 import common.IntMapComparator;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
+import file.BookmarkWriter;
 
 public class EngineUtils {
 
-	public static BookmarkReader getSortedBookmarkReader(String filename) {
+	public static BookmarkReader getSortedBookmarkReader(String path, String filename) {
 		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(filename);
+		reader.readFile(path, filename);
 		Collections.sort(reader.getBookmarks());
 		
 		String sortedFile = filename + "_sorted";
-		BookmarkSplitter.writeSample(reader, reader.getBookmarks(), sortedFile, null, true);
+		BookmarkWriter.writeSample(reader, reader.getBookmarks(), path, sortedFile, null, true);
 		reader = new BookmarkReader(0, false);
-		reader.readFile(sortedFile);
+		reader.readFile(path, sortedFile);
 		
 		try {
-			if (!new File("./data/csv/" + sortedFile + ".txt").delete()) {
+			String deletePath = "";
+			if (path == null) {
+				deletePath = "./data/csv/" + sortedFile + ".txt";
+			} else {
+				deletePath = path + sortedFile;
+			}
+			if (!new File(deletePath).delete()) {
 				System.out.println("Problem while deleting sorted temp-file");
 			}
 		} catch (Exception e) {

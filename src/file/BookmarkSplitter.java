@@ -66,7 +66,7 @@ public class BookmarkSplitter {
 	public void splitUserPercentage(String filename, int percentage, boolean usePercentage, int count) {
 		for (int i = 1; i <= count; i++) {
 			List<Bookmark> lines = getUserPercentage(percentage, usePercentage);
-			writeSample(this.reader, lines, filename /*+ "_" + percentage + "_perc_" */ + i, null, false);
+			BookmarkWriter.writeSample(this.reader, lines, filename /*+ "_" + percentage + "_perc_" */ + i, null, false);
 		}
 	}
 	
@@ -80,9 +80,9 @@ public class BookmarkSplitter {
 		List<Bookmark> trainUserSample = userSample.subList(0, trainUserSize);
 		List<Bookmark> testUserSample = userSample.subList(trainUserSize, trainUserSize + testUserSize);
 			
-		writeSample(this.reader, trainUserSample, filename + "_train", null, false);
-		writeSample(this.reader, testUserSample, filename + "_test", null, false);
-		writeSample(this.reader, userSample, filename, null, false);
+		BookmarkWriter.writeSample(this.reader, trainUserSample, filename + "_train", null, false);
+		BookmarkWriter.writeSample(this.reader, testUserSample, filename + "_test", null, false);
+		BookmarkWriter.writeSample(this.reader, userSample, filename, null, false);
 	}
 	
 	// puts the last bookmark of each user into the testset
@@ -112,10 +112,10 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeSample(this.reader, trainLines, filename + "_train", null, realNames);
-		writeSample(this.reader, testLines, filename + "_test", null, realNames);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename + "_train", null, realNames);
+		BookmarkWriter.writeSample(this.reader, testLines, filename + "_test", null, realNames);
 		trainLines.addAll(testLines);
-		writeSample(this.reader, trainLines, filename, null, realNames);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, realNames);
 	}
 	
 	// puts one bookmark at random of each user into the testset
@@ -137,10 +137,10 @@ public class BookmarkSplitter {
 			}
 		}
 		
-		writeSample(this.reader, trainLines, filename + "_train", null, false);
-		writeSample(this.reader, testLines, filename + "_test", null, false);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename + "_train", null, false);
+		BookmarkWriter.writeSample(this.reader, testLines, filename + "_test", null, false);
 		trainLines.addAll(testLines);
-		writeSample(this.reader, trainLines, filename, null, false);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, false);
 	}
 	
 	public void leavePercentageOutSplit(String filename, int percentage, boolean last, Integer userNumber, boolean tagRec) {
@@ -183,67 +183,13 @@ public class BookmarkSplitter {
 		
 		Collections.sort(trainLines);
 		Collections.sort(testLines);
-		writeSample(this.reader, trainLines, filename + "_train", null, false);
-		writeSample(this.reader, testLines, filename + "_test", null, false);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename + "_train", null, false);
+		BookmarkWriter.writeSample(this.reader, testLines, filename + "_test", null, false);
 		trainLines.addAll(testLines);
-		writeSample(this.reader, trainLines, filename, null, false);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, false);
 	}
 	
 	// Statics -------------------------------------------------------------------------------------------------------------------------------------------
-	
-	public static boolean writeSample(BookmarkReader reader, List<Bookmark> userSample, String filename, List<int[]> catPredictions, boolean realValues) {
-		try {
-			FileWriter writer = new FileWriter(new File("./data/csv/" + filename + ".txt"));
-			BufferedWriter bw = new BufferedWriter(writer);
-			int userCount = 0;
-			// TODO: check encoding
-			for (Bookmark bookmark : userSample) {
-				String user = (realValues ? reader.getUsers().get(bookmark.getUserID()).replace("\"", "") : Integer.toString(bookmark.getUserID()));
-				String resource = (realValues ? reader.getResources().get(bookmark.getResourceID()).replace("\"", "") : Integer.toString(bookmark.getResourceID()));
-				bw.write("\"" + user + "\";");
-				bw.write("\"" + resource + "\";");
-				bw.write("\"" + bookmark.getTimestamp().replace("\"", "") + "\";\"");
-				int i = 0;
-				for (int t : bookmark.getTags()) {
-					String tag = (realValues ? reader.getTags().get(t).replace("\"", "") : Integer.toString(t));
-					bw.write(tag);
-					if (++i < bookmark.getTags().size()) {
-						bw.write(',');
-					}					
-				}
-				bw.write("\";\"");
-				
-				List<Integer> userCats = (catPredictions == null ? bookmark.getCategories() : Ints.asList(catPredictions.get(userCount++)));
-				i = 0;
-				for (int cat : userCats) {
-					//bw.write(URLEncoder.encode((catPredictions == null ? reader.getCategories().get(cat).replace("\"", "") : reader.getTags().get(cat)).replace("\"", ""), "UTF-8"));
-					bw.write("t" + cat);
-					if (++i < userCats.size()) {
-						bw.write(',');
-					}					
-				}
-				bw.write("\"");
-				if (bookmark.getRating() != -2) {
-					bw.write(";\"" + (int)bookmark.getRating() + "\"");
-				} else {
-					bw.write(";\"\"");
-				}
-				if (bookmark.getTitle() != null) {
-					bw.write(";\"" + bookmark.getTitle() + "\"");
-				} /*else {
-					bw.write(";\"\"");
-				}*/
-				bw.write("\n");
-			}
-			
-			bw.flush();
-			bw.close();
-			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
 	
 	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart, boolean realNames, String userWhiteList) {		
 		BookmarkReader reader = new BookmarkReader(0, false);
@@ -284,7 +230,7 @@ public class BookmarkSplitter {
 				CoreFiltering filtering = new CoreFiltering(reader);
 				reader = filtering.filterOrphansIterative(userLevel, resLevel, tagLevel);
 				String coreResultfile = resultfile;// + "_c" + ++i;
-				writeSample(reader, reader.getBookmarks(), coreResultfile, null, false);
+				BookmarkWriter.writeSample(reader, reader.getBookmarks(), coreResultfile, null, false);
 				if (reader.getBookmarks().size() >= size) {
 					return;
 				}
