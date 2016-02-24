@@ -29,9 +29,8 @@ The source-code can be directly checked-out through this repository. It contains
 * ml_core for MovieLens
 * lastfm_core for LastFM
 * wiki_core for Wikipedia (based on bookmarks from Delicious)
-* twitter_core
-** /researchers (for researchers dataset)
-** /general (for general dataset)
+* twitter_core/researchers for the Twitter researchers dataset
+* twitter_core/general for the Twitter random dataset
 
 ## How-to-use
 The _tagrecommender_ .jar uses three parameters:
@@ -83,6 +82,8 @@ Data-Processing:
 * ml for MovieLens
 * lastfm for LastFM
 * wiki for Wikipedia (based on bookmarks from Delicious)
+* twitter_res for the Twitter researchers dataset
+* twitter_gen for the Twitter random dataset
 
 and third the filename (without file extension)
 
