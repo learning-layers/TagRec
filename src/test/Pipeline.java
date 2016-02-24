@@ -21,8 +21,8 @@
 package test;
 
 import itemrecommendations.CFResourceCalculator;
-import itemrecommendations.HuangCalculator;
 import itemrecommendations.CIRTTCalculator;
+import itemrecommendations.HuangCalculator;
 import itemrecommendations.MPResourceCalculator;
 import itemrecommendations.SustainCalculator;
 import itemrecommendations.ZhengCalculator;
@@ -43,37 +43,35 @@ import common.SolrConnector;
 import common.Utilities;
 import processing.BLLCalculator;
 import processing.CFTagRecommender;
-import processing.MPCalculator;
 import processing.ContentBasedCalculator;
 import processing.FolkRankCalculator;
+import processing.GIRPTMCalculator;
+import processing.MPCalculator;
 import processing.MPurCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
-import processing.GIRPTMCalculator;
+
 import processing.RecencyCalculator;
 import processing.SolrHashtagCalculator;
+import processing.ProcessFrequencyRecency;
+import processing.ProcessFrequencyRecencySocial;
+import processing.SocialCalculator;
 import processing.ThreeLTCalculator;
-import processing.analyzing.TagReuseProbAnalyzer;
 import processing.analyzing.UserTagDistribution;
+
 import engine.Algorithm;
-import engine.BaseLevelLearningEngine;
+import engine.EngineInterface;
 import engine.EntityRecommenderEngine;
 import engine.EntityType;
-import engine.ResourceRecommenderEngine;
-import engine.UserRecommenderEngine;
-import engine.EngineInterface;
-import engine.LanguageModelEngine;
 import engine.TagRecommenderEvalEngine;
-import engine.ThreeLayersEngine;
 import file.BookmarkReader;
 import file.BookmarkSplitter;
 import file.postprocessing.CatDescFiltering;
 import file.preprocessing.BibsonomyProcessor;
 import file.preprocessing.CiteULikeProcessor;
-import file.preprocessing.JSONProcessor;
-import file.preprocessing.PintsProcessor;
 import file.preprocessing.LastFMProcessor;
 import file.preprocessing.MovielensProcessor;
+import file.preprocessing.PintsProcessor;
 import file.preprocessing.TensorProcessor;
 
 public class Pipeline {
@@ -111,7 +109,11 @@ public class Pipeline {
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
 		String dir = DATASET + "_core" + SUBDIR;
-		String path = dir + "/" + DATASET + "_sample";
+		String path = dir + DATASET + "_sample";
+		String networkFileName = "./data/csv/" + dir + "network.txt";
+		
+		// Test Social Recommender
+		//startSocialRecommendation(dir, path, networkFileName);
 		
 		//TOPIC_NAME = "lda_500";
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
@@ -140,7 +142,7 @@ public class Pipeline {
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator(dir, path, 1, 15, -5, false, CalculationType.NONE, false);
+		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 
@@ -199,10 +201,11 @@ public class Pipeline {
 			System.out.println("Too few arguments!");
 			return;
 		}
+		String subdir = "/";
 		String op = args[0];
 		String samplePath = "", sampleDir = "";
 		int sampleCount = 1;
-		String subdir = "/";
+
 		if (args[1].equals("cul")) {
 			sampleDir = "cul_core";
 		} else if (args[1].equals("flickr")) {
@@ -314,7 +317,7 @@ public class Pipeline {
 		} else if (op.equals("item_cirtt")) {
 			startResourceCIRTTCalculator(sampleDir, samplePath, "", sampleCount, 20, Features.ENTITIES, false, true, false, true);
 		} else if (op.equals("item_sustain")) {
-			startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
+			startSustainApproach(sampleDir, samplePath, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 		} else if (op.equals("tag_all")) {
 			startAllTagRecommenderApproaches(sampleDir, samplePath, !narrowFolksonomy);
 		} else if (op.equals("tag_samples")) {
@@ -331,7 +334,12 @@ public class Pipeline {
 			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
-		} else {
+		} else if(op.equals("social_rec")) {
+		    startSocialRecommendation(sampleDir, samplePath, networkFileName);
+		} else if (op.equals("social_analysis")) {
+		    analysisSocial(sampleDir, samplePath, networkFileName, "all");
+		}
+		else {
 			System.out.println("Unknown operation");
 		}
 	}
@@ -423,6 +431,32 @@ public class Pipeline {
 		}
 	}
 
+	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename) {
+	    double beta = 0.5;
+	    double exponentSocial = 0.5;
+	    String[] algos = {"social_freq", "social", "hybrid", "hybrid_freq"};
+	    getTrainTestSize(sampleName);
+	    SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
+        for (String algo : algos){
+            String filename = "social" + beta + "_" + exponentSocial + "_" + algo;
+            calculator.predictSample(beta, exponentSocial, algo);
+            writeMetrics(sampleDir, sampleName, filename, 1, 10, null, null, null);
+        }
+	}
+	
+	private static void analysisSocial(String sampleDir, String sampleName, String networkFilename, String type){
+		getTrainTestSize(sampleName);
+		SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
+        if (type.equals("social")){
+	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork());
+	    }else if(type.equals("personal")){
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes());
+	    }else if(type.equals("all")){
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes());
+	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork());
+	    }
+	}
+	
 	private static void startGirpCalculator(String sampleDir, String sampleName, boolean all) {
 		getTrainTestSize(sampleName);
 		BookmarkReader reader = null;
@@ -545,7 +579,6 @@ public class Pipeline {
 		writeMetrics(sampleDir, sampleName, "cb", 1, 10, null, reader, null);
 	}
 	
-	// Engine testing
 	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	private static void startEngineTest(String path, String filename) {
 		EngineInterface recEngine = new EntityRecommenderEngine();
@@ -730,7 +763,12 @@ public class Pipeline {
 		System.out.println("Test-size: " + TEST_SIZE);
 	}
 	
-	// passing the trainSize means that MyMediaLite files will be evaluated
+	/**
+	 * 
+	 * Passing the trainSize means that MyMediaLite files will be evaluated
+	 * 
+	 * 
+	 * */
 	private static void evaluate(String sampleDir, String sampleName, String prefix, String postfix, boolean calcTags, boolean tensor, BookmarkReader reader) {
 		if (reader == null) {
 			getTrainTestSize(sampleName + (postfix != null ? "_" + postfix : ""));

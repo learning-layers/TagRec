@@ -127,6 +127,10 @@ public class Bookmark implements Comparable<Bookmark> {
 		return this.tags;
 	}
 	
+	public Long getTimestampAsLong(){
+	    return Long.parseLong(this.timestamp);
+	}
+	
 	// Statics ----------------------------------------------------------------------------------
 	
 	public static double getAvgNumberOfTopics(List<Bookmark> lines) {
