@@ -172,5 +172,6 @@ _Bibtex:_
 ## Contacts and contributors (in alphabetically order)
 * Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone.kopeinik@tugraz.at (sustain resource recommender algorithm)
 * Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (huang, zheng and CIRTT resource recommender algorithms)
+* Subhash Pujari, Knowledge Technologies Institute, Graz University of Technology, spujari@know-center.at (twitter hashtag recommender algorithms)
 * Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contact)
 * Christoph Trattner, Norwegian University of Science and Technology Trondheim, chritrat@idi.ntnu.no (general contact)
