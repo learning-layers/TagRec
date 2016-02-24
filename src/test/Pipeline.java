@@ -91,8 +91,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "lastfm";
-	private final static String SUBDIR = "/core1";
+	private final static String DATASET = "twitter";
+	private final static String SUBDIR = "/researchers";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -116,7 +116,7 @@ public class Pipeline {
 		//TOPIC_NAME = "lda_500";
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		
-		//startSolrHashtagCalculator(dir, "http://kti-social:8938", "researcher", true, true, 24);
+		//startSolrHashtagCalculator(dir, "http://kti-social:8938", "researcher", false, true, 24);
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -134,13 +134,13 @@ public class Pipeline {
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
 		//BookmarkSplitter.splitSample(dir + "/tweets", dir + "/twitter_sample", 1, 0, true, false, true, dir + "/white_user.txt");
-		//try { getStatistics(path, false); } catch (Exception e) { e.printStackTrace(); }
+		//try { getStatistics("sss-eval", false); } catch (Exception e) { e.printStackTrace(); }
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.NONE, false);
+		//startActCalculator(dir, path, 1, 15, -5, false, CalculationType.NONE, false);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 
@@ -191,7 +191,7 @@ public class Pipeline {
 		//startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 			
 		// Engine Testing
-		//startEngineTest("C:/", "sss_recomm.txt");
+		//startEngineTest(null, "sss_recomm");
 		//startKnowBrainTest("ml_group2");
 		
 		// Commandline Arguments
@@ -554,10 +554,13 @@ public class Pipeline {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Tags for user and resource: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, null, EntityType.TAG)); // BLLac+MPr
-		System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", null, null, 10, false, null, EntityType.TAG)); // BLL
-		System.out.println("Tags for resource: " + recEngine.getEntitiesWithLikelihood(null, "http://sss.eu/31116473812357491143/", null, 10, false, null, EntityType.TAG)); // MPr
-		System.out.println("Tags MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.TAG)); // MP
+		System.out.println("Tags for user and resource with BLLac+MPr: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.BLLacMPr, EntityType.TAG)); // BLLac+MPr
+		System.out.println("Tags for user and resource with MPur: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.MPur, EntityType.TAG)); // MPur
+		System.out.println("Tags with 3Lcoll: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.THREELcoll, EntityType.TAG)); // BLLac+MPr
+		System.out.println("Tags with MP: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.MP, EntityType.TAG)); // MPur
+		//System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", null, null, 10, false, null, EntityType.TAG)); // BLL
+		//System.out.println("Tags for resource: " + recEngine.getEntitiesWithLikelihood(null, "http://sss.eu/31116473812357491143/", null, 10, false, null, EntityType.TAG)); // MPr
+		//System.out.println("Tags MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.TAG)); // MP
 
 		System.out.println("LD - Resources for user (Tags):" + recEngine.getEntitiesWithLikelihood("http://sss.eu/207091058105385/", null, null, 10, false, Algorithm.RESOURCETAGCB, EntityType.RESOURCE)); // CBtags
 		System.out.println("Resources for user (CF): " + recEngine.getEntitiesWithLikelihood("http://sss.eu/207091058105385/", null, null, 10, false, null , EntityType.RESOURCE)); // CF

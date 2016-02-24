@@ -31,50 +31,34 @@ import file.BookmarkReader;
 
 public class TagRecommenderEvalEngine implements EngineInterface {
 
-	//private EngineInterface mpEngine;
+	private EngineInterface lmEngine;
 	private EngineInterface bllEngine;
-	//private EngineInterface threelEngine;	
+	private EngineInterface threelEngine;
+	private EngineInterface mpEngine;
+	
 	//private Random random;
 	private BufferedWriter bw;
 	
 	public TagRecommenderEvalEngine() {
-		//this.mpEngine = null;
+		this.lmEngine = null;
 		this.bllEngine = null;
-		//this.threelEngine = null;
+		this.threelEngine = null;
+		this.mpEngine = null;
+		
 		//this.random = new Random();
 		this.bw = null;
 	}
 	
 	@Override
 	public void loadFile(String path, String filename) throws Exception {
-		//this.lmEngine = null;
-		//this.bllEngine = null;
-		//this.threelEngine = null;
-		
-		//BookmarkReader reader = new BookmarkReader(0, false);
-		//reader.readFile(filename);
-		//if (reader.getCategories().size() > 0) {
-		//	this.threelEngine = new ThreeLayersEngine();
-		//	this.threelEngine.loadFile(filename);
-		//}
-		//if (reader.hasTimestamp()) {
-			this.bllEngine = new BaseLevelLearningEngine();
-			this.bllEngine.loadFile(path, filename);
-		//}
-		//this.lmEngine = new LanguageModelEngine();
-		//this.lmEngine.loadFile(filename);
-		
-		/* KnowBrain
-		//if (filename.contains("group1") || filename.contains("group3")) {
-			this.threelEngine = new ThreeLayersCollectiveEngine();
-			this.threelEngine.loadFile(filename);
-		//} else {
-			this.bllEngine = new BaseLevelLearningCollectiveEngine();
-			this.bllEngine.loadFile(filename);
-		//}
-			this.mpEngine = new MostPopularCollectiveEngine();
-			this.mpEngine.loadFile(filename);
-		*/
+		this.lmEngine = new LanguageModelEngine();
+		this.lmEngine.loadFile(path, filename);
+		this.bllEngine = new BaseLevelLearningEngine();
+		this.bllEngine.loadFile(path, filename);
+		this.threelEngine = new ThreeLayersCollectiveEngine();
+		this.threelEngine.loadFile(path, filename);
+		this.mpEngine = new MostPopularCollectiveEngine();
+		this.mpEngine.loadFile(path, filename);
 			
 		try {
 			String logFile = "";
@@ -95,23 +79,34 @@ public class TagRecommenderEvalEngine implements EngineInterface {
 		Map<String, Double> returnMap = null;
 		String algorithmString = null;
 		
-
-		if (this.bllEngine != null) {
-			if (algorithm == null || algorithm == Algorithm.BLLacMPr) {
-				algorithmString = "BLLacMPr";
-			} else if (algorithm == Algorithm.BLLac) {
-				algorithmString = "BLLac";
-			} else if (algorithm == Algorithm.BLL) {
-				algorithmString = "BLL";
-			}
-			if (algorithmString != null) {
+		if (algorithm == Algorithm.BLLacMPr) {
+			if (this.bllEngine != null) {
+				algorithmString = Algorithm.BLLacMPr.name();
 				returnMap = this.bllEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
 			}
-		}		
-		//if (algorithmString == null) {
-		//	algorithmString = "MPur";
-		//	returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);
-		//}
+		} else if (algorithm == Algorithm.MPur) {
+			if (this.lmEngine != null) {
+				algorithmString = Algorithm.MPur.name();
+				returnMap = this.lmEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);				
+			}
+		} else if (algorithm == Algorithm.THREELcoll) {
+			if (topics != null && topics.size() > 0) {
+				if (this.threelEngine != null) {
+					algorithmString = Algorithm.THREELcoll.name();
+					returnMap = this.threelEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);				
+				}
+			} else {
+				if (this.mpEngine != null) {
+					algorithmString = Algorithm.THREELcoll.name();
+					returnMap = this.mpEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);				
+				}
+			}
+		} else {
+			if (this.mpEngine != null) {
+				algorithmString = Algorithm.MP.name();
+				returnMap = this.mpEngine.getEntitiesWithLikelihood(user, resource, topics, count, filterOwnEntities, algorithm, type);				
+			}
+		}
 
 		/* KnowBrain study
 		if (algorithm == null || algorithm == Algorithm.THREELcoll || algorithm == Algorithm.THREEL) {

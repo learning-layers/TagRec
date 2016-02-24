@@ -44,7 +44,7 @@ public class ThreeLayersCollectiveEngine implements EngineInterface {
 			if (user != null && userID != -1) {
 				tagIDs = this.calculator.getRankedTagList(userID, -1, topicIDs, System.currentTimeMillis() / 1000.0, count.intValue(), false, false, true);
 			} else {
-				new LinkedHashMap<String, Double>();
+				return new LinkedHashMap<String, Double>();
 			}
 		}
 		

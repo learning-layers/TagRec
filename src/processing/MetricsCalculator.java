@@ -268,6 +268,9 @@ public class MetricsCalculator {
 				bw.write(Double.toString((serendipitySum / size)).replace('.', ','));
 			//}
 			
+			if (k == 10) {
+				System.out.println("nDCG@10: " + (nDCGSum / size));
+			}
 			if (endLine) {
 				bw.write("\n");
 			}		
