@@ -150,7 +150,7 @@ _Bibtex:_
 
 
 
-## References
+## Publications
 * C. Trattner, D. Kowald, P. Seitlinger, S. Kopeinik, S. and T. Ley: [Modeling Activation Processes in Human Memory to Predict the Use of Tags in Social Bookmarking Systems](http://www.christophtrattner.info/pubs/bll_journal_final.pdf), Journal of Web Science, 2016. 
 * S. Larrain, C. Trattner, D. Parra, E. Graells-Garrido and K. Norvag: [Good Times Bad Times: A Study on Recency Effects in Collaborative Filtering for Social Tagging](http://www.christophtrattner.info/pubs/recsys2015b.pdf), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
 * P. Seitlinger, D. Kowald, S. Kopeinik, I. Hasani-Mavriqi, T. Ley, and Elisabeth Lex: [Attention Please! A Hybrid Resource Recommender Mimicking Attention-Interpretation Dynamics](http://arxiv.org/pdf/1501.07716v1.pdf). In Proc. of WWW'2015 Companion. ACM. 2015
@@ -159,6 +159,8 @@ _Bibtex:_
 * D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://www2014.kr/wp-content/uploads/2014/05/companion_p463.pdf). In Proceedings of the 23rd international conference on World Wide Web Companion, WWW '14, ACM, New York, NY, USA, 2014.
 * E. Lacic, D. Kowald, P. Seitlinger, C. Trattner, and D. Parra. [Recommending Items in Social Tagging Systems Using Tag and Time Information](http://www.christophtrattner.info/pubs/sp2014.pdf). In Proceedings of the 1st Social Personalization Workshop co-located with the 25th ACM Conference on Hypertext and Social Media, HT'14, ACM, New York, NY, USA, 2014.
 * P. Seitlinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In Proceedings of The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
+
+## References
 * A. Hotho, R. Jäschke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411–426. Springer, 2006.
 * L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354–365. Springer, 2012.
 * R. Jäschke, L. Marinho, A. Hotho, L. Schmidt-Thieme, and G. Stumme. Tag recommendations in folksonomies. In Knowledge Discovery in Databases: PKDD 2007, pages 506–514. Springer, 2007.
