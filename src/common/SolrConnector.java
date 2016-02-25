@@ -17,6 +17,8 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.MoreLikeThisParams;
 
+import processing.hashtag.Tweet;
+
 public class SolrConnector {
 	
 	private SolrServer server;
@@ -45,6 +47,27 @@ public class SolrConnector {
 		}
 		
 		return tweets;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Tweet> getTweetObjects() {
+		List<Tweet> tweetObjects = new ArrayList<Tweet>();
+		
+		SolrQuery solrParams = new SolrQuery();
+		solrParams.set("q", "*:*");
+		solrParams.set("rows", Integer.MAX_VALUE);
+		QueryResponse r = null;
+		try {
+			r = this.server.query(solrParams);
+			SolrDocumentList docs = r.getResults();
+			for (SolrDocument d : docs) {
+				tweetObjects.add(new Tweet((String) d.get("id"), (String) d.get("userid"), (String) d.get("text"), (String) d.get("timestamp"), new HashSet<String>((List<String>) d.get("hashtags"))));
+			}
+		} catch (SolrServerException e) {
+			e.printStackTrace();
+		}
+		
+		return tweetObjects;
 	}
 	
 	@SuppressWarnings("unchecked")

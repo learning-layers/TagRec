@@ -131,11 +131,11 @@ public class BookmarkReader {
 				if (lineParts.length > 4) { // are there categories
 					for (String cat : lineParts[4].replace("\"", "").split(",")) {
 						if (!cat.isEmpty()) {
-							if (cat.contains("_")) {
-								categories.add(cat.substring(0, cat.indexOf("_")).toLowerCase());
-							} else {
+							//if (cat.contains("_")) {
+							//	categories.add(cat.substring(0, cat.indexOf("_")).toLowerCase());
+							//} else {
 								categories.add(cat.toLowerCase());
-							}
+							//}
 						}
 					}
 				}
@@ -290,6 +290,10 @@ public class BookmarkReader {
 		return this.tagCounts;
 	}
 	
+	public Map<String, Integer> getTagMap() {
+		return this.tagMap;
+	}
+	
 	public List<String> getResources() {
 		return this.resources;
 	}
@@ -304,6 +308,10 @@ public class BookmarkReader {
 	
 	public List<Integer> getUserCounts() {
 		return this.userCounts;
+	}
+	
+	public Map<String, Integer> getUserMap() {
+		return this.userMap;
 	}
 	
 	public int getCountLimit() {

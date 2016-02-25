@@ -1,4 +1,4 @@
-package processing;
+package processing.hashtag;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import processing.BLLCalculator;
 
 import com.google.common.primitives.Ints;
 
@@ -282,11 +284,11 @@ public class SocialCalculator {
         return sortedResultMap;
     } 
     
-    private Map<Integer, Double> getRankedTagListSocialBLLHybrid(int userID, Long timesString, double beta, double exponentSocial){
-        Map<Integer, Double> rankedList = new HashMap<Integer, Double>();
+    private Map<Integer, Double> getRankedTagListSocialBLLHybrid(int userID, Long timesString, double beta, double exponentSocial, boolean sort) {
+        Map<Integer, Double> rankedList = new LinkedHashMap<Integer, Double>();
         String user = this.users.get(userID);
         List<String> friendList = network.get(user);
-        HashMap <Integer, Double> tagRank = new HashMap<Integer, Double>();
+        HashMap <Integer, Double> tagRank = new LinkedHashMap<Integer, Double>();
         if (friendList != null){
             for(String friend : friendList){
                 HashMap<Integer, ArrayList<Long>> tagTimestampMap = userTagTimes.get(friend);
@@ -331,16 +333,21 @@ public class SocialCalculator {
             Double val = resultMap.get(entry.getKey());    
             resultMap.put(entry.getKey(), val == null ? (beta) * entry.getValue().doubleValue() : (1-beta) * val.doubleValue() + (beta) * entry.getValue().doubleValue());
         }
-        Map<Integer, Double>sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-        sortedResultMap.putAll(resultMap);
-        return sortedResultMap;
+        
+        if (sort) {
+	        Map<Integer, Double>sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
+	        sortedResultMap.putAll(resultMap);
+	        return sortedResultMap;
+        } else {
+        	return resultMap;
+        }
     }
     
     /**
      * @param sampleSize
      * @return
      */
-    private List<Map<Integer, Double>> calculateSocialTagScore(double beta, double exponentSocial, String algorithm) {
+    private List<Map<Integer, Double>> calculateSocialTagScore(double beta, double exponentSocial, String algorithm, boolean sort) {
         
         List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
         for (int i = trainSize; i < reader.getBookmarks().size(); i++) { // the test-set
@@ -351,7 +358,7 @@ public class SocialCalculator {
             }else if(algorithm.equals("social")){
                 map = getRankedTagListSocial(data.getUserID(), data.getTimestampAsLong(), exponentSocial);
             }else if (algorithm.equals("hybrid")) {
-                map = getRankedTagListSocialBLLHybrid(data.getUserID(), data.getTimestampAsLong(), beta, exponentSocial);
+                map = getRankedTagListSocialBLLHybrid(data.getUserID(), data.getTimestampAsLong(), beta, exponentSocial, sort);
             }else if (algorithm.equals("hybrid_freq")){
             	map = getRankedTagListSocialFrequencyHybrid(data.getUserID(), data.getTimestampAsLong(), beta);
             }
@@ -363,8 +370,15 @@ public class SocialCalculator {
     /**
      * @return
      */
-    public BookmarkReader predictSample(double exponentSocial, double beta, String algorithm) {
-        List<Map<Integer, Double>> actValues = calculateSocialTagScore(beta, exponentSocial, algorithm);
+    public BookmarkReader predictSample(double exponentSocial, double beta, String algorithm, List<Map<Integer, Double>> contentBasedValues) {
+    	List<Map<Integer, Double>> actValues = null;
+    	if (contentBasedValues == null) {
+    		actValues = calculateSocialTagScore(beta, exponentSocial, algorithm, true);        
+    	} else {
+    		actValues = calculateSocialTagScore(beta, exponentSocial, algorithm, false);
+    		// TODO: map with content-based results
+    	}
+        
         List<int[]> predictionValues = new ArrayList<int[]>();
         for (int i = 0; i < actValues.size(); i++) {
             Map<Integer, Double> modelVal = actValues.get(i);

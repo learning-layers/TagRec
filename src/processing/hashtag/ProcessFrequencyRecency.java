@@ -1,4 +1,4 @@
-package processing;
+package processing.hashtag;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import common.TimeUtil;
 
 /**
  * @author spujari

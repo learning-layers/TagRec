@@ -39,7 +39,7 @@ public class EngineUtils {
 
 	public static BookmarkReader getSortedBookmarkReader(String path, String filename) {
 		BookmarkReader reader = new BookmarkReader(0, false);
-		reader.readFile(path, filename);
+		reader.readFile(path, filename);		
 		Collections.sort(reader.getBookmarks());
 		
 		String sortedFile = filename + "_sorted";

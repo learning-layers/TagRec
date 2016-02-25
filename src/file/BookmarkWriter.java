@@ -51,7 +51,8 @@ public class BookmarkWriter {
 				i = 0;
 				for (int cat : userCats) {
 					//bw.write(URLEncoder.encode((catPredictions == null ? reader.getCategories().get(cat).replace("\"", "") : reader.getTags().get(cat)).replace("\"", ""), "UTF-8"));
-					bw.write("t" + cat);
+					String catName = (realValues ? reader.getCategories().get(cat).replace("\"", "") : "t" + cat);
+					bw.write(catName);
 					if (++i < userCats.size()) {
 						bw.write(',');
 					}					

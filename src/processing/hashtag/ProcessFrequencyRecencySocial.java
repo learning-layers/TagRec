@@ -1,4 +1,4 @@
-package processing;
+package processing.hashtag;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+
+import common.TimeUtil;
 
 public class ProcessFrequencyRecencySocial {
     

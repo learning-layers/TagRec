@@ -30,7 +30,8 @@ public class ThreeLayersCollectiveEngine implements EngineInterface {
 		List<Integer> topicIDs = new ArrayList<>();
 		if (topics != null) {
 			for (String t : topics) {
-				int tID = this.reader.getCategories().indexOf(t);
+				List<String> categories = this.reader.getCategories();
+				int tID = categories.indexOf(t.toLowerCase());
 				if (tID != -1) {
 					topicIDs.add(tID);
 				}

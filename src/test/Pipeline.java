@@ -50,15 +50,13 @@ import processing.MPCalculator;
 import processing.MPurCalculator;
 import processing.MalletCalculator;
 import processing.MetricsCalculator;
-
 import processing.RecencyCalculator;
-import processing.SolrHashtagCalculator;
-import processing.ProcessFrequencyRecency;
-import processing.ProcessFrequencyRecencySocial;
-import processing.SocialCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.UserTagDistribution;
-
+import processing.hashtag.ProcessFrequencyRecency;
+import processing.hashtag.ProcessFrequencyRecencySocial;
+import processing.hashtag.SocialCalculator;
+import processing.hashtag.SolrHashtagCalculator;
 import engine.Algorithm;
 import engine.EngineInterface;
 import engine.EntityRecommenderEngine;
@@ -90,7 +88,7 @@ public class Pipeline {
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
 	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "/researchers";
+	private final static String SUBDIR = "/general";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -108,16 +106,13 @@ public class Pipeline {
 				"You should have received a copy of the GNU Affero General Public License\n" +
 				"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n" + 
 				"-----------------------------------------------------------------------------\n\n");
-		String dir = DATASET + "_core" + SUBDIR;
+		String dir = DATASET + "_core" + SUBDIR + "/";
 		String path = dir + DATASET + "_sample";
 		String networkFileName = "./data/csv/" + dir + "network.txt";
 		
 		// Test Social Recommender
-		//startSocialRecommendation(dir, path, networkFileName);
-		
-		//TOPIC_NAME = "lda_500";
-		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
-		
+		//startSocialRecommendation(dir, path, networkFileName, null);
+	
 		//startSolrHashtagCalculator(dir, "http://kti-social:8938", "researcher", false, true, 24);
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
@@ -127,6 +122,10 @@ public class Pipeline {
 		
 		//getTrainTestSize(path);
 		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
+		
+		
+		//TOPIC_NAME = "lda_500";
+		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		
 		//evaluate(dir, path, "pitf", TOPIC_NAME, true, true, null);
 		
@@ -193,7 +192,7 @@ public class Pipeline {
 		//startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 			
 		// Engine Testing
-		//startEngineTest(null, "sss_recomm");
+		//startEngineTest(null, "test");
 		//startKnowBrainTest("ml_group2");
 		
 		// Commandline Arguments
@@ -333,13 +332,16 @@ public class Pipeline {
 			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
 			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("stats")) {
-			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }
-		} else if(op.equals("social_rec")) {
-		    startSocialRecommendation(sampleDir, samplePath, networkFileName);
+			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }	
 		} else if (op.equals("social_analysis")) {
 		    analysisSocial(sampleDir, samplePath, networkFileName, "all");
-		}
-		else {
+		} else if(op.equals("hashtag_hybrid")) {
+		    startSocialRecommendation(sampleDir, samplePath, "./data/csv/" + sampleDir + "network.txt", "hybrid");
+		} else if(op.equals("hashtag_socialmp")) {
+		    startSocialRecommendation(sampleDir, samplePath, "./data/csv/" + sampleDir + "network.txt", "social_freq");
+		} else if(op.equals("hashtag_socialbll")) {
+		    startSocialRecommendation(sampleDir, samplePath, "./data/csv/" + sampleDir + "network.txt", "social_bll");
+		} else {
 			System.out.println("Unknown operation");
 		}
 	}
@@ -431,15 +433,20 @@ public class Pipeline {
 		}
 	}
 
-	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename) {
+	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename, String algo) {
 	    double beta = 0.5;
 	    double exponentSocial = 0.5;
-	    String[] algos = {"social_freq", "social", "hybrid", "hybrid_freq"};
+	    String[] algos = null;
+	    if (algo == null) {
+	    	algos = new String[]{"social_freq", "social", "hybrid"};//, "hybrid_freq"};
+	    } else {
+	    	algos = new String[]{algo};
+	    }
 	    getTrainTestSize(sampleName);
 	    SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
-        for (String algo : algos){
-            String filename = "social" + beta + "_" + exponentSocial + "_" + algo;
-            calculator.predictSample(beta, exponentSocial, algo);
+        for (String a : algos){
+            String filename = "social" + beta + "_" + exponentSocial + "_" + a;
+            calculator.predictSample(beta, exponentSocial, a, null);
             writeMetrics(sampleDir, sampleName, filename, 1, 10, null, null, null);
         }
 	}
@@ -587,10 +594,13 @@ public class Pipeline {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		List<String> categories = new ArrayList<String>();
+		categories.add("category");
+		categories.add("bla");
 		System.out.println("Tags for user and resource with BLLac+MPr: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.BLLacMPr, EntityType.TAG)); // BLLac+MPr
 		System.out.println("Tags for user and resource with MPur: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.MPur, EntityType.TAG)); // MPur
-		System.out.println("Tags with 3Lcoll: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.THREELcoll, EntityType.TAG)); // BLLac+MPr
-		System.out.println("Tags with MP: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.MP, EntityType.TAG)); // MPur
+		System.out.println("Tags with 3Lcoll: " + recEngine.getEntitiesWithLikelihood("bla", "res", categories, 10, false, Algorithm.THREELcoll, EntityType.TAG)); // BLLac+MPr
+		System.out.println("Tags with MP: " + recEngine.getEntitiesWithLikelihood("bla", "res", null, 10, false, Algorithm.MP, EntityType.TAG)); // MPur
 		//System.out.println("Tags for user: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", null, null, 10, false, null, EntityType.TAG)); // BLL
 		//System.out.println("Tags for resource: " + recEngine.getEntitiesWithLikelihood(null, "http://sss.eu/31116473812357491143/", null, 10, false, null, EntityType.TAG)); // MPr
 		//System.out.println("Tags MostPopular: " + recEngine.getEntitiesWithLikelihood(null, null, null, 10, false, null, EntityType.TAG)); // MP

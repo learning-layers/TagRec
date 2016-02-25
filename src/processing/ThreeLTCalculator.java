@@ -179,14 +179,24 @@ public class ThreeLTCalculator {
 	
 	public Map<Integer, Double> getCollectiveRankedTagList(List<Integer> testCats, double testTimestamp, int limit, boolean tagBLL, boolean topicBLL) {
 		Map<Integer, Double> collectiveTagMap = new LinkedHashMap<Integer, Double>();
-		for (int id = 0; id < this.reader.getUsers().size(); id++) {
-			Map<Integer, Double> tagMap = getRankedTagList(id, -1, testCats, testTimestamp, limit, tagBLL, topicBLL, false);
-			for (Map.Entry<Integer, Double> entry : tagMap.entrySet()) {
-				Double val = collectiveTagMap.get(entry.getKey());
-				collectiveTagMap.put(entry.getKey(), val == null ? entry.getValue() : val.doubleValue() + entry.getValue());
+		
+		List<Bookmark> bookmarks = this.reader.getBookmarks();
+		List<Map<Integer, Integer>> resTopics = Utilities.getResTopics(bookmarks);
+		for (Bookmark b : bookmarks) {
+			if (b.getResourceID() < resTopics.size()) {
+				double sim = Utilities.getCosineSimList(testCats, new ArrayList<Integer>(resTopics.get(b.getResourceID()).keySet()));
+				Double ajhid = Math.pow(sim, 3);
+				if (ajhid.isNaN() || ajhid.isInfinite()) {
+					ajhid = 0.0;
+					System.out.println("Cos - NAN");
+				}
+				for (int t : b.getTags()) {
+					Double tVal = collectiveTagMap.get(t);
+					collectiveTagMap.put(t, tVal == null ? ajhid : tVal.doubleValue() + ajhid);
+				}
 			}
 		}
-		
+				
 		Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(collectiveTagMap));
 		sortedResultMap.putAll(collectiveTagMap);
 		Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>();

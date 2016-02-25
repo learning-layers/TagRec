@@ -70,6 +70,7 @@ public class MetricsCalculator {
 		}
 		BufferedWriter bw = null;
 		//TODO: Enable if you need data for statistical tests
+		/*
 		if ((recommTags && (k == 5 || k == 10)) || (!recommTags && k == 20)) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
@@ -78,6 +79,7 @@ public class MetricsCalculator {
 				e.printStackTrace();
 			}
 		}
+		*/
 		
 		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
 		double count = this.reader.getPredictionData().size();		 // all users
