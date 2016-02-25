@@ -12,7 +12,7 @@ Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, l
 
 The software already contains four novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) (Seitlinger et al, 2013) uses topic information and is based on the ALCOVE/MINERVA2 theories (Krutschke, 1992; Hintzman, 1984). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) (Kowald et al., 2014b) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://www.christophtrattner.info/pubs/msm8_kowald.pdf)) (Kowald et al., 2015b) is a combination of the former two approaches and integrates the time component on the level of tags and topics. Finally, the fourth one ([BLLac+MPr](http://www.christophtrattner.info/pubs/msm7_kowald.pdf)) extends the BLL+C algorithm with semantic correlations (Kowald et al., 2015a).
 
-Based on our latest strand of research, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://www.christophtrattner.info/pubs/sp2014.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004). Furthermore, it contains another novel item-recommender called [SUSTAIN+CFu](http://arxiv.org/pdf/1501.07716v1.pdf) (Seitlinger et al., 2015) that improves user-based CF via integrating the addentional focus of users via the SUSTAIN model (Love et al., 2004).
+Additionally, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://www.christophtrattner.info/pubs/sp2014.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004). Furthermore, it contains another novel item-recommender called [SUSTAIN+CFu](http://arxiv.org/pdf/1501.07716v1.pdf) (Seitlinger et al., 2015) that improves user-based CF via integrating the addentional focus of users via the SUSTAIN model (Love et al., 2004).
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
@@ -29,6 +29,8 @@ The source-code can be directly checked-out through this repository. It contains
 * ml_core for MovieLens
 * lastfm_core for LastFM
 * wiki_core for Wikipedia (based on bookmarks from Delicious)
+* twitter_core/researchers for the Twitter researchers dataset
+* twitter_core/general for the Twitter random dataset
 
 ## How-to-use
 The _tagrecommender_ .jar uses three parameters:
@@ -65,6 +67,12 @@ Data-Processing:
 * lda_samples for creating LDA topics for the resources in a dataset
 * tensor_samples for creating samples for the FM and PITF methods implemented in [PITF and FM algorithms](http://www.informatik.uni-konstanz.de/rendle/software/tag-recommender/)
 * mymedialite_samples for creating samples for the WRMF method implemented in [MyMediaLite](http://www.mymedialite.net/)
+* process_bibsonomy for converting the BibSonomy dataset into the TagRec format
+* process_citeulike for converting the CiteUlike dataset into the TagRec format
+* process_lastfm for converting the LastFM dataset into the TagRec format
+* process_ml for converting the MovieLens dataset into the TagRec format
+* process_del for converting the Delicious dataset into the TagRec format
+* process_flickr for converting the Flickr dataset into the TagRec format
 
 , second the dataset(-directory):
 * bib for BibSonomy
@@ -74,6 +82,8 @@ Data-Processing:
 * ml for MovieLens
 * lastfm for LastFM
 * wiki for Wikipedia (based on bookmarks from Delicious)
+* twitter_res for the Twitter researchers dataset
+* twitter_gen for the Twitter random dataset
 
 and third the filename (without file extension)
 
@@ -117,20 +127,6 @@ for _k_ = 1 to 10 (or 20) - each line is one _k_
 0,5212146123336273;0,16408544726301685;0,22663857529082376 ...
 
 ## Citation
-D. Kowald, E. Lacic, and C. Trattner. [Tagrec:Towards a standardized tag recommender benchmarking framework](http://www.christophtrattner.info/pubs/ht241-kowald.pdf). In Proceedings of the 25th ACM Conference on Hypertext and Social Media, HT'14, New York, NY, USA, 2014. ACM.
-
-_Bibtex:_
-`@inproceedings{Kowald2014TagRec,
- author = {Kowald, Dominik and Lacic, Emanuel and Trattner, Christoph},
- title = {TagRec: Towards A Standardized Tag Recommender Benchmarking Framework},
- booktitle = {Proceedings of the 25th ACM Conference on Hypertext and Social Media},
- series = {HT '14},
- year = {2014},
- isbn = {978-1-4503-2263-8},
- location = {Santiago de Chile, Chile},
- publisher = {ACM},
- address = {New York, NY, USA},
-}`
 
 C. Trattner, D. Kowald and E. Lacic: [TagRec: Towards a Toolkit for Reproducible Evaluation and Development of Tag-Based Recommender Algorithms](http://www.christophtrattner.info/pubs/sigweb2015.pdf), ACM SIGWEB Newsletter, Spring 2015, ACM, New York, NY, USA, 2015. (invited)
 
@@ -147,14 +143,35 @@ _Bibtex:_
  address = {New York, NY, USA},
 }`
 
-## References
+D. Kowald, E. Lacic, and C. Trattner. [Tagrec:Towards a standardized tag recommender benchmarking framework](http://www.christophtrattner.info/pubs/ht241-kowald.pdf). In Proceedings of the 25th ACM Conference on Hypertext and Social Media, HT'14, New York, NY, USA, 2014. ACM.
+
+_Bibtex:_
+`@inproceedings{Kowald2014TagRec,
+ author = {Kowald, Dominik and Lacic, Emanuel and Trattner, Christoph},
+ title = {TagRec: Towards A Standardized Tag Recommender Benchmarking Framework},
+ booktitle = {Proceedings of the 25th ACM Conference on Hypertext and Social Media},
+ series = {HT '14},
+ year = {2014},
+ isbn = {978-1-4503-2263-8},
+ location = {Santiago de Chile, Chile},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}`
+
+
+
+## Publications
+* C. Trattner, D. Kowald, P. Seitlinger, S. Kopeinik, S. and T. Ley: [Modeling Activation Processes in Human Memory to Predict the Use of Tags in Social Bookmarking Systems](http://www.christophtrattner.info/pubs/bll_journal_final.pdf), Journal of Web Science, 2016.
+* D. Kowald and E. Lex: [Evaluating Tag Recommender Algorithms in Real-World Folksonomies: A Comparative Study](http://dl.acm.org/citation.cfm?id=2799664), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
+* S. Larrain, C. Trattner, D. Parra, E. Graells-Garrido and K. Norvag: [Good Times Bad Times: A Study on Recency Effects in Collaborative Filtering for Social Tagging](http://www.christophtrattner.info/pubs/recsys2015b.pdf), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
 * P. Seitlinger, D. Kowald, S. Kopeinik, I. Hasani-Mavriqi, T. Ley, and Elisabeth Lex: [Attention Please! A Hybrid Resource Recommender Mimicking Attention-Interpretation Dynamics](http://arxiv.org/pdf/1501.07716v1.pdf). In Proc. of WWW'2015 Companion. ACM. 2015
 * D. Kowald, S. Kopeinik, P. Seitinger, T. Ley, D. Albert, and C. Trattner: [Refining Frequency-Based Tag Reuse Predictions by Means of Time and Semantic Context](http://www.christophtrattner.info/pubs/msm7_kowald.pdf). In Mining, Modeling, and Recommending 'Things' in Social Media, Lecture Notes in Computer Science, Vol. 8940, Springer, 2015a.
 * D. Kowald, P. Seitinger, S. Kopeinik, T. Ley, and C. Trattner: [Forgetting the Words but Remembering the Meaning: Modeling Forgetting in a Verbal and Semantic Tag Recommender](http://www.christophtrattner.info/pubs/msm8_kowald.pdf). In Mining, Modeling, and Recommending 'Things' in Social Media, Lecture Notes in Computer Science, Vol. 8940, Springer, 2015b.
 * D. Kowald, P. Seitlinger, C. Trattner, and T. Ley. [Long Time No See: The Probability of Reusing Tags as a Function of Frequency and Recency](http://www2014.kr/wp-content/uploads/2014/05/companion_p463.pdf). In Proceedings of the 23rd international conference on World Wide Web Companion, WWW '14, ACM, New York, NY, USA, 2014.
 * E. Lacic, D. Kowald, P. Seitlinger, C. Trattner, and D. Parra. [Recommending Items in Social Tagging Systems Using Tag and Time Information](http://www.christophtrattner.info/pubs/sp2014.pdf). In Proceedings of the 1st Social Personalization Workshop co-located with the 25th ACM Conference on Hypertext and Social Media, HT'14, ACM, New York, NY, USA, 2014.
 * P. Seitlinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In Proceedings of The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
-* S. Larrain, C. Trattner, D. Parra, E. Graells-Garrido and K. Norvag: [Good Times Bad Times: A Study on Recency Effects in Collaborative Filtering for Social Tagging](http://www.christophtrattner.info/pubs/recsys2015b.pdf), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
+
+## References
 * A. Hotho, R. Jäschke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411–426. Springer, 2006.
 * L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354–365. Springer, 2012.
 * R. Jäschke, L. Marinho, A. Hotho, L. Schmidt-Thieme, and G. Stumme. Tag recommendations in folksonomies. In Knowledge Discovery in Databases: PKDD 2007, pages 506–514. Springer, 2007.
@@ -167,10 +184,11 @@ _Bibtex:_
 * B. C. Love, D. L. Medin, and T. M. Gureckis. Sustain: A network model of category learning. Psychological review, 111(2):309, 2004.
 
 ## Main contributor
-* Dominik Kowald, Know-Center, Graz University of Technology, dkowald@know-center.at
+* Dominik Kowald, Know-Center, Graz University of Technology, dkowald@know-center.at (general contact)
 
 ## Contacts and contributors (in alphabetically order)
 * Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone.kopeinik@tugraz.at (sustain resource recommender algorithm)
 * Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (huang, zheng and CIRTT resource recommender algorithms)
-* Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contact)
-* Christoph Trattner, Norwegian University of Science and Technology Trondheim, chritrat@idi.ntnu.no (general contact)
+* Subhash Pujari, Knowledge Technologies Institute, Graz University of Technology, spujari@know-center.at (twitter hashtag recommender algorithms)
+* Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contac)
+* Christoph Trattner, Know-Center, ctrattner@know-center.at (general contact)
