@@ -30,11 +30,14 @@ public class MostPopularCollectiveEngine implements EngineInterface {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
+		List<Integer> filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource);
 		
 		Map<String, Double> returnMap = new LinkedHashMap<String, Double>();
 		for (Map.Entry<String, Double> entry : collectiveTags.entrySet()) {
 			if (returnMap.size() < count.intValue()) {
-				returnMap.put(entry.getKey(), entry.getValue());
+				if (!filterTags.contains(entry.getKey())) {
+					returnMap.put(entry.getKey(), entry.getValue());
+				}
 			} else {
 				break;
 			}

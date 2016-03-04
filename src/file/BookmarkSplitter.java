@@ -143,7 +143,7 @@ public class BookmarkSplitter {
 		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, false);
 	}
 	
-	public void leavePercentageOutSplit(String filename, int percentage, boolean last, Integer userNumber, boolean tagRec) {
+	public void leavePercentageOutSplit(String filename, int percentage, boolean last, Integer userNumber, boolean tagRec, boolean realNames) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
 		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		Set<Integer> indices = new HashSet<Integer>();
@@ -183,10 +183,10 @@ public class BookmarkSplitter {
 		
 		Collections.sort(trainLines);
 		Collections.sort(testLines);
-		BookmarkWriter.writeSample(this.reader, trainLines, filename + "_train", null, false);
-		BookmarkWriter.writeSample(this.reader, testLines, filename + "_test", null, false);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename + "_train", null, realNames);
+		BookmarkWriter.writeSample(this.reader, testLines, filename + "_test", null, realNames);
 		trainLines.addAll(testLines);
-		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, false);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, realNames);
 	}
 	
 	// Statics -------------------------------------------------------------------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ public class BookmarkSplitter {
 		BookmarkSplitter splitter = new BookmarkSplitter(reader);
 		for (int i = 1; i <= count; i++) {
 			if (percentage > 0) {
-				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec);
+				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec, realNames);
 			} else {
 				splitter.leaveLastOutSplit(sampleName, coldStart, realNames, userWhiteList);
 			}

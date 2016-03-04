@@ -17,12 +17,13 @@ public class ProcessFrequencyRecencySocial {
     
 	private String sampleDir;
     
-    public ProcessFrequencyRecencySocial(String sampleDir, HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTime, HashMap<String, ArrayList<String>> network) {
+    public ProcessFrequencyRecencySocial(String sampleDir, HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTime, HashMap<String, ArrayList<String>> network, Integer granularity) {
         this.sampleDir = sampleDir;
         
-        //ArrayList<Integer> durationSeconds = new ArrayList<Integer>();
-        //ArrayList<Integer> durationMinutes = new ArrayList<Integer>();
+        ArrayList<Integer> durationSeconds = new ArrayList<Integer>();
+        ArrayList<Integer> durationMinutes = new ArrayList<Integer>();
         ArrayList<Integer> durationHours = new ArrayList<Integer>();
+        ArrayList<Integer> durationDays = new ArrayList<Integer>();
         
         for (String user : userTagTime.keySet())
         {
@@ -38,14 +39,40 @@ public class ProcessFrequencyRecencySocial {
                     friendHashMapList.add(userTagTime.get(friend));
                 }
             }
-            HashMap<Integer, ArrayList<Long>> allTagTimeMap = getAllTagsHashMap(friendHashMapList);        
-            //durationSeconds.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.SECOND));
-            //durationMinutes.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.MINUTE));
-            durationHours.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.HOUR));
+            HashMap<Integer, ArrayList<Long>> allTagTimeMap = getAllTagsHashMap(friendHashMapList);
+            if (granularity == null) {
+	            durationSeconds.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.SECOND));
+	            durationMinutes.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.MINUTE));
+	            durationHours.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.HOUR));
+	            durationDays.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.DAY));
+            } else {
+            	if (granularity == TimeUtil.SECOND) {
+            		durationSeconds.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.SECOND));
+            	} else if (granularity == TimeUtil.MINUTE) {
+            		durationMinutes.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.MINUTE));
+            	} else if (granularity == TimeUtil.HOUR) {
+    	            durationHours.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.HOUR));
+            	} else if (granularity == TimeUtil.DAY) {
+            		durationDays.addAll(createDurationList(userTagTime.get(user), allTagTimeMap, TimeUtil.DAY));
+            	}
+            }
         }
-        //saveDurationList(durationSeconds, "recencySocialSeconds");
-        //saveDurationList(durationMinutes, "recencySocialMinutes");
-        saveDurationList(durationHours, "recencySocialHours");
+        if (granularity == null) {
+	        saveDurationList(durationSeconds, "social_recency_seconds.txt");
+	        saveDurationList(durationMinutes, "social_recency_minutes.txt");
+	        saveDurationList(durationHours, "social_recency_hours.txt");
+	        saveDurationList(durationDays, "social_recency_days.txt");
+        } else {
+        	if (granularity == TimeUtil.SECOND) {
+        		saveDurationList(durationSeconds, "social_recency_seconds.txt");
+        	} else if (granularity == TimeUtil.MINUTE) {
+        		saveDurationList(durationMinutes, "social_recency_minutes.txt");
+        	} else if (granularity == TimeUtil.HOUR) {
+        		saveDurationList(durationHours, "social_recency_hours.txt");
+        	} else if (granularity == TimeUtil.DAY) {
+        		saveDurationList(durationDays, "social_recency_days.txt");
+        	}
+        }
     }
     
     private HashMap<Integer, ArrayList<Long>> getAllTagsHashMap(ArrayList<HashMap<Integer, ArrayList<Long>>> friendHashMapList){

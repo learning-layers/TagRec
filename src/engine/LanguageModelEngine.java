@@ -82,7 +82,7 @@ public class LanguageModelEngine implements EngineInterface {
 		if (filterOwnEntities == null) {
 			filterOwnEntities = true;
 		}
-		List<Integer> filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource, userMap);
+		List<Integer> filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource);
 		
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
 		if (algorithm == null || algorithm != Algorithm.MP) {

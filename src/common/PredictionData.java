@@ -30,27 +30,22 @@ public class PredictionData {
 	private int userID;
 	private int resID;
 	private int k;
-	private List<String> realData;
-	private List<String> predictionData;
+	private List<String> realData = new ArrayList<String>();
+	private List<String> predictionData = new ArrayList<String>();
 	
 	private double numFoundRelevantDocs;
 	
 	public PredictionData(int userID, int resID, List<String> realData, List<String> predictionData, int k) {
 		this.userID = userID;
 		this.resID = resID;
-		this.realData = realData;
+		for (String rd : realData) {
+			this.realData.add(rd.toLowerCase());
+		}
 		this.k = k;
-		if (k == 0) {
-			this.predictionData = predictionData;
-		} else if (predictionData.size() < k) {
-			this.predictionData = new ArrayList<String>();
-			this.predictionData.addAll(predictionData);
-			//TODO: enable
-			//while (this.predictionData.size() < k) {
-			//	this.predictionData.add("x");
-			//}
-		} else {
-			this.predictionData = predictionData.subList(0, k);
+		for (String pd : predictionData) {
+			if (k == 0 || this.predictionData.size() < k) {
+				this.predictionData.add(pd.toLowerCase());
+			}
 		}
 		
 		determineRelevantDocs();

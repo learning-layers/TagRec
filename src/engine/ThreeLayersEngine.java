@@ -72,7 +72,7 @@ public class ThreeLayersEngine implements EngineInterface {
 			if (user != null) {
 				userID = this.reader.getUsers().indexOf(user);
 			}
-			filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource, this.calculator.getUserMaps().get(userID));
+			filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource/*, this.calculator.getUserMaps().get(userID)*/);
 			int resID = -1;
 			if (resource != null) {
 				resID = this.reader.getResources().indexOf(resource);

@@ -2,9 +2,11 @@ package processing.hashtag;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -130,7 +132,8 @@ public class SocialCalculator {
         HashMap<String, ArrayList<String>> network = new HashMap<String, ArrayList<String>>();
         try {
             File file = new File(filepath);
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            InputStreamReader reader = new InputStreamReader(new FileInputStream(file), "UTF8");
+            BufferedReader br = new BufferedReader(reader);
             String line = "";
             while((line=br.readLine())!= null){
                 String[] tokens = line.split("\t");
@@ -370,21 +373,46 @@ public class SocialCalculator {
     /**
      * @return
      */
-    public BookmarkReader predictSample(double exponentSocial, double beta, String algorithm, List<Map<Integer, Double>> contentBasedValues) {
+    public BookmarkReader predictSample(double exponentSocial, double beta, String algorithm, Map<Integer, Map<Integer, Double>> contentBasedValues) {
+    	List<Map<Integer, Double>> resultValues = null;
     	List<Map<Integer, Double>> actValues = null;
+        reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+        List<Bookmark> testLines = reader.getTestLines();
     	if (contentBasedValues == null) {
-    		actValues = calculateSocialTagScore(beta, exponentSocial, algorithm, true);        
+    		actValues = calculateSocialTagScore(beta, exponentSocial, algorithm, true);
+    		resultValues = actValues;
     	} else {
     		actValues = calculateSocialTagScore(beta, exponentSocial, algorithm, false);
-    		// TODO: map with content-based results
+    		resultValues = new ArrayList<Map<Integer, Double>>();
+    		int i = 0;
+    		for (Map<Integer, Double> actMap : actValues) {
+    			int userID = testLines.get(i++).getUserID();
+    			Map<Integer, Double> contentMap = contentBasedValues.get(userID);
+    			if (contentMap != null && contentMap.entrySet() != null) {
+	    			for (Map.Entry<Integer, Double> contentEntry : contentMap.entrySet()) {
+	    				if (contentEntry != null && contentEntry.getKey() != null) {
+		    				Double actVal = actMap.get(contentEntry.getKey());
+		    				actMap.put(contentEntry.getKey(), actVal == null ? contentEntry.getValue() : actVal.doubleValue() + contentEntry.getValue());
+	    				}
+	    			}
+    			}
+    			
+    	        Map<Integer, Double>sortedActMap = new TreeMap<Integer, Double>(new DoubleMapComparator(actMap));
+    	        sortedActMap.putAll(actMap);
+    	        resultValues.add(sortedActMap);   			
+    		}
     	}
         
         List<int[]> predictionValues = new ArrayList<int[]>();
-        for (int i = 0; i < actValues.size(); i++) {
-            Map<Integer, Double> modelVal = actValues.get(i);
-            predictionValues.add(Ints.toArray(modelVal.keySet()));
+        if (resultValues != null) {
+	        for (int i = 0; i < resultValues.size(); i++) {
+	            Map<Integer, Double> resultMap = resultValues.get(i);
+	            if (resultMap != null && resultMap.keySet() != null) {
+	            	predictionValues.add(Ints.toArray(resultMap.keySet()));
+	            }
+	        }
         }
-        reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));
+
         PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
         writer.writeFile(this.filename + "_social" + exponentSocial + "_" + beta + "_" + algorithm);
         return reader;

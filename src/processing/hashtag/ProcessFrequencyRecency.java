@@ -20,7 +20,7 @@ public class ProcessFrequencyRecency {
     
 	private String sampleDir;
 	
-    public void ProcessTagAnalytics(String sampleDir, HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap) {
+    public void ProcessTagAnalytics(String sampleDir, HashMap<String, HashMap<Integer, ArrayList<Long>>> userTagTimestampMap, Integer granularity) {
     	this.sampleDir = sampleDir;
     	
         // frequency
@@ -29,10 +29,22 @@ public class ProcessFrequencyRecency {
         // recency in duration
         //HashMap< Integer, Integer> tagRecency = getRecencyInDuration(userTagTimestampMap);
 
-        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.SECOND), "./tagrecency" + "_" + "Seconds");
-        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MINUTE), "./tagrecency" + "_" + "MINUTE");
-        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.HOUR), "recencyHours" );
-        //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "./tagrecency" + "_" + "DAY" );
+    	if (granularity == null) {
+	        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.SECOND), "individual_recency_seconds.txt");
+	        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MINUTE), "individual_recency_minutes.txt");
+	        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.HOUR), "individual_recency_hours.txt");
+	        saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "individual_recency_days.txt");
+    	} else {
+        	if (granularity == TimeUtil.SECOND) {
+        		saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.SECOND), "individual_recency_seconds.txt");
+        	} else if (granularity == TimeUtil.MINUTE) {
+        		saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MINUTE), "individual_recency_minutes.txt");
+        	} else if (granularity == TimeUtil.HOUR) {
+        		saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.HOUR), "individual_recency_hours.txt");
+        	} else if (granularity == TimeUtil.DAY) {
+        		saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "individual_recency_days.txt");
+        	}
+    	}
         //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.FIFTEEN_DAYS), "./tagrecency" + "_" + "FIFTEEN_DAYS");
         //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MONTH), "./tagrecency" + "_" + "MONTH");
         // user unique tag count

@@ -22,8 +22,10 @@ package file;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,6 +103,7 @@ public class PredictionFileWriter {
 		
 		try {
 			FileWriter writer = new FileWriter(new File("./data/results/" + filename + ".txt"));
+			//OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("./data/results/" + filename + ".txt")), "UTF8");
 			BufferedWriter bw = new BufferedWriter(writer);
 			
 			int i=0;
@@ -151,7 +154,8 @@ public class PredictionFileWriter {
 	// Statics
 	public static void writeSimplePredictions(List<Set<String>> predictionValues, List<Set<String>> realValues, String filename) {
 		try {
-			FileWriter writer = new FileWriter(new File("./data/results/" + filename + ".txt"));
+			//FileWriter writer = new FileWriter(new File("./data/results/" + filename + ".txt"));
+			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("./data/results/" + filename + ".txt")), "UTF8");
 			BufferedWriter bw = new BufferedWriter(writer);
 
 			for (int i = 0; i < predictionValues.size(); i++) {

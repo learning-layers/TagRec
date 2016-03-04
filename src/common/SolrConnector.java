@@ -3,6 +3,7 @@ package common;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class SolrConnector {
 			r = this.server.query(solrParams);
 			SolrDocumentList docs = r.getResults();
 			for (SolrDocument d : docs) {
-				tweets.put((String) d.get("text"), new HashSet<String>((List<String>) d.get("hashtags")));
+				tweets.put((String) d.get("text"), new LinkedHashSet<String>((List<String>) d.get("hashtags")));
 			}
 		} catch (SolrServerException e) {
 			e.printStackTrace();
@@ -61,7 +62,7 @@ public class SolrConnector {
 			r = this.server.query(solrParams);
 			SolrDocumentList docs = r.getResults();
 			for (SolrDocument d : docs) {
-				tweetObjects.add(new Tweet((String) d.get("id"), (String) d.get("userid"), (String) d.get("text"), (String) d.get("timestamp"), new HashSet<String>((List<String>) d.get("hashtags"))));
+				tweetObjects.add(new Tweet((String) d.get("id"), (String) d.get("userid"), (String) d.get("text"), (String) d.get("timestamp"), new LinkedHashSet<String>((List<String>) d.get("hashtags"))));
 			}
 		} catch (SolrServerException e) {
 			e.printStackTrace();
@@ -191,7 +192,7 @@ public class SolrConnector {
 				for (String h : hashtags) {
 					if (hashtagMap.size() < limit) {
 						if (!hashtagMap.containsKey(h)) {
-							hashtagMap.put(h, score);
+							hashtagMap.put(h.toLowerCase(), score);
 						}
 					}
 				}

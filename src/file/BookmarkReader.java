@@ -22,7 +22,9 @@ package file;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,7 +95,8 @@ public class BookmarkReader {
 			} else {
 				filePath = path + filename;
 			}
-			FileReader reader = new FileReader(new File(filePath));
+			//FileReader reader = new FileReader(new File(filePath));
+			InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(filePath)), "UTF8");
 			BufferedReader br = new BufferedReader(reader);
 			List<String> categories = new ArrayList<String>(), tags = new ArrayList<String>();
 			Bookmark userData = null;

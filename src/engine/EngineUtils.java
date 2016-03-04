@@ -63,8 +63,8 @@ public class EngineUtils {
 		return reader;
 	}
 	
-	public static List<Integer> getFilterTags(boolean filterOwnEntities, BookmarkReader reader, String user, String resource, Map<Integer, Double> userMap) {
-		List<Integer> filterTags = null;
+	public static List<Integer> getFilterTags(boolean filterOwnEntities, BookmarkReader reader, String user, String resource) {
+		List<Integer> filterTags = new ArrayList<Integer>();
 		if (filterOwnEntities && user != null) {
 			if (resource != null) {
 				int userID = -1;
@@ -76,13 +76,11 @@ public class EngineUtils {
 					resID = reader.getResources().indexOf(resource);
 				}
 				filterTags = Bookmark.getTagsOfBookmark(reader.getBookmarks(), userID, resID);
-			} else {
+			}/* else {
 				if (userMap != null) {
 					filterTags = new ArrayList<Integer>(userMap.keySet());
 				}
-			}
-		} else {
-			filterTags = new ArrayList<Integer>();
+			}*/
 		}
 		
 		return filterTags;

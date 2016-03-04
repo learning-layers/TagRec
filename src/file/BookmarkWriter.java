@@ -2,11 +2,16 @@ package file;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.List;
 
 import com.google.common.primitives.Ints;
+
 import common.Bookmark;
 
 public class BookmarkWriter {
@@ -27,7 +32,8 @@ public class BookmarkWriter {
 			} else {
 				filePath = path + filename;
 			}
-			FileWriter writer = new FileWriter(new File(filePath));
+			//FileWriter writer = new FileWriter(new File(filePath));
+			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(filePath)), "UTF8");
 			BufferedWriter bw = new BufferedWriter(writer);
 			int userCount = 0;
 			// TODO: check encoding

@@ -27,6 +27,11 @@ public class ThreeLayersCollectiveEngine implements EngineInterface {
 		if (count == null || count.doubleValue() < 1) {
 			count = 10;
 		}
+		if (filterOwnEntities == null) {
+			filterOwnEntities = true;
+		}
+		List<Integer> filterTags = EngineUtils.getFilterTags(filterOwnEntities, this.reader, user, resource);
+		
 		List<Integer> topicIDs = new ArrayList<>();
 		if (topics != null) {
 			for (String t : topics) {
@@ -52,7 +57,13 @@ public class ThreeLayersCollectiveEngine implements EngineInterface {
 		// map to strings
 		Map<String, Double> tagStrings = new LinkedHashMap<String, Double>();
 		for (Map.Entry<Integer, Double> entry : tagIDs.entrySet()) {
-			tagStrings.put(this.reader.getTags().get(entry.getKey()), entry.getValue());
+			if (tagStrings.size() < count.intValue()) {
+				if (!filterTags.contains(entry.getKey())) {
+					tagStrings.put(this.reader.getTags().get(entry.getKey()), entry.getValue());
+				}
+			} else {
+				break;
+			}
 		}
 		return tagStrings;
 	}

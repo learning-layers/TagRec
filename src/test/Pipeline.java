@@ -40,6 +40,7 @@ import common.Bookmark;
 import common.CalculationType;
 import common.Features;
 import common.SolrConnector;
+import common.TimeUtil;
 import common.Utilities;
 import processing.BLLCalculator;
 import processing.CFTagRecommender;
@@ -52,6 +53,7 @@ import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.RecencyCalculator;
 import processing.ThreeLTCalculator;
+import processing.analyzing.TagReuseProbAnalyzer;
 import processing.analyzing.UserTagDistribution;
 import processing.hashtag.ProcessFrequencyRecency;
 import processing.hashtag.ProcessFrequencyRecencySocial;
@@ -87,8 +89,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "twitter";
-	private final static String SUBDIR = "/general";
+	private final static String DATASET = "mace";
+	private final static String SUBDIR = "/resource";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -111,9 +113,11 @@ public class Pipeline {
 		String networkFileName = "./data/csv/" + dir + "network.txt";
 		
 		// Test Social Recommender
-		//startSocialRecommendation(dir, path, networkFileName, null);
-	
-		//startSolrHashtagCalculator(dir, "http://kti-social:8938", "researcher", false, true, 24);
+		//startSocialRecommendation(dir, path, networkFileName, "hybrid", null, null);
+		// with content
+		//startSocialRecommendation(dir, path, networkFileName, "hybrid", "http://kti-social:8938", "researcher");
+		
+		//startSolrHashtagCalculator(dir, path, "http://kti-social:8938", "general", true, true, 24);
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -121,8 +125,7 @@ public class Pipeline {
 		//TensorProcessor.writeFiles(path, TRAIN_SIZE, TEST_SIZE, true, null, null, null);
 		
 		//getTrainTestSize(path);
-		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);
-		
+		//TagReuseProbAnalyzer.analyzeSample(path, TRAIN_SIZE, TEST_SIZE, false);	
 		
 		//TOPIC_NAME = "lda_500";
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
@@ -134,24 +137,23 @@ public class Pipeline {
 		//evaluateAllTagRecommenderApproaches(dir, path);
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
-		//BookmarkSplitter.splitSample(dir + "/tweets", dir + "/twitter_sample", 1, 0, true, false, true, dir + "/white_user.txt");
-		//try { getStatistics("sss-eval", false); } catch (Exception e) { e.printStackTrace(); }
+		//BookmarkSplitter.splitSample(dir + "/mace", dir + "/mace_sample", 1, 20, false, false, true, null);
+		//try { getStatistics(path, false); } catch (Exception e) { e.printStackTrace(); }
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.NONE, false);
+		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.NONE, false);
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
-
 		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.USER_TO_RESOURCE_ONLY, false);
-		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.USER_TO_RESOURCE, false);
+		//startActCalculator(dir, path, 1, -5, -5, true, CalculationType.USER_TO_RESOURCE, false);
 		
 		//startRecCalculator(dir, path);
 		
 		// Test the GIRP and GIRPTM algorithms
-		//startGirpCalculator(dir, path, false);
+		//startGirpCalculator(dir, path, true);
 		
 		// Test the MP_u, MP_r and MP_u_r algorithms
 		//startModelCalculator(dir, path, 1, -5, false);
@@ -175,7 +177,7 @@ public class Pipeline {
 		//start3LayersJavaCalculator(dir, path, "", 1, -5, -5, true, true, false);
 		
 		// Test the 3LT_topic algorithm
-		//start3LayersJavaCalculator(dir, path, "lda_1000", 1, -5, -5, true, false, true);
+		//start3LayersJavaCalculator(dir, path, "", 1, -5, -5, true, false, true);
 		
 		// TODO: just execute to test your recommender - results can be found in metrics/bib_core
 		//startContentBasedCalculator(dir, path);
@@ -184,11 +186,12 @@ public class Pipeline {
 		//writeTensorFiles(path, true);
 		//evaluate(dir, path, "wrmf_500_mml", TOPIC_NAME, false, true, null);
 		//createLdaSamples(path, 1, 500, false);
+		//startBaselineCalculatorForResources(dir, path, 1, false);
 		//startCfResourceCalculator(dir, path, 1, 20, true, false, false, false, Features.ENTITIES);
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, true, false, Features.ENTITIES);
 		//startCfResourceCalculator(dir, path, 1, 20, false, true, false, false, Features.TOPICS);
 		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, false, true, false, true);
-		//startBaselineCalculatorForResources(dir, path, 1, false);
+		//startResourceCIRTTCalculator(dir, path, "", 1, 20, Features.ENTITIES, true, true, false, false);
 		//startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 			
 		// Engine Testing
@@ -202,7 +205,7 @@ public class Pipeline {
 		}
 		String subdir = "/";
 		String op = args[0];
-		String samplePath = "", sampleDir = "";
+		String samplePath = "", sampleDir = "", sampleNetwork = "";
 		int sampleCount = 1;
 
 		if (args[1].equals("cul")) {
@@ -231,6 +234,7 @@ public class Pipeline {
 		}
 		sampleDir += subdir;
 		samplePath += (sampleDir + "/" + args[2]);
+		sampleNetwork = "./data/csv/" + sampleDir + "/network.txt";
 		
 		boolean narrowFolksonomy = args[1].equals("flickr") || args[1].contains("twitter");
 		if (op.equals("cf")) {
@@ -325,35 +329,39 @@ public class Pipeline {
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "3", !narrowFolksonomy);
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "4", !narrowFolksonomy);
 		} else if (op.equals("twitter")) {
+			analysisSocial(sampleDir, samplePath, sampleNetwork, "all", null);
+			startSocialRecommendation(sampleDir, samplePath, sampleNetwork, null, null, null);
 			startBaselineCalculator(sampleDir, samplePath, sampleCount, true);
 			startModelCalculator(sampleDir, samplePath, sampleCount, -5, !narrowFolksonomy);
+			startRecCalculator(sampleDir, samplePath);
 			startGirpCalculator(sampleDir, samplePath, !narrowFolksonomy);
-			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.NONE, true);
+			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.NONE, false);
 			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
 			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }	
 		} else if (op.equals("social_analysis")) {
-		    analysisSocial(sampleDir, samplePath, networkFileName, "all");
+		    analysisSocial(sampleDir, samplePath, sampleNetwork, "all", null);
 		} else if(op.equals("hashtag_hybrid")) {
-		    startSocialRecommendation(sampleDir, samplePath, "./data/csv/" + sampleDir + "network.txt", "hybrid");
+		    startSocialRecommendation(sampleDir, samplePath, sampleNetwork, "hybrid", null, null);
 		} else if(op.equals("hashtag_socialmp")) {
-		    startSocialRecommendation(sampleDir, samplePath, "./data/csv/" + sampleDir + "network.txt", "social_freq");
+		    startSocialRecommendation(sampleDir, samplePath, sampleNetwork, "social_freq", null, null);
 		} else if(op.equals("hashtag_socialbll")) {
-		    startSocialRecommendation(sampleDir, samplePath, "./data/csv/" + sampleDir + "network.txt", "social_bll");
+		    startSocialRecommendation(sampleDir, samplePath, sampleNetwork, "social_bll", null, null);
 		} else {
 			System.out.println("Unknown operation");
 		}
 	}
 
 	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------	
-	private static void startSolrHashtagCalculator(String sampleDir, String solrUrl, String sampleName, boolean train, boolean hours, Integer mostRecentTweets) {
+	private static void startSolrHashtagCalculator(String sampleDir, String samplePath, String solrUrl, String solrCore, boolean train, boolean hours, Integer mostRecentTweets) {
 		if (train) {
-			String suffix = SolrHashtagCalculator.predictTrainSample(sampleDir, sampleName, solrUrl, hours, mostRecentTweets);
-			writeMetrics(sampleDir, sampleDir + "/" + sampleName, suffix, 1, 10, null, null, null);
+			String suffix = SolrHashtagCalculator.predictTrainSample(sampleDir, solrCore, solrUrl, hours, mostRecentTweets);
+			writeMetrics(sampleDir, sampleDir + "/" + solrCore, suffix, 1, 10, null, null, null);
 		} else {
-			String suffix = SolrHashtagCalculator.predictSample(sampleDir, sampleName, solrUrl);
-			writeMetrics(sampleDir, sampleDir + "/" + sampleName, suffix, 1, 10, null, null, null);
+			// using test set content!
+			String suffix = SolrHashtagCalculator.predictSample(sampleDir, solrCore, solrUrl);
+			writeMetrics(sampleDir, sampleDir + "/" + solrCore, suffix, 1, 10, null, null, null);
 		}
 	}
 	
@@ -433,7 +441,7 @@ public class Pipeline {
 		}
 	}
 
-	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename, String algo) {
+	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename, String algo, String solrUrl, String solrCore) {
 	    double beta = 0.5;
 	    double exponentSocial = 0.5;
 	    String[] algos = null;
@@ -443,24 +451,37 @@ public class Pipeline {
 	    	algos = new String[]{algo};
 	    }
 	    getTrainTestSize(sampleName);
+	    
+	    Map<Integer, Map<Integer, Double>> contentBasedValues = null;
+	    if (solrUrl != null && solrCore != null) {
+	    	BookmarkReader reader = new BookmarkReader(0, false);
+	    	reader.readFile(sampleName);
+	    	System.out.println("Created reader ...");
+	    	
+	    	//contentBasedValues = SolrHashtagCalculator.getNormalizedHashtagPredictions(sampleDir, solrCore, solrUrl, reader);	    	
+	    	contentBasedValues = SolrHashtagCalculator.readHashtagPrediction("./data/csv/" + sampleDir + "/" + solrCore);
+	    	writeMetrics(sampleDir, sampleDir + solrCore, "solrht_normalized", 1, 10, null, null, null);
+	    	System.out.println("Number of content-based recommendations: " + contentBasedValues.size());
+	    }
+	    
 	    SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
         for (String a : algos){
             String filename = "social" + beta + "_" + exponentSocial + "_" + a;
-            calculator.predictSample(beta, exponentSocial, a, null);
+            calculator.predictSample(beta, exponentSocial, a, contentBasedValues);
             writeMetrics(sampleDir, sampleName, filename, 1, 10, null, null, null);
         }
 	}
 	
-	private static void analysisSocial(String sampleDir, String sampleName, String networkFilename, String type){
+	private static void analysisSocial(String sampleDir, String sampleName, String networkFilename, String type, Integer granularity){
 		getTrainTestSize(sampleName);
 		SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
         if (type.equals("social")){
-	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork());
+	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork(), granularity);
 	    }else if(type.equals("personal")){
-	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes());
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes(), granularity);
 	    }else if(type.equals("all")){
-	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes());
-	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork());
+	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes(), granularity);
+	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork(), granularity);
 	    }
 	}
 	

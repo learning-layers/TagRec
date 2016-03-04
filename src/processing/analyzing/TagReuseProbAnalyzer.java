@@ -111,7 +111,7 @@ public class TagReuseProbAnalyzer {
 				if (sum > 0.0) {
 					if (normalize) {
 						if (powerlaw) {
-							for (int i = 1; i < sum; i++) {
+							for (double i = 1.0; i < count; i++) {
 								bw.write(entry.getKey() + "\n");	
 							}
 						} else {

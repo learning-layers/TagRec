@@ -22,8 +22,10 @@ package file;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -54,7 +56,8 @@ public class PredictionFileReader {
 	public boolean readFile(String filename, int k, BookmarkReader wikiReader, Integer minBookmarks, Integer maxBookmarks, Integer minResBookmarks, Integer maxResBookmarks, CatDescFiltering categorizer) {
 		try {
 			this.filename = filename;
-			FileReader reader = new FileReader(new File("./data/results/" + filename + ".txt"));
+			//FileReader reader = new FileReader(new File("./data/results/" + filename + ".txt"));
+			InputStreamReader reader = new InputStreamReader(new FileInputStream(new File("./data/results/" + filename + ".txt")), "UTF8");
 			BufferedReader br = new BufferedReader(reader);
 			String line = null;
 			

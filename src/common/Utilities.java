@@ -23,9 +23,11 @@ package common;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -197,7 +199,8 @@ public class Utilities {
 		List<String> returnList = new ArrayList<String>();
 		
 		try {
-			FileReader reader = new FileReader(new File(filename));
+			//FileReader reader = new FileReader(new File(filename));
+			InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(filename)), "UTF8");
 			BufferedReader br = new BufferedReader(reader);
 			String line = "";
 			while ((line = br.readLine()) != null) {

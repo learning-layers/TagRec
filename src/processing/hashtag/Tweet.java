@@ -1,5 +1,7 @@
 package processing.hashtag;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Tweet {
@@ -8,14 +10,16 @@ public class Tweet {
 	private String userid;
 	private String text;
 	private String timestamp;
-	private Set<String> hashtags;
+	private Set<String> hashtags = new LinkedHashSet<String>();
 	
 	public Tweet(String id, String userid, String text, String timestamp, Set<String> hashtags) {
 		this.id = id;
 		this.userid = userid;
 		this.text = text;
 		this.timestamp = timestamp;
-		this.hashtags = hashtags;
+		for (String ht : hashtags) {
+			this.hashtags.add(ht.toLowerCase());
+		}
 	}
 
 	public String getId() {

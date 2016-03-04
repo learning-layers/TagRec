@@ -201,11 +201,11 @@ public class ThreeLTCalculator {
 		sortedResultMap.putAll(collectiveTagMap);
 		Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>();
 		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
-			if (returnMap.size() < limit) {
+			//if (returnMap.size() < limit) {
 				returnMap.put(entry.getKey(), entry.getValue());
-			} else {
-				break;
-			}
+			//} else {
+			//	break;
+			//}
 		}
 		
 		return returnMap;
