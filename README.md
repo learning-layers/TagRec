@@ -29,8 +29,6 @@ The source-code can be directly checked-out through this repository. It contains
 * ml_core for MovieLens
 * lastfm_core for LastFM
 * wiki_core for Wikipedia (based on bookmarks from Delicious)
-* twitter_core/researchers for the Twitter researchers dataset
-* twitter_core/general for the Twitter random dataset
 
 ## How-to-use
 The _tagrecommender_ .jar uses three parameters:
@@ -82,8 +80,6 @@ Data-Processing:
 * ml for MovieLens
 * lastfm for LastFM
 * wiki for Wikipedia (based on bookmarks from Delicious)
-* twitter_res for the Twitter researchers dataset
-* twitter_gen for the Twitter random dataset
 
 and third the filename (without file extension)
 
@@ -189,6 +185,5 @@ _Bibtex:_
 ## Contacts and contributors (in alphabetically order)
 * Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone.kopeinik@tugraz.at (sustain resource recommender algorithm)
 * Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (huang, zheng and CIRTT resource recommender algorithms)
-* Subhash Pujari, Knowledge Technologies Institute, Graz University of Technology, spujari@know-center.at (twitter hashtag recommender algorithms)
 * Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contac)
 * Christoph Trattner, Know-Center, ctrattner@know-center.at (general contact)
