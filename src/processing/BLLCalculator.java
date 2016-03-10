@@ -65,9 +65,9 @@ public class BLLCalculator {
 	
 	private CooccurenceMatrix rMatrix;
 		
-	public BLLCalculator(BookmarkReader reader, int trainSize, int dVal, int beta, boolean userBased, boolean resBased, CalculationType cType) {
+	public BLLCalculator(BookmarkReader reader, int trainSize, double dVal, int beta, boolean userBased, boolean resBased, CalculationType cType, Double lambda) {
 		this.reader = reader;
-		this.dVal = (double)dVal / 10.0;
+		this.dVal = dVal;//(double)dVal / 10.0;
 		this.beta = (double)beta / 10.0;
 		this.userBased = userBased;
 		this.resBased = resBased;
@@ -78,7 +78,7 @@ public class BLLCalculator {
 		this.userDenoms = new ArrayList<Double>();
 		this.userTimestamps = new ArrayList<Long>();
 		//if (this.userBased) {
-			this.userMaps = getArtifactMaps(reader, this.trainList, testList, false, this.userTimestamps, this.userDenoms, this.dVal, true);
+			this.userMaps = getArtifactMaps(reader, this.trainList, testList, false, this.userTimestamps, this.userDenoms, this.dVal, true, lambda);
 			this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 			this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);
 			if (cType != CalculationType.NONE) {
@@ -88,7 +88,7 @@ public class BLLCalculator {
 		this.resDenoms = new ArrayList<Double>();
 		this.resTimestamps = new ArrayList<Long>();
 		//if (this.resBased) {		
-			this.resMaps = getArtifactMaps(reader, this.trainList, testList, true, this.resTimestamps, this.resDenoms, this.dVal, true);
+			this.resMaps = getArtifactMaps(reader, this.trainList, testList, true, this.resTimestamps, this.resDenoms, this.dVal, true, null);
 		//}
 	}	
 
@@ -224,7 +224,7 @@ public class BLLCalculator {
 
 	// Basis activations values for each user
 	public static List<Map<Integer, Double>> getArtifactMaps(BookmarkReader reader, List<Bookmark> userLines, List<Bookmark> testLines, boolean resource,
-			List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize) {
+			List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize, Double lambda) {
 		
 		List<Map<Integer, Double>> maps = new ArrayList<Map<Integer, Double>>();
 		for (Bookmark data : userLines) {
@@ -245,14 +245,14 @@ public class BLLCalculator {
 				}
 				timestampList.add(baselineTimestamp);
 				if (baselineTimestamp != -1) {
-					maps.add(addActValue(data, new LinkedHashMap<Integer, Double>(), baselineTimestamp, resource, dVal));
+					maps.add(addActValue(data, new LinkedHashMap<Integer, Double>(), baselineTimestamp, resource, dVal, lambda));
 				} else {
 					maps.add(null);
 				}
 			} else {
 				baselineTimestamp = timestampList.get(refID);
 				if (baselineTimestamp != -1) {
-					addActValue(data, maps.get(refID), baselineTimestamp, resource, dVal);
+					addActValue(data, maps.get(refID), baselineTimestamp, resource, dVal, lambda);
 				}
 			}
 		}
@@ -286,7 +286,7 @@ public class BLLCalculator {
 	public static Map<Integer, Double> getSortedArtifactMapForUser(int userID, BookmarkReader reader, List<Bookmark> userLines, List<Bookmark> testLines, boolean resource,
 			List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize) {
 		
-		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize);
+		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize, null);
 		if (artifactMaps != null && userID < artifactMaps.size()) {
 			Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(artifactMaps.get(userID)));
 			sortedResultMap.putAll(artifactMaps.get(userID));		
@@ -299,7 +299,7 @@ public class BLLCalculator {
 		List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize) {
 		
 		Map<Integer, Double> collectiveArtifactMap = new LinkedHashMap<Integer, Double>();
-		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize);
+		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize, null);
 		for (Map<Integer, Double> map : artifactMaps) {
 			for (Map.Entry<Integer, Double> entry : map.entrySet()) {
 				Double val = collectiveArtifactMap.get(entry.getKey());
@@ -312,23 +312,29 @@ public class BLLCalculator {
 		return sortedResultMap;
 	}
 	
-	private static Map<Integer, Double> addActValue(Bookmark data, Map<Integer, Double> actValues, long baselineTimestamp, boolean resource, double dVal) {
+	private static Map<Integer, Double> addActValue(Bookmark data, Map<Integer, Double> actValues, long baselineTimestamp, boolean resource, double dVal, Double lambda) {
 		if (!data.getTimestamp().isEmpty()) {
 			Double newAct = 0.0;
 			if (resource) {
 				newAct = 1.0;
 			} else {
 				Double recency = (double)(baselineTimestamp - Long.parseLong(data.getTimestamp()) + 1.0);
-				//double recency = Math.ceil((baselineTimestamp - Long.parseLong(data.getTimestamp()) + 1.0) / 60.0 / 60.0 / 24.0 / 365.0 / 10);
-				//System.out.println(recency);			
-				newAct = Math.pow(recency, dVal * -1.0);
+				//if (recency > 365 * 24 * 60 * 60) {
+				//	newAct = 0.0;
+				//} else {
+					newAct = Math.pow(recency, dVal * -1.0);
+					if (lambda != null) {
+						double cutoff = Math.exp(recency * lambda.doubleValue() * -1.0);
+						newAct *= cutoff;
+					}
+				//}
 			}
 			for (Integer value : data.getTags()) {
 				Double oldAct = actValues.get(value);
 				if (!newAct.isInfinite() && !newAct.isNaN()) {
 					actValues.put(value, (oldAct != null ? oldAct + newAct : newAct));
 				} else {
-					System.out.println(data.getUserID() + "_" + baselineTimestamp + " " + data.getTimestamp());
+					System.out.println("BLL error: " + data.getUserID() + "_" + baselineTimestamp + " " + data.getTimestamp());
 				}
 			}
 		}
@@ -338,13 +344,14 @@ public class BLLCalculator {
 	// Statics  -------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 	private static String timeString;
 	
-	private static List<Map<Integer, Double>> startActCreation(BookmarkReader reader, int sampleSize, boolean sorting, boolean userBased, boolean resBased, int dVal, int beta, CalculationType cType) {
+	private static List<Map<Integer, Double>> startActCreation(BookmarkReader reader, int sampleSize, boolean sorting, boolean userBased, boolean resBased, double dVal,
+			int beta, CalculationType cType, Double lambda) {
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		
 		Stopwatch timer = new Stopwatch();
 		timer.start();
-		BLLCalculator calculator = new BLLCalculator(reader, trainSize, dVal, beta, userBased, resBased, cType);
+		BLLCalculator calculator = new BLLCalculator(reader, trainSize, dVal, beta, userBased, resBased, cType, lambda);
 		timer.stop();
 		long trainingTime = timer.elapsed(TimeUnit.MILLISECONDS);
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
@@ -366,7 +373,7 @@ public class BLLCalculator {
 		return results;
 	}
 	
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int dVal, int beta, CalculationType cType) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, double dVal, int beta, CalculationType cType, Double lambda) {
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
 		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
@@ -374,7 +381,7 @@ public class BLLCalculator {
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 
-		List<Map<Integer, Double>> actValues = startActCreation(reader, sampleSize, true, userBased, resBased, dVal, beta, cType);
+		List<Map<Integer, Double>> actValues = startActCreation(reader, sampleSize, true, userBased, resBased, dVal, beta, cType, lambda);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
 		for (int i = 0; i < actValues.size(); i++) {

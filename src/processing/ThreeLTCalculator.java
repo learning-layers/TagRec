@@ -54,7 +54,7 @@ public class ThreeLTCalculator {
 		this.bookmarkBLL = bookmarkBLL;		
 		this.cType = cType;
 		
-		this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true);
+		this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true, null);
 		this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 		this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);
 		if (this.cType == CalculationType.USER_TO_RESOURCE) {
@@ -189,6 +189,9 @@ public class ThreeLTCalculator {
 				if (ajhid.isNaN() || ajhid.isInfinite()) {
 					ajhid = 0.0;
 					System.out.println("Cos - NAN");
+				}
+				if (ajhid == 0.0) {
+					ajhid = 0.1;
 				}
 				for (int t : b.getTags()) {
 					Double tVal = collectiveTagMap.get(t);

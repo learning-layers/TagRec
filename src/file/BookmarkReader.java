@@ -142,11 +142,11 @@ public class BookmarkReader {
 						}
 					}
 				}
-				if (lineParts.length > 5) { // is there a rating?
-					try {
-						userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
-					} catch (Exception e) { /* do nothing */ }
-				}
+				//if (lineParts.length > 5) { // is there a rating?
+				//	try {
+				//		userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
+				//	} catch (Exception e) { /* do nothing */ }
+				//}
 				
 				// TODO ----------------------
 				// extend common/Bookmark class with fields for title (= lineParts[6]) and description (= lineParts[7])

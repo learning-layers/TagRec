@@ -39,7 +39,6 @@ import java.util.Map;
 import common.Bookmark;
 import common.CalculationType;
 import common.Features;
-import common.SolrConnector;
 import common.TimeUtil;
 import common.Utilities;
 import processing.BLLCalculator;
@@ -55,10 +54,6 @@ import processing.RecencyCalculator;
 import processing.ThreeLTCalculator;
 import processing.analyzing.TagReuseProbAnalyzer;
 import processing.analyzing.UserTagDistribution;
-import processing.hashtag.ProcessFrequencyRecency;
-import processing.hashtag.ProcessFrequencyRecencySocial;
-import processing.hashtag.SocialCalculator;
-import processing.hashtag.SolrHashtagCalculator;
 import engine.Algorithm;
 import engine.EngineInterface;
 import engine.EntityRecommenderEngine;
@@ -89,8 +84,8 @@ public class Pipeline {
 	// placeholder for the topic posfix
 	private static String TOPIC_NAME = null;
 	// placeholder for the used dataset
-	private final static String DATASET = "mace";
-	private final static String SUBDIR = "/resource";
+	private final static String DATASET = "bib";
+	private final static String SUBDIR = "/core1";
 	
 	public static void main(String[] args) {
 		System.out.println("TagRecommender:\n" + "" +
@@ -111,13 +106,8 @@ public class Pipeline {
 		String dir = DATASET + "_core" + SUBDIR + "/";
 		String path = dir + DATASET + "_sample";
 		String networkFileName = "./data/csv/" + dir + "network.txt";
-		
-		// Test Social Recommender
-		//startSocialRecommendation(dir, path, networkFileName, "hybrid", null, null);
-		// with content
-		//startSocialRecommendation(dir, path, networkFileName, "hybrid", "http://kti-social:8938", "researcher");
-		
-		//startSolrHashtagCalculator(dir, path, "http://kti-social:8938", "general", true, true, 24);
+				
+		//startSolrHashtagCalculator(dir, path, "http://kti-social:8938", "researcher", true, true, 24);
 		
 		//BibsonomyProcessor.processUnsortedFile("dc09_core/test_core/", "tas", "dc09_sample_test");
 		//MovielensProcessor.processFile("000_dataset_dump/tags.dat", "000_dataset_dump/movielens", "000_dataset_dump/ratings.dat");
@@ -138,13 +128,18 @@ public class Pipeline {
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
 		//BookmarkSplitter.splitSample(dir + "/mace", dir + "/mace_sample", 1, 20, false, false, true, null);
-		//try { getStatistics(path, false); } catch (Exception e) { e.printStackTrace(); }
+		//try { getStatistics("sss_recomm", false); } catch (Exception e) { e.printStackTrace(); }
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
 		// Method Testing -> just uncomment the methods you want to test
 		// Test the BLL and BLL+MP_r algorithms (= baseline to beat :))
-		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.NONE, false);
+		//startActCalculator(dir, path, 1, 1.699, null, -5, false, CalculationType.NONE, false);
+		
+		// Test Social Recommender
+		//startSocialRecommendation(dir, path, networkFileName, "social", 1.699, null, 1.242, null, null, null);
+		// with content
+		//startSocialRecommendation(dir, path, networkFileName, "hybrid", "http://kti-social:8938", "researcher");
 		
 		// Test the BLL_AC and BLL_AC+MP_r algorithms (could take a while)
 		//startActCalculator(dir, path, 1, -5, -5, false, CalculationType.USER_TO_RESOURCE_ONLY, false);
@@ -195,7 +190,7 @@ public class Pipeline {
 		//startSustainApproach(dir, path, 2.845, 0.5, 6.396, 0.0936, 0, 0, 20, 0.5);
 			
 		// Engine Testing
-		//startEngineTest(null, "test");
+		//startEngineTest(null, "sss_recomm");
 		//startKnowBrainTest("ml_group2");
 		
 		// Commandline Arguments
@@ -222,12 +217,6 @@ public class Pipeline {
 			sampleDir = "lastfm_core";
 		} else if (args[1].equals("del")) {
 			sampleDir = "del_core";
-		} else if (args[1].equals("twitter_res")) {
-			sampleDir = "twitter_core";
-			subdir = "/researchers";
-		} else if (args[1].equals("twitter_gen")) {
-			sampleDir = "twitter_core";
-			subdir = "/general";
 		} else {
 			System.out.println("Dataset not available");
 			return;
@@ -236,7 +225,7 @@ public class Pipeline {
 		samplePath += (sampleDir + "/" + args[2]);
 		sampleNetwork = "./data/csv/" + sampleDir + "/network.txt";
 		
-		boolean narrowFolksonomy = args[1].equals("flickr") || args[1].contains("twitter");
+		boolean narrowFolksonomy = args[1].equals("flickr");
 		if (op.equals("cf")) {
 			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
 		} else if (op.equals("cfr")) {
@@ -244,10 +233,10 @@ public class Pipeline {
 		} else if (op.equals("fr")) {
 			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("bll_c")) {
-			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.NONE, true);
+			startActCalculator(sampleDir, samplePath, sampleCount, 0.5, null, -5, !narrowFolksonomy, CalculationType.NONE, true);
 		} else if (op.equals("bll_c_ac")) {
 			if (!narrowFolksonomy) {
-				startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.USER_TO_RESOURCE, true);
+				startActCalculator(sampleDir, samplePath, sampleCount, 0.5, null, -5, !narrowFolksonomy, CalculationType.USER_TO_RESOURCE, true);
 			}
 		} else if (op.equals("girptm")) {
 			startGirpCalculator(sampleDir, samplePath, !narrowFolksonomy);
@@ -328,49 +317,21 @@ public class Pipeline {
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "2", !narrowFolksonomy);
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "3", !narrowFolksonomy);
 			startSampleTagRecommenderApproaches(sampleDir, samplePath + "4", !narrowFolksonomy);
-		} else if (op.equals("twitter")) {
-			analysisSocial(sampleDir, samplePath, sampleNetwork, "all", null);
-			startSocialRecommendation(sampleDir, samplePath, sampleNetwork, null, null, null);
-			startBaselineCalculator(sampleDir, samplePath, sampleCount, true);
-			startModelCalculator(sampleDir, samplePath, sampleCount, -5, !narrowFolksonomy);
-			startRecCalculator(sampleDir, samplePath);
-			startGirpCalculator(sampleDir, samplePath, !narrowFolksonomy);
-			startActCalculator(sampleDir, samplePath, sampleCount, -5, -5, !narrowFolksonomy, CalculationType.NONE, false);
-			startCfTagCalculator(sampleDir, samplePath, sampleCount, 20, -5, false);
-			startFolkRankCalculator(sampleDir, samplePath, sampleCount);
 		} else if (op.equals("stats")) {
 			try { getStatistics(samplePath, false); } catch (Exception e) { e.printStackTrace(); }	
-		} else if (op.equals("social_analysis")) {
-		    analysisSocial(sampleDir, samplePath, sampleNetwork, "all", null);
-		} else if(op.equals("hashtag_hybrid")) {
-		    startSocialRecommendation(sampleDir, samplePath, sampleNetwork, "hybrid", null, null);
-		} else if(op.equals("hashtag_socialmp")) {
-		    startSocialRecommendation(sampleDir, samplePath, sampleNetwork, "social_freq", null, null);
-		} else if(op.equals("hashtag_socialbll")) {
-		    startSocialRecommendation(sampleDir, samplePath, sampleNetwork, "social_bll", null, null);
 		} else {
 			System.out.println("Unknown operation");
 		}
 	}
 
 	// Tag Recommenders methods ---------------------------------------------------------------------------------------------------------------------------------------------	
-	private static void startSolrHashtagCalculator(String sampleDir, String samplePath, String solrUrl, String solrCore, boolean train, boolean hours, Integer mostRecentTweets) {
-		if (train) {
-			String suffix = SolrHashtagCalculator.predictTrainSample(sampleDir, solrCore, solrUrl, hours, mostRecentTweets);
-			writeMetrics(sampleDir, sampleDir + "/" + solrCore, suffix, 1, 10, null, null, null);
-		} else {
-			// using test set content!
-			String suffix = SolrHashtagCalculator.predictSample(sampleDir, solrCore, solrUrl);
-			writeMetrics(sampleDir, sampleDir + "/" + solrCore, suffix, 1, 10, null, null, null);
-		}
-	}
 	
 	private static void startAllTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
 		startBaselineCalculator(sampleDir, samplePath, 1, true);		// MP
 		startModelCalculator(sampleDir, samplePath, 1, -5, all);		// MPur
 		startGirpCalculator(sampleDir, samplePath, all);					// GIRPTM
-		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.NONE, true);				// BLL
-		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.USER_TO_RESOURCE, true);	// BLLac
+		startActCalculator(sampleDir, samplePath, 1, 0.5, null, -5, all, CalculationType.NONE, true);				// BLL
+		startActCalculator(sampleDir, samplePath, 1, 0.5, null, -5, all, CalculationType.USER_TO_RESOURCE, true);	// BLLac
 		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, false);				// 3L		
 		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, true, false);					// 3LTtop
 		start3LayersJavaCalculator(sampleDir, samplePath, "", 1, -5, -5, all, false, true);					// 3LTtag
@@ -382,7 +343,7 @@ public class Pipeline {
 	private static void startSampleTagRecommenderApproaches(String sampleDir, String samplePath, boolean all) {
 		startModelCalculator(sampleDir, samplePath, 1, -5, all);											// MPur
 		startGirpCalculator(sampleDir, samplePath, all);														// GIRPTM
-		startActCalculator(sampleDir, samplePath, 1, -5, -5, all, CalculationType.USER_TO_RESOURCE, false);	// BLLac
+		startActCalculator(sampleDir, samplePath, 1, 0.5, null, -5, all, CalculationType.USER_TO_RESOURCE, false);	// BLLac
 		startFolkRankCalculator(sampleDir, samplePath, 1);													// APR+FR
 	}
 	
@@ -414,16 +375,16 @@ public class Pipeline {
 		evaluate(sampleDir, samplePath, "userlayerstopicbll_5_5", null, true, false, reader);
 	}
 
-	private static void startActCalculator(String sampleDir, String sampleName, int sampleCount, int dUpperBound, int betaUpperBound, boolean all, CalculationType type, boolean allMetrics) {
+	private static void startActCalculator(String sampleDir, String sampleName, int sampleCount, double dVal, Double lambda, int betaUpperBound, boolean all, CalculationType type, boolean allMetrics) {
 		getTrainTestSize(sampleName);
-		List<Integer> dValues = getBetaValues(dUpperBound);
+		//List<Integer> dValues = getBetaValues(dUpperBound);
 		List<Integer> betaValues = getBetaValues(betaUpperBound);
 		String ac = type == CalculationType.USER_TO_RESOURCE ? "_ac" : "";
 		BookmarkReader reader = null;
 		
 		for (int i = 1; i <= sampleCount; i++) {
-			for (int dVal : dValues) {
-				reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, dVal, 5, type);
+			//for (int dVal : dValues) {
+				reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, dVal, 5, type, lambda);
 				if (type == CalculationType.USER_TO_RESOURCE_ONLY) {
 					writeMetrics(sampleDir, sampleName, "ac_5_5", sampleCount, 10, null, allMetrics ? reader : null, null);
 				} else {
@@ -431,58 +392,14 @@ public class Pipeline {
 				}
 				if (all) {
 					for (int betaVal : betaValues) {
-						reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal, type);
+						reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal, type, lambda);
 						writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, 10, null, allMetrics ? reader : null, null);
 					}
 					//reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, false, true, dVal, 5, type);
 					//writeMetrics(sampleDir, sampleName, "bll_r" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null, reader);
 				}
-			}
+			//}
 		}
-	}
-
-	private static void startSocialRecommendation(String sampleDir, String sampleName, String networkFilename, String algo, String solrUrl, String solrCore) {
-	    double beta = 0.5;
-	    double exponentSocial = 0.5;
-	    String[] algos = null;
-	    if (algo == null) {
-	    	algos = new String[]{"social_freq", "social", "hybrid"};//, "hybrid_freq"};
-	    } else {
-	    	algos = new String[]{algo};
-	    }
-	    getTrainTestSize(sampleName);
-	    
-	    Map<Integer, Map<Integer, Double>> contentBasedValues = null;
-	    if (solrUrl != null && solrCore != null) {
-	    	BookmarkReader reader = new BookmarkReader(0, false);
-	    	reader.readFile(sampleName);
-	    	System.out.println("Created reader ...");
-	    	
-	    	//contentBasedValues = SolrHashtagCalculator.getNormalizedHashtagPredictions(sampleDir, solrCore, solrUrl, reader);	    	
-	    	contentBasedValues = SolrHashtagCalculator.readHashtagPrediction("./data/csv/" + sampleDir + "/" + solrCore);
-	    	writeMetrics(sampleDir, sampleDir + solrCore, "solrht_normalized", 1, 10, null, null, null);
-	    	System.out.println("Number of content-based recommendations: " + contentBasedValues.size());
-	    }
-	    
-	    SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
-        for (String a : algos){
-            String filename = "social" + beta + "_" + exponentSocial + "_" + a;
-            calculator.predictSample(beta, exponentSocial, a, contentBasedValues);
-            writeMetrics(sampleDir, sampleName, filename, 1, 10, null, null, null);
-        }
-	}
-	
-	private static void analysisSocial(String sampleDir, String sampleName, String networkFilename, String type, Integer granularity){
-		getTrainTestSize(sampleName);
-		SocialCalculator calculator = new SocialCalculator(sampleDir, sampleName, networkFilename, TRAIN_SIZE, TEST_SIZE);
-        if (type.equals("social")){
-	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork(), granularity);
-	    }else if(type.equals("personal")){
-	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes(), granularity);
-	    }else if(type.equals("all")){
-	        new ProcessFrequencyRecency().ProcessTagAnalytics(sampleDir, calculator.getUserTagTimes(), granularity);
-	        new ProcessFrequencyRecencySocial(sampleDir, calculator.getUserTagTimes(), calculator.getNetwork(), granularity);
-	    }
 	}
 	
 	private static void startGirpCalculator(String sampleDir, String sampleName, boolean all) {
@@ -616,8 +533,7 @@ public class Pipeline {
 			e.printStackTrace();
 		}
 		List<String> categories = new ArrayList<String>();
-		categories.add("category");
-		categories.add("bla");
+		categories.add("Concept 1");
 		System.out.println("Tags for user and resource with BLLac+MPr: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.BLLacMPr, EntityType.TAG)); // BLLac+MPr
 		System.out.println("Tags for user and resource with MPur: " + recEngine.getEntitiesWithLikelihood("http://sss.eu/302875752153271240/", "http://sss.eu/31116473812357491143/", null, 10, false, Algorithm.MPur, EntityType.TAG)); // MPur
 		System.out.println("Tags with 3Lcoll: " + recEngine.getEntitiesWithLikelihood("bla", "res", categories, 10, false, Algorithm.THREELcoll, EntityType.TAG)); // BLLac+MPr

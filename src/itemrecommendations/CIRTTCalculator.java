@@ -96,7 +96,7 @@ public class CIRTTCalculator {
 		this.userTopics = Utilities.getUniqueTopicMaps(this.trainList, false);//Utilities.getRelativeTopicMaps(this.trainList, false);
 		this.allUsers = Utilities.getAllEntities(this.trainList, false);
 		if (this.bll) {
-			this.bllValues = BLLCalculator.getArtifactMaps(reader, this.trainList, this.testList, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true);
+			this.bllValues = BLLCalculator.getArtifactMaps(reader, this.trainList, this.testList, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true, null);
 		}
 		
 		/*if (this.features == Features.ENTITIES) {
