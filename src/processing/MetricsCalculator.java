@@ -117,8 +117,9 @@ public class MetricsCalculator {
 			map += data.getMAP();
 			if (resourceTopics != null) {
 				List<Integer> knownResources = Bookmark.getResourcesFromUser(wikiReader.getBookmarks().subList(0, trainSize), data.getUserID());
-				diversity += data.getDiversity(resourceTopics);
-				serendipity += data.getSerendipity(resourceTopics, knownResources);
+				// TODO: uncomment and check exception
+				//diversity += data.getDiversity(resourceTopics);
+				//serendipity += data.getSerendipity(resourceTopics, knownResources);
 			}
 			nDCG += data.getNDCG();
 			
@@ -260,6 +261,7 @@ public static void calculateNDCGMetrics(String filename, int k, String outputFil
 				bw.write(Double.toString((gamma)).replace('.', ',') + ";");
 				bw.write(Double.toString((cfWeight)).replace('.', ',') + ";");
 				bw.write(Double.toString((nDCGSum)).replace('.', ',') + ";");
+				bw.write(Double.toString((calc.getMAP())).replace('.', ',') + ";");
 				bw.write(Double.toString((calc.getRecall())).replace('.', ',') + ";");
 				bw.write(Double.toString((calc.getPrecision())).replace('.', ',') + ";");
 				bw.write(Double.toString((minCluster)).replace('.', ',') + ";");

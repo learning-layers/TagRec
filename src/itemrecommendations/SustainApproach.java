@@ -284,11 +284,11 @@ public class SustainApproach {
 				currentResource.setElement(t, 1);
 			}	
 			
-//			if (clusterList.size()==0){
-//				clusterList.add(currentResource);
-//				//continue;
-//			}
-//			
+			if (clusterList.size()==0){
+				clusterList.add(currentResource);
+				continue;
+			}
+			
 			
 			
 			double maxActivation = 0;
