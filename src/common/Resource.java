@@ -1,20 +1,25 @@
 package common;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class Resource {
-	int id; 
+	public int id; 
 	int occurrence;
 	HashMap<Integer, Integer> cooccurrence;
-    Map<Double, Integer> MIs;  
+	HashMap<Integer, Double> similarResources;
+    TreeMap<Double, Integer> MIs; 
+    double log2;
 	
 	public Resource(int id){
 		this.id = id;
 		this.occurrence = 0;
 		this.cooccurrence = new HashMap<Integer, Integer>();
 		this.MIs = new TreeMap<Double, Integer>();
+		this.log2 = Math.log( 2 );
+		this.similarResources = new HashMap<Integer, Double>();
 	}
 	
 	public void increment(){
@@ -50,13 +55,25 @@ public class Resource {
 	
 	private double log2( double x )
     {
-		// Math.log is base e, natural log, ln
-		return Math.log( x ) / Math.log( 2 );
+		return Math.log( x ) / this.log2;
     }
 	
 	
-	public void getHighestMIs(int number){
+	public HashMap<Integer, Double> getHighestMIs(int number){
 		//this.MIs.descendingKeySet();???
+		HashMap<Integer, Double> highestMIs = new HashMap<Integer, Double>();
+		int count = 0;
+		for (Map.Entry<Double, Integer> entry :this.MIs.descendingMap().entrySet()){
+			highestMIs.put(entry.getValue(), entry.getKey());
+			if (++count == number)
+				break;
+		}
+		
+		return highestMIs;
+	}
+
+	public void addSim(int resourceId, double similarity) {
+		this.similarResources.put(resourceId, similarity);		
 	}
 	
 }

@@ -83,7 +83,6 @@ public class SustainApproach {
 	
 		rankedResourseCalculator = new BM25Calculator(this.reader, this.trainSize, false, true, false, 5, Similarity.COSINE, Features.ENTITIES);
 		this.userLearningRateList = new HashMap<Integer, Double>();
-		this.numberOfTopics = this.reader.getCategories().size();
 		this.resourceListPerUser = new HashMap<Integer, List<Integer>>();
 		//go through all users - matrix user-resource
 		// Set is ordered per user? TODO: ask Dominik, Set can not be ordered linkedHashSet can. Is there a method to get sorted resources? 
@@ -95,11 +94,19 @@ public class SustainApproach {
 		
 	
 		this.resTopicTrainList = Utilities.getResTopics(this.trainList);
+		this.numberOfTopics = this.reader.getCategories().size();
+		//FIXME: I there are not topics we can try using tags instead!
+		//this.resTopicTrainList = Utilities.getResMaps(this.trainList);
+		//this.numberOfTopics = this.reader.getTags().size();
 		
-		//this.resTopicTestList = Utilities.getResTopics(this.testList);
 		
 		this.uniqueUserList = reader.getUniqueUserListFromTestSet(trainSize);
 		
+		
+		for (Map<Integer, Integer>tags : this.resTopicTrainList){
+			List<String> tagNames = Utilities.getTagNames(new ArrayList<Integer>(tags.keySet()), reader);
+			System.out.println(tagNames.toString());
+		}
 		
 		//saves Cluster per user
 		this.userClusterList = new HashMap<Integer, ArrayList<GVector>>();
@@ -415,17 +422,19 @@ public class SustainApproach {
 	}
 	
 	
-	private int[] predict(int userId, double r, double tau, double learningRate, double beta, int candidateNumber, int sampleSize, double cfWeight){
+	private int[] predict(int userId, double r, double tau, double learningRate, double beta, int candidateNumber, int sampleSize, double alpha){
 		Map<Integer, Double> resourceActivationMap = new HashMap<Integer, Double>();
+
 		
-		if (candidateNumber>0){
+//		if (candidateNumber>0){
 			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
 			//TreeMap<Integer, Double> candidateSet = this.calculateCandidateSet(userId);
 			Map<Integer, Double> CFValues = new HashMap<Integer, Double>();
 			
 			int count = 0;
+			
 			for (Map.Entry<Integer, Double> resource : candidateSet.entrySet()){
-				if (count == candidateNumber)
+				if (candidateNumber>0 && count == candidateNumber)
 					break;
 				double resourceActivation = this.calculateResourceActivations(userId, resource.getKey(), beta, r);
 				resourceActivationMap.put(resource.getKey(), resourceActivation);
@@ -439,24 +448,26 @@ public class SustainApproach {
 			for ( Entry<Integer, Double> entry : resourceActivationMap.entrySet()){
 				double valueSustain = entry.getValue();
 				double valueCF = CFValues.get(entry.getKey());
-				double activation = entry.getValue()*cfWeight+CFValues.get(entry.getKey())* (1-cfWeight);	
+				double activation = entry.getValue()*alpha+CFValues.get(entry.getKey())* (1-alpha);	
 				resourceActivationMap.put(entry.getKey(), activation);
-			}
+	//		}
 					
 		}
-		else{
-			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
-			for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
-				if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
-					continue;
-				double resourceActivation = this.calculateResourceActivations(userId, resource, beta, r);
-				double activation = resourceActivation*(1-cfWeight);
-					if (candidateSet.containsKey(resource))
-						activation+=candidateSet.get(resource)*cfWeight;
-				resourceActivationMap.put(resource, activation);
-			}
-		
-		}	
+//		else{
+//			TreeMap<Integer, Double> candidateSet = (TreeMap<Integer, Double>) this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
+//		//for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
+//			for (Map.Entry<Integer, Double> resource : candidateSet.entrySet()){
+//				if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
+//					continue;
+//				double resourceActivation = this.calculateResourceActivations(userId, resource.getKey(), beta, r);
+//				
+//				double activation = resourceActivation*(alpha);
+//				activation+=resource.getValue()*(1-alpha);
+//				
+//				resourceActivationMap.put(resource.getKey(), activation);
+//			}
+//		
+//		}	
 			
 		TreeMap<Integer, Double> sortedResourceActivationMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resourceActivationMap));
 		sortedResourceActivationMap.putAll(resourceActivationMap);
