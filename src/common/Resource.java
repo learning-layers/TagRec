@@ -13,9 +13,11 @@ import org.joda.time.LocalDateTime;
 public class Resource {
 	public int id; 
 	int occurrence;
-	HashMap<Integer, Integer> cooccurrence;
-	public HashMap<Integer, Double> similarResources;
-    TreeMap<Double, ArrayList<Integer>> MIs; 
+	//HashMap<Integer, Integer> cooccurrence;
+	int [] cooccurrence;
+	//public HashMap<Integer, Double> similarResources;
+    public double [] similarResources;
+	TreeMap<Double, ArrayList<Integer>> MIs; 
     double log2;
     HashSet<Integer> tags;
 	
@@ -23,10 +25,12 @@ public class Resource {
 		int hashmapSize = (int) (size/0.75+2); 
 		this.id = id;
 		this.occurrence = 0;
-		this.cooccurrence = new HashMap<Integer, Integer>(hashmapSize);
+		//this.cooccurrence = new HashMap<Integer, Integer>(hashmapSize);
+		this.cooccurrence = new int [size];
 		this.MIs = new TreeMap<Double, ArrayList<Integer>>();
 		this.log2 = Math.log( 2 );
-		this.similarResources = new HashMap<Integer, Double>(hashmapSize);
+		//this.similarResources = new HashMap<Integer, Double>();
+		this.similarResources = new double [size];
 		this.tags = new HashSet<Integer>();
 	}
 	
@@ -35,19 +39,23 @@ public class Resource {
 	} 
 	
 	public void incrementCoocurrence(int resource){
-		this.cooccurrence.put(resource, this.cooccurrence.getOrDefault(resource,0)+1);
+		//this.cooccurrence.put(resource, this.cooccurrence.getOrDefault(resource,0)+1);
+		
+		this.cooccurrence[resource] = this.cooccurrence[resource]+1; 
 	}
 
 
 	public Integer getCooccurrence(int resource) {
-		return cooccurrence.get(resource);
+		//return cooccurrence.get(resource);
+		return cooccurrence[resource];
 	}
 	
 	
 	// n = number of all resources
 	public void calculateMI (Resource r1, int n){
 //		System.out.println(r1.id);
-		double n11 = this.cooccurrence.getOrDefault(r1.id, 0);
+		//double n11 = this.cooccurrence.getOrDefault(r1.id, 0);
+		double n11 = this.cooccurrence[r1.id];
 		double n10 = this.occurrence-n11;
 		double n01 = r1.occurrence-n11;			
 		
@@ -80,11 +88,8 @@ public class Resource {
 		list.add(r1.id);
 	}
 	
-	private double log2( double x )
-    {
+	private double log2( double x ){
 		return Math.log( x ) / this.log2;
-		//return Math.log( x ) / this.log2;
-		
     }
 	
 	
@@ -104,8 +109,9 @@ public class Resource {
 	}
 
 	public void addSim(int resourceId, double similarity) {
-		if (similarity >0)
-			this.similarResources.put(resourceId, similarity);		
+//		if (similarity >0)
+//			this.similarResources.put(resourceId, similarity);		
+		this.similarResources[resourceId]=similarity;
 	}
 	
 	public void addTags(List<Integer> tags){

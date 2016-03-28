@@ -1,34 +1,25 @@
 package itemrecommendations;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-
-import javax.vecmath.GVector;
+import java.util.TreeMap;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
-import processing.BM25Calculator;
 import common.Bookmark;
 import common.DoubleMapComparator;
-import common.Features;
 import common.Resource;
 import common.Session;
-import common.Similarity;
 import common.Utilities;
+
 import file.BookmarkReader;
 import file.PredictionFileWriter;
 
@@ -53,7 +44,7 @@ public class NiemannApproach {
 	private List<Integer> uniqueUserList;
 	private List<Session> sessionList;
 	private HashMap<Integer, Resource> sessionResourceMap;
-	private HashMap<Integer, Integer> resourceTagMap;
+	
 	
 	//last Session of a user
 	private HashMap<Integer, Session> userSessionMap;
@@ -131,11 +122,13 @@ public class NiemannApproach {
 			 
 			for (int resId : userResources){
 				Resource userRes = this.sessionResourceMap.get(resId);
-				for (Map.Entry<Integer, Double> simRes : userRes.similarResources.entrySet()){
-					if (userResources.contains(simRes.getKey()))
-						continue;
-					itemSimMap.put(simRes.getKey(), itemSimMap.getOrDefault(simRes.getKey(), 0.0)+simRes.getValue());
-				}	
+//				for (Map.Entry<Integer, Double> simRes : userRes.similarResources.entrySet()){
+//					if (userResources.contains(simRes.getKey()))
+//						continue;
+//					itemSimMap.put(simRes.getKey(), itemSimMap.getOrDefault(simRes.getKey(), 0.0)+simRes.getValue());
+//				}
+				for ( int i =0; i<userRes.similarResources.length; i++)
+					itemSimMap.put(i, itemSimMap.getOrDefault(i, 0.0)+userRes.similarResources[i]);
 			}
 
 			

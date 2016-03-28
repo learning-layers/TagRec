@@ -52,6 +52,8 @@ public class BookmarkReader {
 	private Map<String, Integer> userMap;
 	private List<Integer> userCounts;
 	private englishStemmer stemmer;
+	private HashSet<String> resourceWithTag;
+	private HashSet<String> resourceWithTopic;
 	
 	private boolean hasTimestamp = false;
  	
@@ -69,6 +71,8 @@ public class BookmarkReader {
 		this.users = new ArrayList<String>();
 		this.userMap = new HashMap<String, Integer>();
 		this.userCounts = new ArrayList<Integer>();
+		this.resourceWithTag = new HashSet<String>();
+		this.resourceWithTopic = new HashSet<String>();
 		if (stemming) {
 			this.stemmer = new englishStemmer();
 		}
@@ -98,6 +102,7 @@ public class BookmarkReader {
 				userData = new Bookmark(-1, -1, timestamp);
 				categories.clear();
 				tags.clear();
+				int tagCount =0;
 				for (String tag : lineParts[3].replace("\"", "").split(",")) {
 					if (!tag.isEmpty()) {
 						String stemmedTag = tag.toLowerCase();
@@ -106,9 +111,14 @@ public class BookmarkReader {
 							this.stemmer.stem();
 							stemmedTag = this.stemmer.getCurrent();
 						}
+						tagCount++;
 						tags.add(stemmedTag);
 					}
 				}
+				if (tagCount != 0)
+					this.resourceWithTag.add(wikiID);
+				
+				int topicCount =0;
 				if (lineParts.length > 4) { // are there categories
 					for (String cat : lineParts[4].replace("\"", "").split(",")) {
 						if (!cat.isEmpty()) {
@@ -117,9 +127,16 @@ public class BookmarkReader {
 							} else {
 								categories.add(cat.toLowerCase());
 							}
+							topicCount++;
 						}
 					}
 				}
+				
+				if (topicCount != 0)
+					this.resourceWithTopic.add(wikiID);
+				
+				
+				
 				if (lineParts.length > 5) { // is there a rating?
 					try {
 						userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
@@ -276,6 +293,14 @@ public class BookmarkReader {
 		return this.hasTimestamp;
 	}
 	
+	public HashSet<String> getTaggedResources(){
+		return this.resourceWithTag;
+	}
+	
+	public HashSet<String> getTopicResources(){
+		return this.resourceWithTopic;
+	}
+
 	public List<Integer> getUniqueUserListFromTestSet(int trainSize) {
 		Set<Integer> userList = new HashSet<Integer>();	
 		if (trainSize == -1) {
