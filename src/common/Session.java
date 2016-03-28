@@ -1,22 +1,21 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class Session {
-	private int userID;
-	private String startTime;
+	public int userID;
+	public String startTime;
 
 
 	private List<Bookmark> bookmarks;
-	private List<Integer> resources;
-	private List<Integer> tags;
-	private List<Integer> categories;
+	private HashSet<Integer> resources;
+	public int lastResource;
+	
 	
 	public Session() {
-		this.categories = new ArrayList<Integer>();
-		this.tags = new ArrayList<Integer>();
-		this.resources = new ArrayList<Integer>();
+		this.resources = new HashSet<Integer>();
 		this.bookmarks = new ArrayList<Bookmark>();
 	}
 
@@ -26,16 +25,12 @@ public class Session {
 		startTime = bm.getTimestamp();
 		bookmarks.add(bm);
 		resources.add(bm.getWikiID());
-		tags.addAll(bm.getTags());
-		categories.addAll(bm.getCategories());
+		this.lastResource = bm.getWikiID();
 	}
 
-	public List<Integer> getResources() {
+	public HashSet<Integer> getResources() {
 		return resources;
 	}
 
-	public List<Integer> getTags() {
-		return tags;
-	}
-	
+		
 }

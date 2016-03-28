@@ -93,21 +93,11 @@ public class SustainApproach {
 	    //go through all unique resources - Erstelle resourcen topic matrix
 		
 	
-		this.resTopicTrainList = Utilities.getResTopics(this.trainList);
-		this.numberOfTopics = this.reader.getCategories().size();
-		//FIXME: I there are not topics we can try using tags instead!
-		//this.resTopicTrainList = Utilities.getResMaps(this.trainList);
-		//this.numberOfTopics = this.reader.getTags().size();
-		
+	
 		
 		this.uniqueUserList = reader.getUniqueUserListFromTestSet(trainSize);
 		
-		
-		for (Map<Integer, Integer>tags : this.resTopicTrainList){
-			List<String> tagNames = Utilities.getTagNames(new ArrayList<Integer>(tags.keySet()), reader);
-			System.out.println(tagNames.toString());
-		}
-		
+	
 		//saves Cluster per user
 		this.userClusterList = new HashMap<Integer, ArrayList<GVector>>();
 		//saves lambda per user
@@ -138,7 +128,18 @@ public class SustainApproach {
 
 
 
-	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
+	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight, boolean onTags) {
+		
+		if (onTags){
+			this.resTopicTrainList = Utilities.getResMaps(this.trainList);
+			this.numberOfTopics = this.reader.getTags().size();
+		}
+		else{	
+			this.resTopicTrainList = Utilities.getResTopics(this.trainList);
+			this.numberOfTopics = this.reader.getCategories().size();
+		}
+		
+		//
 		
 		// for every user
 		for (Integer userId : this.uniqueUserList) {
