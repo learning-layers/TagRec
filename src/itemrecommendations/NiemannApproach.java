@@ -206,7 +206,7 @@ public class NiemannApproach {
 					session = new Session();
 				}
 				session.addBookmark(bm);
-				Resource r = this.sessionResourceMap.getOrDefault(bm.getWikiID(), new Resource(bm.getWikiID()));
+				Resource r = this.sessionResourceMap.getOrDefault(bm.getWikiID(), new Resource(bm.getWikiID(),this.trainSize));
 				r.addTags(bm.getTags());
 				this.sessionResourceMap.put(r.id, r);
 				

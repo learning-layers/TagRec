@@ -19,13 +19,14 @@ public class Resource {
     double log2;
     HashSet<Integer> tags;
 	
-	public Resource(int id){
+	public Resource(int id, int size){
+		int hashmapSize = (int) (size/0.75+2); 
 		this.id = id;
 		this.occurrence = 0;
-		this.cooccurrence = new HashMap<Integer, Integer>();
+		this.cooccurrence = new HashMap<Integer, Integer>(hashmapSize);
 		this.MIs = new TreeMap<Double, ArrayList<Integer>>();
 		this.log2 = Math.log( 2 );
-		this.similarResources = new HashMap<Integer, Double>();
+		this.similarResources = new HashMap<Integer, Double>(hashmapSize);
 		this.tags = new HashSet<Integer>();
 	}
 	

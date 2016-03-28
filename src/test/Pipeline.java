@@ -106,9 +106,12 @@ public class Pipeline {
 //		files.add(new ImmutablePair<String,String>("kdd", "kdd" + "/" +"kdd_sample"));	
 //		files.add(new ImmutablePair<String,String>("travelWell/resource", "travelWell/resource" + "/" +"travelWell_sample"));
 //		files.add(new ImmutablePair<String,String>("travelWell", "travelWell" + "/" +"travelWell_sample"));
-//		files.add(new ImmutablePair<String,String>("mace_core/resource", "mace_core/resource" + "/" +"mace_sample"));
+		files.add(new ImmutablePair<String,String>("mace_core/resource", "mace_core/resource" + "/" +"mace_sample"));
+	
+		getStatistics("mace_core/resource" + "/" +"mace_sample");
+		
 //		files.add(new ImmutablePair<String,String>("travelWell", "travelWell/coldstart" + "/" +"travelWell_sample"));
-	 files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
+//	 files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
 //	 files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500"));
 	//files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500_param"));
 	//files.add(new ImmutablePair<String,String>("delicious", "delicious" + "/" +"del_sample_lda_500"));
@@ -204,19 +207,19 @@ public class Pipeline {
         int sessionDuration = DAY;
         boolean recommendTags = false;
         
-        // Niemann start
-        for (Pair<String, String> file : files){
-//        	System.out.println(new LocalDateTime().toString()+" : Duration 60: start "+file.getRight()); 
-//        	startNiemannApproach(file.getLeft(), file.getRight(), 60, sampleSize, recommendTags);
+//        // Niemann start
+//        for (Pair<String, String> file : files){
+////        	System.out.println(new LocalDateTime().toString()+" : Duration 60: start "+file.getRight()); 
+////        	startNiemannApproach(file.getLeft(), file.getRight(), 60, sampleSize, recommendTags);
+////        	System.out.println(new LocalDateTime().toString()+"finished");
+////        	System.out.println(new LocalDateTime().toString()+" : Duration 120: start "+file.getRight()); 
+////        	startNiemannApproach(file.getLeft(), file.getRight(), 120, sampleSize, recommendTags);
+////        	System.out.println(new LocalDateTime().toString()+"finished");
+//        	System.out.println(new LocalDateTime().toString()+" : Duration 180: start "+file.getRight()); 
+//        	startNiemannApproach(file.getLeft(), file.getRight(), 180, sampleSize, recommendTags);
 //        	System.out.println(new LocalDateTime().toString()+"finished");
-//        	System.out.println(new LocalDateTime().toString()+" : Duration 120: start "+file.getRight()); 
-//        	startNiemannApproach(file.getLeft(), file.getRight(), 120, sampleSize, recommendTags);
-//        	System.out.println(new LocalDateTime().toString()+"finished");
-        	System.out.println(new LocalDateTime().toString()+" : Duration 180: start "+file.getRight()); 
-        	startNiemannApproach(file.getLeft(), file.getRight(), 180, sampleSize, recommendTags);
-        	System.out.println(new LocalDateTime().toString()+"finished");
-       // 	startNiemannApproach(file.getLeft(), file.getRight(), DAY, sampleSize, recommendTags);
-        }
+//       // 	startNiemannApproach(file.getLeft(), file.getRight(), DAY, sampleSize, recommendTags);
+//        }
         
         // sustain start
 //        for (int cn =0; cn<candidateNumbers.length; cn++){
@@ -657,6 +660,8 @@ public class Pipeline {
 		System.out.println("Tags: " + tags);
 		int tagAssignments = reader.getTagAssignmentsCount();
 		System.out.println("Tag-Assignments: " + tagAssignments);
+		int categories = reader.getCategories().size();
+		System.out.println("Categories: " + categories);
 	}
 
 	private static void getTrainTestSize(String sample) {
