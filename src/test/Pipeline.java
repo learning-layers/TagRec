@@ -33,7 +33,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.LocalDateTime;
+
 
 import common.CalculationType;
 import common.Features;
@@ -47,12 +47,7 @@ import processing.MalletCalculator;
 import processing.MetricsCalculator;
 import processing.RecCalculator;
 import processing.ThreeLayersCalculator;
-import engine.BaseLevelLearningEngine;
-import engine.CFResourceRecommenderEngine;
-import engine.EngineInterface;
-import engine.LanguageModelEngine;
-import engine.TagRecommenderEngine;
-import engine.ThreeLayersEngine;
+
 import file.BookmarkReader;
 import file.BookmarkSplitter;
 import file.postprocessing.CatDescFiltering;
@@ -108,7 +103,7 @@ public class Pipeline {
 //		files.add(new ImmutablePair<String,String>("travelWell", "travelWell" + "/" +"travelWell_sample"));
 		files.add(new ImmutablePair<String,String>("mace_core/resource", "mace_core/resource" + "/" +"mace_sample"));
 	
-//		getStatistics("mace_core/resource" + "/" +"mace_sample");
+//		getStatistics("aposdle" + "/" +"aposdle_sample");
 		
 //		files.add(new ImmutablePair<String,String>("travelWell", "travelWell/coldstart" + "/" +"travelWell_sample"));
 //	 files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
@@ -215,9 +210,9 @@ public class Pipeline {
 //        	System.out.println(new LocalDateTime().toString()+" : Duration 120: start "+file.getRight()); 
 //        	startNiemannApproach(file.getLeft(), file.getRight(), 120, sampleSize, recommendTags);
 //        	System.out.println(new LocalDateTime().toString()+"finished");
-        	System.out.println(new LocalDateTime().toString()+" : Duration 180: start "+file.getRight()); 
-        	startNiemannApproach(file.getLeft(), file.getRight(), 180, sampleSize, recommendTags);
-        	System.out.println(new LocalDateTime().toString()+"finished");
+//        	System.out.println(new LocalDateTime().toString()+" : Duration 180: start "+file.getRight()); 
+//        	startNiemannApproach(file.getLeft(), file.getRight(), 180, sampleSize, recommendTags);
+//        	System.out.println(new LocalDateTime().toString()+"finished");
        // 	startNiemannApproach(file.getLeft(), file.getRight(), DAY, sampleSize, recommendTags);
         }
         
@@ -664,7 +659,7 @@ public class Pipeline {
 		System.out.println("Categories: " + categories);
 		
 		System.out.println("Avg. TAGS per post : " + tagAssignments/(double)bookmarks);
-		System.out.println("Avg. Topics per resource : " + tagAssignments/(double)bookmarks);
+		System.out.println("Avg. Topics per resource : " + reader.getTopicAssignmentsCount()/(double)bookmarks);
 		System.out.println("Avg. resources per user : " + bookmarks/(double)users);
 		System.out.println("Avg. posts per resource : " + bookmarks/(double)resources);
 		

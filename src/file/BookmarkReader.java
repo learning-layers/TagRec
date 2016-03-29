@@ -54,14 +54,15 @@ public class BookmarkReader {
 	private englishStemmer stemmer;
 	private HashSet<String> resourceWithTag;
 	private HashSet<String> resourceWithTopic;
-	
+
+
 	private boolean hasTimestamp = false;
  	
 	public BookmarkReader(int countLimit, boolean stemming) {
 		this.countLimit = countLimit;
 		this.userLines = new ArrayList<Bookmark>();
 		this.categories = new ArrayList<String>();
-		
+			
 		this.tags = new ArrayList<String>();
 		this.tagMap = new HashMap<String, Integer>();
 		this.tagCounts = new ArrayList<Integer>();
@@ -240,6 +241,17 @@ public class BookmarkReader {
 		for (Bookmark data : this.userLines) {
 			if (this.countLimit == 0 || count++ < this.countLimit) {
 				sum += data.getTags().size();
+			}
+		}
+		return sum;
+	}
+	
+	public int getTopicAssignmentsCount() {
+		int sum = 0;
+		int count = 0;
+		for (Bookmark data : this.userLines) {
+			if (this.countLimit == 0 || count++ < this.countLimit) {
+				sum += data.getCategories().size();
 			}
 		}
 		return sum;
