@@ -101,15 +101,14 @@ public class Pipeline {
 //		files.add(new ImmutablePair<String,String>("kdd", "kdd" + "/" +"kdd_sample"));	
 //		files.add(new ImmutablePair<String,String>("travelWell/resource", "travelWell/resource" + "/" +"travelWell_sample"));
 //		files.add(new ImmutablePair<String,String>("travelWell", "travelWell" + "/" +"travelWell_sample"));
-		files.add(new ImmutablePair<String,String>("mace_core/resource", "mace_core/resource" + "/" +"mace_sample"));
-	
-//		getStatistics("aposdle" + "/" +"aposdle_sample");
+//		files.add(new ImmutablePair<String,String>("mace_core/resource", "mace_core/resource" + "/" +"mace_sample"));
 		
+	
 //		files.add(new ImmutablePair<String,String>("travelWell", "travelWell/coldstart" + "/" +"travelWell_sample"));
 //	 files.add(new ImmutablePair<String,String>("bib_core", "bib_core" + "/" +"bib_sample_lda_500"));
 //	 files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500"));
 	//files.add(new ImmutablePair<String,String>("cul_core", "cul_core" + "/" +"cul_sample_lda_500_param"));
-	//files.add(new ImmutablePair<String,String>("delicious", "delicious" + "/" +"del_sample_lda_500"));
+//	files.add(new ImmutablePair<String,String>("delicious", "delicious" + "/" +"del_sample_lda_500"));
 	//	files.add(new ImmutablePair<String,String>("delicious", "delicious" + "/" +"hetrec_sample_1_lda_24_res"));
 	//	files.add(new ImmutablePair<String,String>("ml_core", "ml_core" + "/" +"ml_sample_lda_500"));
 	//	files.add(new ImmutablePair<String,String>("lastFm", "lastFm"+ "/" +"lastfm_sample_lda_500"));
@@ -135,11 +134,6 @@ public class Pipeline {
 		
 		
 		
-		// initially beta was set to 1
-		//beta from paper 6.396
-		//double beta = 1;
-		double beta =6.396;
-		double [] betas = {6.396};
 		// initially r was set to 2
 		
 		// r original paper = 9.998; 
@@ -167,8 +161,9 @@ public class Pipeline {
 		//double [] learning_rates={1, 0.75, 0.5, 0.25, 0.1, 0.096, 0.075, 0.05, 0.025, 0.01, 0.0075, 0.005, 0.0025, 0.001, 0.00075};
 		double [] learning_rates={0.096};
 		//double[] gamma = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
-		double[] gamma = {0.0};
-		double learning_rate=0.1;
+		double[] gammas = {0.0};
+		double gamma = 0.0;
+		double learning_rate=0.096;
 		//double learning_rate=0.0936;
 		// tau according to paper = 0.5
 		double tau_cluster=0.5;
@@ -191,19 +186,25 @@ public class Pipeline {
         // E2: int []trainingRecencies = {0, 20, 25, 30};
         int []trainingRecencies = {0};
                
+        
+        //alpha determines the influence of SUSTAIN and CFu. alpha=1 means pure SUSTAIN. alpha =0 means pure CFu 
         //double [] alpha = {0};
         //double [] alpha = {0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
-        double [] alpha = {0.5,1};
+        double [] alphas = {0.5};
+        double alpha = 0.5;
         boolean onTags = false;
         
         
         // Niemann Approach parameter
-        DAY = 0;
-        int sessionDuration = DAY;
-        boolean recommendTags = false;
+  //      DAY = 0;
+  //      int sessionDuration = DAY;
+  //      boolean recommendTags = false;
+        
+ //       Pipeline.calculateTELDatasetStats();
+        
         
         // Niemann start
-        for (Pair<String, String> file : files){
+//        for (Pair<String, String> file : files){
 //        	System.out.println(new LocalDateTime().toString()+" : Duration 60: start "+file.getRight()); 
 //        	startNiemannApproach(file.getLeft(), file.getRight(), 60, sampleSize, recommendTags);
 //        	System.out.println(new LocalDateTime().toString()+"finished");
@@ -214,32 +215,30 @@ public class Pipeline {
 //        	startNiemannApproach(file.getLeft(), file.getRight(), 180, sampleSize, recommendTags);
 //        	System.out.println(new LocalDateTime().toString()+"finished");
        // 	startNiemannApproach(file.getLeft(), file.getRight(), DAY, sampleSize, recommendTags);
-        }
+//        }
         
         // sustain start
-//        for (int cn =0; cn<candidateNumbers.length; cn++){
-//        	for (int tr=0; tr<trainingRecencies.length; tr++){
-//        		for (Pair<String, String> file : files){
-//        			for (int rc =0; rc<rs.length; rc++){
-//        				for (int lrc = 0; lrc<learning_rates.length; lrc++){
-//        					for (int cfc = 0; cfc<alpha.length; cfc++){
-//        						for (int tauc = 0; tauc<taus_cluster.length; tauc++){
-//        							for (int b = 0; b<betas.length; b++){
-//        								for (int gc = 0; gc<gamma.length; gc++){
-//        								startSustainApproach(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], gamma[gc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, alpha[cfc], onTags);
-//        								System.out.println("r "+rs[rc]+"lr "+learning_rates[lrc]+"tau "+taus_cluster[tauc]);
-//        						//		startParameterEstimation(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], gamma[gc],trainingRecencies[tr], candidateNumbers[cn], sampleSize, alpha[cfc]);
-//          						
-//        								}
-//        							}	
-//        						}	
-//        					}
-//        				}
-//        			}	
-//        		}	
-//           	}
-//        }
-        //startSustainApproach(dir, path, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize);
+    /*    for (int cn =0; cn<candidateNumbers.length; cn++){
+        	for (int tr=0; tr<trainingRecencies.length; tr++){
+        		for (Pair<String, String> file : files){
+        			for (int rc =0; rc<rs.length; rc++){
+        				for (int lrc = 0; lrc<learning_rates.length; lrc++){
+        					for (int cfc = 0; cfc<alphas.length; cfc++){
+        						for (int tauc = 0; tauc<taus_cluster.length; tauc++){
+    								for (int gc = 0; gc<gammas.length; gc++){
+    								startSustainApproach(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], learning_rates[lrc], gammas[gc], trainingRecencies[tr], candidateNumbers[cn], sampleSize, alphas[cfc], onTags);
+    						//		System.out.println("r "+rs[rc]+"lr "+learning_rates[lrc]+"tau "+taus_cluster[tauc]);
+    						//		startParameterEstimation(file.getLeft(), file.getRight(), rs[rc], taus_cluster[tauc], betas[b], learning_rates[lrc], gammas[gc],trainingRecencies[tr], candidateNumbers[cn], sampleSize, alphas[cfc]);
+      						
+    								}
+        						}	
+        					}
+        				}
+        			}	
+        		}	
+           	}
+        }*/
+        //startSustainApproach(dir, path, r, tau_cluster, learning_rate, trainingRecency, candidateNumber, sampleSize);
 		//evaluate(dir, path, "sustain", null, false);
 		
 		
@@ -408,11 +407,11 @@ public class Pipeline {
 		}else if (op.equals("sustain")) {
 			if (args.length>3)
 				trainingRecency = Integer.valueOf(args[3]);
-			startSustainApproach(sampleDir, samplePath, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, 0.4);
+			startSustainApproach(sampleDir, samplePath, r, tau_cluster, learning_rate, gamma, trainingRecency, candidateNumber, sampleSize, 1, false);
 		}else if (op.equals("sustainCF")) {
 			if (args.length>3)
 				trainingRecency = Integer.valueOf(args[3]);
-			startSustainApproach(sampleDir, samplePath, r, tau_cluster, beta, learning_rate, trainingRecency, candidateNumber, sampleSize, 0.4);
+			startSustainApproach(sampleDir, samplePath, r, tau_cluster, learning_rate, gamma, trainingRecency, candidateNumber, sampleSize, 0.5, false);
 		}}
 //	}
 
@@ -425,6 +424,21 @@ public class Pipeline {
 	}
 	
 	
+	
+	private static void calculateTELDatasetStats(){
+		System.out.println("-----------------------	BIB -------------------------------------");
+		getStatistics("bib_core" + "/" +"bib_sample_lda_500");
+		System.out.println("-----------------------	CULike -------------------------------------");
+		getStatistics("cul_core" + "/" +"cul_sample_lda_500");
+		System.out.println("-----------------------	KDD -------------------------------------");
+		getStatistics("kdd" + "/" +"kdd_sample");
+		System.out.println("-----------------------	TravelWell -------------------------------------");
+		getStatistics("travelWell/resource" + "/" +"travelWell_sample");
+		System.out.println("-----------------------	MACE -------------------------------------");
+		getStatistics("mace_core/resource" + "/" +"mace_sample");
+		System.out.println("-----------------------	Aposdel -------------------------------------");
+		getStatistics("aposdle" + "/" +"aposdle_sample");
+	}
 	
 	
 	private static void startActCalculator(String sampleDir, String sampleName,
@@ -662,6 +676,17 @@ public class Pipeline {
 		System.out.println("Avg. Topics per resource : " + reader.getTopicAssignmentsCount()/(double)bookmarks);
 		System.out.println("Avg. resources per user : " + bookmarks/(double)users);
 		System.out.println("Avg. posts per resource : " + bookmarks/(double)resources);
+		System.out.println("Avg. topics per user : " + reader.getAverageTopicsPerUser());
+		System.out.println("Avg. user per topics : " + reader.getAverageUserPerTopic());
+		System.out.println("Avg. tags per user : " + reader.getAverageTagsPerUser());
+		System.out.println("Avg. users per tag : " + reader.getAverageUserPerTag());
+		System.out.println("Avg. tags per resource : " + reader.getAverageTagsPerResource());
+		System.out.println("Avg. resources per tag : " + reader.getAverageResourcePerTag());
+		
+		
+		
+		//Topics per user
+		//User per Topics
 		
 		int noneTaggedResources = resources - reader.getTaggedResources().size();
 		int noneTopicResources = resources - reader.getTopicResources().size(); 
@@ -758,11 +783,11 @@ public class Pipeline {
 		writeMetricsForResources(sampleDir, sampleName, suffix + "5", size, 20, null, reader);
 	}
 	
-	private static void startParameterEstimation(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight, boolean onTags) {
+	private static void startParameterEstimation(String sampleDir, String sampleName, double r, double tau, double learning_rate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight, boolean onTags) {
 		BookmarkReader reader = null;
 		getTrainTestSize(sampleName);
 		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
-		reader = sustain.predictResources(r, tau, beta, learning_rate, gamma,trainingRecency, candidateNumber, sampleSize, cfWeight, onTags);
+		reader = sustain.predictResources(r, tau, learning_rate, gamma,trainingRecency, candidateNumber, sampleSize, cfWeight, onTags);
 				
 		String dir = sampleDir + "/" + "sust_param" + "_" + "metrics";
 		String inputFile = sampleName + "_" + "sustain";
@@ -771,12 +796,12 @@ public class Pipeline {
 	}
 	
 	
-	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double alpha, boolean onTags) {
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double learning_rate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double alpha, boolean onTags) {
 		BookmarkReader reader = null;
 		getTrainTestSize(sampleName);
 		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);
 		//for (int i = 1; i <= size; i++) {
-		reader = sustain.predictResources(r, tau, beta, learning_rate, gamma,trainingRecency, candidateNumber, sampleSize, alpha, onTags);
+		reader = sustain.predictResources(r, tau, learning_rate, gamma,trainingRecency, candidateNumber, sampleSize, alpha, onTags);
 		//}
 		
 		// todo check whether size is needed as a parameter
@@ -804,7 +829,7 @@ public class Pipeline {
 	}
 	
 	//FIXME: uncomment predictResources
-	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double beta, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
+	private static void startSustainApproach(String sampleDir, String sampleName, double r, double tau, double learning_rate, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight) {
 		BookmarkReader reader = null;
 		getTrainTestSize(sampleName);
 		SustainApproach sustain = new SustainApproach(sampleName, TRAIN_SIZE);

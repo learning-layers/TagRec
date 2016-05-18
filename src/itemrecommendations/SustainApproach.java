@@ -128,7 +128,7 @@ public class SustainApproach {
 
 
 
-	public BookmarkReader predictResources(double r, double tau, double beta, double learningRate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight, boolean onTags) {
+	public BookmarkReader predictResources(double r, double tau, double learningRate, double gamma, int trainingRecency, int candidateNumber, int sampleSize, double cfWeight, boolean onTags) {
 		
 		if (onTags){
 			this.resTopicTrainList = Utilities.getResMaps(this.trainList);
@@ -139,9 +139,9 @@ public class SustainApproach {
 			this.numberOfTopics = this.reader.getCategories().size();
 		}
 		
-		//
 		
-		// for every user
+		
+		// training phase
 		for (Integer userId : this.uniqueUserList) {
 			//TODO: pass the last 5 items
 			List<Integer> resourceList = Bookmark.getResourcesFromUser(this.trainList, userId);
@@ -149,21 +149,21 @@ public class SustainApproach {
 		    	resourceList = resourceList.subList(resourceList.size()-trainingRecency, resourceList.size()); 
 			
 		    this.resourceListPerUser.put(userId, resourceList);
-		    train(userId, resourceList, r, tau, learningRate, beta, gamma);
+		    train(userId, resourceList, r, tau, learningRate, gamma);
 		}
 		
 		
 		this.writeUserLambdas(this.sampleName);
 		this.writeUserStats(this.sampleName);
 		
-		
+		// prediction phase
 		LinkedList<int[]> sortedResourcesPerUser = new LinkedList<int[]>();
 		for (Integer userId : this.uniqueUserList) {
 //			if (userId%100 ==0)
 //				System.out.println("user "+userId+" of "+this.uniqueUserList.size());
 			//FIXME: change back learningRate
 			//sortedResourcesPerUser.add(predict(userId,  r, tau, learningRate, beta, candidateNumber, sampleSize, cfWeight));
-			sortedResourcesPerUser.add(predict(userId,  r, tau, this.userLearningRateList.get(userId), beta, candidateNumber, sampleSize, cfWeight));
+			sortedResourcesPerUser.add(predict(userId,  r, candidateNumber, sampleSize, cfWeight));
 		}
 		
 		PredictionFileWriter writer = new PredictionFileWriter(reader, sortedResourcesPerUser);
@@ -267,7 +267,7 @@ public class SustainApproach {
 }
 	
 	
-	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double beta, double gamma){
+	private void train(int userId, List<Integer> list, double r, double tau, double learningRate, double gamma){
 		ArrayList<GVector> clusterList = new ArrayList<GVector>();
 		
 		double[] array = new double[this.numberOfTopics];
@@ -423,52 +423,35 @@ public class SustainApproach {
 	}
 	
 	
-	private int[] predict(int userId, double r, double tau, double learningRate, double beta, int candidateNumber, int sampleSize, double alpha){
+	private int[] predict(int userId, double r, int candidateNumber, int sampleSize, double alpha){
 		Map<Integer, Double> resourceActivationMap = new HashMap<Integer, Double>();
 
 		
-//		if (candidateNumber>0){
-			Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
-			//TreeMap<Integer, Double> candidateSet = this.calculateCandidateSet(userId);
-			Map<Integer, Double> CFValues = new HashMap<Integer, Double>();
-			
-			int count = 0;
-			
-			for (Map.Entry<Integer, Double> resource : candidateSet.entrySet()){
-				if (candidateNumber>0 && count == candidateNumber)
-					break;
-				double resourceActivation = this.calculateResourceActivations(userId, resource.getKey(), beta, r);
-				resourceActivationMap.put(resource.getKey(), resourceActivation);
-				CFValues.put(resource.getKey(), resource.getValue());
-				count++;
-			}
-			
-			this.calculateNormalizedValues(resourceActivationMap);
-			this.calculateNormalizedValues(CFValues);
-			
-			for ( Entry<Integer, Double> entry : resourceActivationMap.entrySet()){
-				double valueSustain = entry.getValue();
-				double valueCF = CFValues.get(entry.getKey());
-				double activation = entry.getValue()*alpha+CFValues.get(entry.getKey())* (1-alpha);	
-				resourceActivationMap.put(entry.getKey(), activation);
-	//		}
-					
+		Map<Integer, Double> candidateSet = this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
+		//TreeMap<Integer, Double> candidateSet = this.calculateCandidateSet(userId);
+		Map<Integer, Double> CFValues = new HashMap<Integer, Double>();
+		
+		int count = 0;
+		
+		for (Map.Entry<Integer, Double> resource : candidateSet.entrySet()){
+			if (candidateNumber>0 && count == candidateNumber)
+				break;
+			double resourceActivation = this.calculateResourceActivations(userId, resource.getKey(), r);
+			resourceActivationMap.put(resource.getKey(), resourceActivation);
+			CFValues.put(resource.getKey(), resource.getValue());
+			count++;
 		}
-//		else{
-//			TreeMap<Integer, Double> candidateSet = (TreeMap<Integer, Double>) this.rankedResourseCalculator.getRankedResourcesList(userId, true, false, false);
-//		//for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
-//			for (Map.Entry<Integer, Double> resource : candidateSet.entrySet()){
-//				if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
-//					continue;
-//				double resourceActivation = this.calculateResourceActivations(userId, resource.getKey(), beta, r);
-//				
-//				double activation = resourceActivation*(alpha);
-//				activation+=resource.getValue()*(1-alpha);
-//				
-//				resourceActivationMap.put(resource.getKey(), activation);
-//			}
-//		
-//		}	
+		
+		this.calculateNormalizedValues(resourceActivationMap);
+		this.calculateNormalizedValues(CFValues);
+		
+		for ( Entry<Integer, Double> entry : resourceActivationMap.entrySet()){
+			double valueSustain = entry.getValue();
+			double valueCF = CFValues.get(entry.getKey());
+			double activation = valueSustain * alpha + valueCF * (1 - alpha);	
+			resourceActivationMap.put(entry.getKey(), activation);
+		}
+
 			
 		TreeMap<Integer, Double> sortedResourceActivationMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resourceActivationMap));
 		sortedResourceActivationMap.putAll(resourceActivationMap);
@@ -483,20 +466,6 @@ public class SustainApproach {
 		}
 		return sortedResources; 
 	}
-	
-	
-//	
-//	private Map<Integer, Double> calculateNormalizedValues(Map<Integer, Double> values) {
-//		//normalize
-//		double sum =0;
-//		for (Map.Entry<Integer, Double> entry : values.entrySet()) {
-//			 sum += entry.getValue();
-//		}
-//		 for (Map.Entry<Integer, Double> entry : values.entrySet()) {
-//			entry.setValue(1000/sum *entry.getValue());
-//		}
-//		return values;
-//	}
 
 	private void calculateNormalizedValues(Map<Integer, Double> values) {
 		//normalize
@@ -507,13 +476,9 @@ public class SustainApproach {
 		 for (Map.Entry<Integer, Double> entry : values.entrySet()) {
 			entry.setValue(entry.getValue()/sum);
 		}
-		 sum=0;
-		 for (Map.Entry<Integer, Double> entry : values.entrySet()) {
-			 sum += entry.getValue();
-		}
 	}
 	
-	private double calculateResourceActivations(int userId, int resource, double beta, double r){
+	private double calculateResourceActivations(int userId, int resource, double r){
 	
 		Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
 		
@@ -539,32 +504,7 @@ public class SustainApproach {
 		return maxActivation;
 		//return totalActivation;
 	}
-	
-	private TreeMap<Integer, Double> calculateCandidateSet(int userId){
-		GVector lastCluster = (this.userClusterList.get(userId)).get(this.userClusterList.get(userId).size()-1);
-		HashMap<Integer, Double> topicMap = new HashMap<Integer, Double>();
-		HashMap<Integer, Double> simMap = new HashMap<Integer, Double>();
-		for (int c=0; c<lastCluster.getSize(); c++){
-			if (lastCluster.getElement(c)>0)
-				topicMap.put(c, lastCluster.getElement(c));
-		}
-			
-		for (int resource =0; resource< this.resTopicTrainList.size(); resource++){
-			if (Bookmark.getResourcesFromUser(this.trainList, userId).contains(resource))
-				continue;
-		   /// are the topics sorted
-			Set<Integer> topics = this.resTopicTrainList.get(resource).keySet();
-			HashMap<Integer, Double> resourceMap = new HashMap<Integer, Double>();
-			
-			for (Integer t : topics)
-				resourceMap.put(t, 1.0);
-			
-			simMap.put(resource, Utilities.getCosineFloatSim(topicMap, resourceMap));
-		}
-		TreeMap<Integer, Double> sortedSimMap = new TreeMap<Integer, Double>(new DoubleMapComparator(simMap));
-		sortedSimMap.putAll(simMap);
-		return sortedSimMap;
-	}
+
 }
 
 

@@ -55,7 +55,6 @@ public class BookmarkReader {
 	private HashSet<String> resourceWithTag;
 	private HashSet<String> resourceWithTopic;
 
-
 	private boolean hasTimestamp = false;
  	
 	public BookmarkReader(int countLimit, boolean stemming) {
@@ -74,6 +73,8 @@ public class BookmarkReader {
 		this.userCounts = new ArrayList<Integer>();
 		this.resourceWithTag = new HashSet<String>();
 		this.resourceWithTopic = new HashSet<String>();
+	
+		
 		if (stemming) {
 			this.stemmer = new englishStemmer();
 		}
@@ -135,8 +136,7 @@ public class BookmarkReader {
 				
 				if (topicCount != 0)
 					this.resourceWithTopic.add(wikiID);
-				
-				
+								
 				
 				if (lineParts.length > 5) { // is there a rating?
 					try {
@@ -256,6 +256,129 @@ public class BookmarkReader {
 		}
 		return sum;
 	}
+	
+	public double getAverageTopicsPerUser() {
+	    Map<Integer, HashSet<Integer>> userTopicCount = new HashMap<Integer, HashSet<Integer>>();
+	    double sumTopics = 0.0;
+	        
+		for (Bookmark data : this.userLines) {
+			HashSet<Integer> topics = userTopicCount.getOrDefault(data.getUserID(), new HashSet<Integer>());
+			topics.addAll(data.getCategories());
+			userTopicCount.put(data.getUserID(),topics);
+		}
+		
+		for (HashSet<Integer> topics : userTopicCount.values()){
+			sumTopics += topics.size();
+		}
+				
+		return sumTopics/userTopicCount.keySet().size();
+	}
+	
+	public double getAverageTagsPerUser() {
+	    Map<Integer, HashSet<Integer>> userTagCount = new HashMap<Integer, HashSet<Integer>>();
+	    double sumTopics = 0.0;
+	        
+		for (Bookmark data : this.userLines) {
+			HashSet<Integer> tags = userTagCount.getOrDefault(data.getUserID(), new HashSet<Integer>());
+			tags.addAll(data.getTags());
+			userTagCount.put(data.getUserID(),tags);
+		}
+		
+		for (HashSet<Integer> tags : userTagCount.values()){
+			sumTopics += tags.size();
+		}
+				
+		return sumTopics/userTagCount.keySet().size();
+	}
+	
+
+	public double getAverageResourcePerTag() {
+	    Map<Integer, HashSet<Integer>> tagResourceCount = new HashMap<Integer, HashSet<Integer>>();;
+	    double sumResources = 0.0;
+        
+	 		for (Bookmark data : this.userLines) {
+	 			for (int tags : data.getTags()){
+	 				HashSet<Integer> resources = tagResourceCount.getOrDefault(tags, new HashSet<Integer>());
+	 				resources.add(data.getWikiID());
+	 				tagResourceCount.put(tags,resources);
+	 			}
+	 		}
+	 		
+	 		for (HashSet<Integer> resources : tagResourceCount.values()){
+	 			sumResources += resources.size();
+	 		}
+	 				
+	 		return sumResources/tagResourceCount.keySet().size();
+
+	}
+	
+
+
+	public double getAverageTagsPerResource() {
+	    Map<Integer, HashSet<Integer>> tagPerResource = new HashMap<Integer, HashSet<Integer>>();
+	    double sumTags = 0.0;
+	        
+		for (Bookmark data : this.userLines) {
+			HashSet<Integer> tags = tagPerResource.getOrDefault(data.getWikiID(), new HashSet<Integer>());
+			tags.addAll(data.getTags());
+			tagPerResource.put(data.getWikiID(),tags);
+		}
+		
+		for (HashSet<Integer> tags : tagPerResource.values()){
+			sumTags += tags.size();
+		}
+				
+		return sumTags/tagPerResource.keySet().size();
+	}
+
+	
+	
+	public double getAverageUserPerTopic() {
+	    
+	    Map<Integer, HashSet<Integer>> topicUserCount = new HashMap<Integer, HashSet<Integer>>();;
+	    double sumUsers = 0.0;
+        
+	 		for (Bookmark data : this.userLines) {
+	 			for (int cat : data.getCategories()){
+	 				HashSet<Integer> users = topicUserCount.getOrDefault(cat, new HashSet<Integer>());
+	 				users.add(data.getUserID());
+	 				topicUserCount.put(cat,users);
+	 			}
+	 		}
+	 		
+	 		for (HashSet<Integer> users : topicUserCount.values()){
+	 			sumUsers += users.size();
+	 		}
+	 				
+	 		return sumUsers/topicUserCount.keySet().size();
+
+	}
+	
+	
+	
+	
+	
+	public double getAverageUserPerTag() {
+	    Map<Integer, HashSet<Integer>> tagUserCount = new HashMap<Integer, HashSet<Integer>>();;
+	    double sumUsers = 0.0;
+        
+	 		for (Bookmark data : this.userLines) {
+	 			for (int tags : data.getTags()){
+	 				HashSet<Integer> users = tagUserCount.getOrDefault(tags, new HashSet<Integer>());
+	 				users.add(data.getUserID());
+	 				tagUserCount.put(tags,users);
+	 			}
+	 		}
+	 		
+	 		for (HashSet<Integer> users : tagUserCount.values()){
+	 			sumUsers += users.size();
+	 		}
+	 				
+	 		return sumUsers/tagUserCount.keySet().size();
+
+	}
+	
+	
 	
 	public List<Bookmark> getBookmarks() {
 		return this.userLines;
