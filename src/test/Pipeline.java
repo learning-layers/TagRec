@@ -128,7 +128,8 @@ public class Pipeline {
 		//startAllTagRecommenderApproaches(dir, path, true);
 		//getTrainTestStatistics(path);
 		//BookmarkSplitter.splitSample(dir + "/mace", dir + "/mace_sample", 1, 20, false, false, true, null);
-		//try { getStatistics("sss_recomm", false); } catch (Exception e) { e.printStackTrace(); }
+		//getTrainTestStatistics("del_core/resource/del_sample");
+		//try { getStatistics("ml_core/000_dataset_dump/ml_core1", false); } catch (Exception e) { e.printStackTrace(); }
 		//BookmarkSplitter.drawUserPercentageSample("bib_core/vedran/bib_bibtex", 5);
 		//createLdaSamples("ml_core/resource/ml_sample", 1, 500, true, true);
 		
