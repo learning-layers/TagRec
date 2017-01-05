@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +36,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import common.Bookmark;
-import file.stemming.englishStemmer;
+import file.stemming.EnglishStemmer;
 
 public class BookmarkReader {
 	
@@ -53,9 +54,11 @@ public class BookmarkReader {
 	private List<String> users;
 	private Map<String, Integer> userMap;
 	private List<Integer> userCounts;
-	private englishStemmer stemmer;
+	private EnglishStemmer stemmer;
 	
 	private boolean hasTimestamp = false;
+	private long firstTimestamp = Long.MAX_VALUE;
+	private long lastTimestamp = Long.MIN_VALUE;
 	
 	private Set<String> userResPairs = new HashSet<String>();
  	
@@ -75,7 +78,7 @@ public class BookmarkReader {
 		this.userMap = new HashMap<String, Integer>();
 		this.userCounts = new ArrayList<Integer>();
 		if (stemming) {
-			this.stemmer = new englishStemmer();
+			this.stemmer = new EnglishStemmer();
 		}
 	}
 	
@@ -142,6 +145,7 @@ public class BookmarkReader {
 						}
 					}
 				}
+				
 				//if (lineParts.length > 5) { // is there a rating?
 				//	try {
 				//		userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
@@ -150,11 +154,11 @@ public class BookmarkReader {
 				
 				// TODO ----------------------
 				// extend common/Bookmark class with fields for title (= lineParts[6]) and description (= lineParts[7])
-				if (lineParts.length > 6) { // is there a rating?
-					try {
-						userData.setTitle(lineParts[5].replace("\"", ""));
-					} catch (Exception e) { /* do nothing */ }
-				}
+				//if (lineParts.length > 6) { // is there a rating?
+				//	try {
+				//		userData.setTitle(lineParts[6].replace("\"", ""));
+				//	} catch (Exception e) { /* do nothing */ }
+				//}
 			}
 			processUserData(userID, userData, tags, categories, resID); // last user
 			br.close();
@@ -172,6 +176,12 @@ public class BookmarkReader {
 				if (!StringUtils.isNumeric(userData.getTimestamp())) {
 					System.out.println("Invalid timestamp");
 					return;
+				}
+				Long timestamp = userData.getTimestampAsLong();
+				if (timestamp < this.firstTimestamp) {
+					this.firstTimestamp = timestamp;
+				} else if (timestamp > this.lastTimestamp) {
+					this.lastTimestamp = timestamp;
 				}
 				this.hasTimestamp = true;
 			}
@@ -301,6 +311,10 @@ public class BookmarkReader {
 		return this.resources;
 	}
 	
+	public Map<String, Integer> getResourceMap() {
+		return this.resourceMap;
+	}
+	
 	public List<Integer> getResourceCounts() {
 		return this.resourceCounts;
 	}
@@ -323,6 +337,14 @@ public class BookmarkReader {
 	
 	public boolean hasTimestamp() {
 		return this.hasTimestamp;
+	}
+	
+	public Date getFirstTimestamp() {
+		return new Date(this.firstTimestamp * 1000);
+	}
+	
+	public Date getLastTimestamp() {
+		return new Date(this.lastTimestamp * 1000);
 	}
 	
 	public List<Integer> getUniqueUserListFromTestSet(int trainSize) {

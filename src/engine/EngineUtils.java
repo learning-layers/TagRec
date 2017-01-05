@@ -40,6 +40,7 @@ public class EngineUtils {
 	public static BookmarkReader getSortedBookmarkReader(String path, String filename) {
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(path, filename);		
+		
 		Collections.sort(reader.getBookmarks());
 		
 		String sortedFile = filename + "_sorted";
@@ -60,6 +61,7 @@ public class EngineUtils {
 		} catch (Exception e) {
 			System.out.println("Problem while deleting sorted temp-file");
 		}
+		
 		return reader;
 	}
 	

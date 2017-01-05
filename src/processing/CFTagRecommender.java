@@ -59,7 +59,7 @@ public class CFTagRecommender {
 				if (i++ < MAX_NEIGHBORS) {
 					//neighborMaps.add(this.userMaps.get(entry.getKey()));
 					List<Integer> tags = Bookmark.getBookmark(this.trainList, entry.getKey(), resID).getTags();
-					double bm25 = this.beta * entry.getValue();
+					double bm25 = /*this.beta **/ entry.getValue();
 					// add tags to resultMap
 					for (int tag : tags) {
 						Double val = resultMap.get(tag);
@@ -78,7 +78,7 @@ public class CFTagRecommender {
 			for (Map.Entry<Integer, Double> entry : resources.entrySet()) {
 				if (i++ < MAX_NEIGHBORS) {
 					List<Integer> tags = Bookmark.getResData(this.trainList, userID, entry.getKey()).getTags();
-					double bm25 = (1.0 - this.beta) * entry.getValue();
+					double bm25 = /*(1.0 - this.beta) **/ entry.getValue();
 					// add tags to resultMap
 					for (int tag : tags) {
 						Double val = resultMap.get(tag);
@@ -109,7 +109,6 @@ public class CFTagRecommender {
 	
 	private Map<Integer, Double> getNeighbors(int userID, int resID) {
 		Map<Integer, Double> neighbors = new LinkedHashMap<Integer, Double>();
-		//List<Map<Integer, Integer>> neighborMaps = new ArrayList<Map<Integer, Integer>>();
 		// get all users that have tagged the resource
 		for (Bookmark data : this.trainList) {
 			if (data.getUserID() != userID) {
@@ -120,24 +119,21 @@ public class CFTagRecommender {
 				}
 			}
 		}
-		//boolean allUsers = false;
 		// if list is empty, use all users		
 		if (neighbors.size() == 0) {
-			//allUsers = true;
 			for (Bookmark data : this.trainList) {
 				neighbors.put(data.getUserID(), 0.0);
 			}
 		}
 		
-		//for (int id : neighbors.keySet()) {
-		//	neighborMaps.add(this.userMaps.get(id));
-		//}
+		//List<Map<Integer, Double>> tfidfMaps = getTFIDFMaps(this.userMaps);
 		if (userID < this.userMaps.size()) {
 			Map<Integer, Integer> targetMap = this.userMaps.get(userID);
-			//double lAverage = getLAverage(neighborMaps);
+			//Map<Integer, Double> targetMap = tfidfMaps.get(userID);
+			
 			for (Map.Entry<Integer, Double> entry : neighbors.entrySet()) {
-				double bm25Value = /*allUsers ? */Utilities.getJaccardSim(targetMap, this.userMaps.get(entry.getKey()));// :
-				//	getBM25Value(neighborMaps, lAverage, targetMap, this.userMaps.get(entry.getKey()));
+				double bm25Value = Utilities.getCosineSim(targetMap, this.userMaps.get(entry.getKey()));
+				//double bm25Value = Utilities.getCosineFloatSim(targetMap, tfidfMaps.get(entry.getKey()));
 				entry.setValue(bm25Value);
 			}
 			
@@ -182,6 +178,8 @@ public class CFTagRecommender {
 		return resources;
 	}
 	
+	
+	
 	public static double getBM25Value(List<Map<Integer, Integer>> neighborMaps, double lAverage, Map<Integer, Integer> targetMap, Map<Integer, Integer> nMap) {
 		double bm25Sum = 0.0;	
 		for (Map.Entry<Integer, Integer> targetVal : targetMap.entrySet()) {
@@ -213,6 +211,26 @@ public class CFTagRecommender {
 		}
 		
 		return count;
+	}
+	
+	public static List<Map<Integer, Double>> getTFIDFMaps(List<Map<Integer, Integer>> neighborMaps) {
+		List<Map<Integer, Double>> targetMaps = new ArrayList<Map<Integer, Double>>();
+		for (Map<Integer, Integer> srcMap : neighborMaps) {
+			Map<Integer, Double> targetMap = new LinkedHashMap<Integer, Double>();
+			for (Map.Entry<Integer, Integer> srcEntry : srcMap.entrySet()) {
+				targetMap.put(srcEntry.getKey(), srcEntry.getValue() * getIDF(srcEntry.getKey(), neighborMaps));
+			}
+			targetMaps.add(targetMap);
+		}
+		return targetMaps;
+	}
+	
+	public static Map<Integer, Double> getTFIDFMap(Map<Integer, Integer> srcMap, List<Map<Integer, Integer>> neighborMaps) {
+		Map<Integer, Double> targetMap = new LinkedHashMap<Integer, Double>();
+		for (Map.Entry<Integer, Integer> srcEntry : srcMap.entrySet()) {
+			targetMap.put(srcEntry.getKey(), srcEntry.getValue() * getIDF(srcEntry.getKey(), neighborMaps));
+		}
+		return targetMap;
 	}
 	
 	public static double getIDF(int tagID, List<Map<Integer, Integer>> neighborMaps) {

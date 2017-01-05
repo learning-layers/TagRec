@@ -54,11 +54,17 @@ public class PredictionFileWriter {
 				int j = 0;
 				String resultString = "";
 				int[] userResults = this.results.get(i);
+				if(userResults == null){
+				    continue;
+				}
 				Bookmark userData = this.reader.getTestLines().get(i);
-				List<Integer> userCats = userData.getTags();
+				if (userResults == null || userData == null) {
+					continue;
+				}
+				List<Integer> userTags = userData.getTags();
 				
 				resultString += (userData.getUserID() + (userData.getResourceID() == -1 ? "" : "-" + userData.getResourceID()) + "|");
-				for (int c : userCats) {
+				for (int c : userTags) {
 					//if (j++ < OUTPUT_LIMIT) {
 						//resultString += (categories.get(c) + ", ");
 						resultString += (c + ", ");
@@ -66,7 +72,7 @@ public class PredictionFileWriter {
 					//	break;
 					//}
 				}
-				if (userCats.size() > 0) {
+				if (userTags.size() > 0) {
 					resultString = resultString.substring(0, resultString.length() - 2);
 				}
 				resultString += "|";
@@ -150,16 +156,16 @@ public class PredictionFileWriter {
 		
 		return false;
 	}
-
+	
 	// Statics
-	public static void writeSimplePredictions(List<Set<String>> predictionValues, List<Set<String>> realValues, String filename) {
+	public static void writeSimplePredictions(List<Set<String>> predictionValues, List<Set<String>> realValues, List<String> tweetIDs, String filename) {
 		try {
 			//FileWriter writer = new FileWriter(new File("./data/results/" + filename + ".txt"));
 			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("./data/results/" + filename + ".txt")), "UTF8");
 			BufferedWriter bw = new BufferedWriter(writer);
 
 			for (int i = 0; i < predictionValues.size(); i++) {
-				String resultString = i + "|";
+				String resultString = (tweetIDs != null ? tweetIDs.get(i) : i) + "|";
 				Set<String> predictions = predictionValues.get(i);
 				Set<String> values = realValues.get(i);
 				String temp = "";

@@ -118,6 +118,51 @@ public class BookmarkSplitter {
 		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, realNames);
 	}
 	
+	public void leaveLastOutSplitWithCondition(String filename, boolean realNames, String userWhiteList, String titleCondition) {
+		List<Bookmark> trainLines = new ArrayList<Bookmark>();
+		List<Bookmark> testLines = new ArrayList<Bookmark>();
+		List<String> testUsers = null;
+		if (userWhiteList != null) {
+			testUsers = Utilities.readFileToStringList("data/csv/" + userWhiteList);
+		}
+		Collections.sort(this.reader.getBookmarks());
+		List<List<Bookmark>> userBookmarks = Utilities.getBookmarks(this.reader.getBookmarks(), false);
+		for (List<Bookmark> uBookmarks : userBookmarks) {
+			boolean isColdStartUser = uBookmarks.size() < 2;
+			boolean putTestB = false;
+			boolean putTrainB = false;
+			Bookmark testB = null;
+			for (int i = uBookmarks.size() - 1; i >= 0; i--) {
+				Bookmark b = uBookmarks.get(i);
+				boolean isTestUser = testUsers.contains(this.reader.getUsers().get(b.getUserID()));
+				if (isTestUser && !isColdStartUser && !putTestB) {
+					if (!b.getTitle().equals(titleCondition)) {
+						testB = b;
+						putTestB = true;
+					}/* else {
+						trainLines.add(b);
+						putTrainB = true;
+					}*/
+				} else {
+					trainLines.add(b);
+					putTrainB = true;
+				}
+			}
+			if (testB != null) {
+				if (putTrainB) {
+					testLines.add(testB);
+				} else {
+					trainLines.add(testB);
+				}
+			}
+		}
+		
+		BookmarkWriter.writeSample(this.reader, trainLines, filename + "_train", null, realNames);
+		BookmarkWriter.writeSample(this.reader, testLines, filename + "_test", null, realNames);
+		trainLines.addAll(testLines);
+		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, realNames);
+	}
+	
 	// puts one bookmark at random of each user into the testset
 	public void leaveOneRandOutSplit(String filename) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
@@ -143,7 +188,7 @@ public class BookmarkSplitter {
 		BookmarkWriter.writeSample(this.reader, trainLines, filename, null, false);
 	}
 	
-	public void leavePercentageOutSplit(String filename, int percentage, boolean last, Integer userNumber, boolean tagRec, boolean realNames) {
+	public void leavePercentageOutSplit(String filename, int percentage, boolean last, Integer userNumber, boolean tagRec, boolean realNames, boolean coldStart) {
 		List<Bookmark> trainLines = new ArrayList<Bookmark>();
 		List<Bookmark> testLines = new ArrayList<Bookmark>();
 		Set<Integer> indices = new HashSet<Integer>();
@@ -162,15 +207,18 @@ public class BookmarkSplitter {
 				userSize = this.reader.getUserCounts().get(currentUser);			
 				userIndex = 1;
 				indices.clear();
-				int limit = (int)((double)percentage / 100.0 * (double)userSize); // altenative: 10
+				int limit = (int)((double)percentage / 100.0 * (double)userSize);
 				if (tagRec && limit == 0 && userSize > 1) {
 					limit++;
 				}
-				while (indices.size() < limit) { // limit + 1 for cold-start users
+				if (!tagRec && coldStart && limit == 0) {
+					limit++;
+				}
+				while (indices.size() < limit) {
 					if (last) {
-						indices.add(userSize - /*1 - */indices.size());
+						indices.add(userSize - indices.size());
 					} else {
-						indices.add(1 + (int)(Math.random() * ((userSize/* - 1*/) + 1)));
+						indices.add(1 + (int)(Math.random() * (userSize + 1)));
 					}
 				}
 			}
@@ -191,16 +239,20 @@ public class BookmarkSplitter {
 	
 	// Statics -------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart, boolean realNames, String userWhiteList) {		
+	public static void splitSample(String filename, String sampleName, int count, int percentage, boolean tagRec, boolean coldStart, boolean realNames, String userWhiteList, String condition) {		
 		BookmarkReader reader = new BookmarkReader(0, false);
 		reader.readFile(filename);
 		Collections.sort(reader.getBookmarks());
 		BookmarkSplitter splitter = new BookmarkSplitter(reader);
 		for (int i = 1; i <= count; i++) {
 			if (percentage > 0) {
-				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec, realNames);
+				splitter.leavePercentageOutSplit(sampleName, percentage, true, null, tagRec, realNames, coldStart);
 			} else {
-				splitter.leaveLastOutSplit(sampleName, coldStart, realNames, userWhiteList);
+				if (condition == null) {
+					splitter.leaveLastOutSplit(sampleName, coldStart, realNames, userWhiteList);
+				} else {
+					splitter.leaveLastOutSplitWithCondition(sampleName, realNames, userWhiteList, condition);
+				}
 			}
 		}
 	}

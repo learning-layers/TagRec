@@ -82,8 +82,10 @@ public class PredictionFileReader {
 						continue; // skip this user if it shoudln't be evaluated - categorizer case
 					}
 				}
-				List<String> realData = Arrays.asList(lineParts[1].split(", "));
-				if (lineParts.length > 2) {
+				if (lineParts.length < 3) {
+					this.predictions.add(null);
+				} else {
+					List<String> realData = Arrays.asList(lineParts[1].split(", "));
 					List<String> predictionData = Arrays.asList(lineParts[2].split(", "));
 					if (predictionData.size() > 0) {
 						PredictionData data = new PredictionData(userID, resID, realData, predictionData, k);
@@ -93,10 +95,8 @@ public class PredictionFileReader {
 						//System.out.println("Line does not have predictions (inner)");
 						this.predictions.add(null);
 					}
-				} else {
-					//System.out.println("Line does not have predictions (outer)");
-					this.predictions.add(null);
 				}
+
 			}
 			if (k == 10) {
 				System.out.println("Number of users to predict: " + this.predictions.size());

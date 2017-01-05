@@ -62,6 +62,7 @@ public class MetricsCalculator {
 	public static double diversitySum = 0.0;
 	public static double serendipitySum = 0.0;
 	public static double nDCGSum = 0.0;
+	public static double nDCG10 = 0.0;
 	
 	public MetricsCalculator(PredictionFileReader reader, String outputFile, int k, BookmarkReader bookmarkReader, boolean recommTags) {
 		this.reader = reader;
@@ -70,7 +71,7 @@ public class MetricsCalculator {
 		}
 		BufferedWriter bw = null;
 		//TODO: Enable if you need data for statistical tests
-		/*
+		
 		if ((recommTags && (k == 5 || k == 10)) || (!recommTags && k == 20)) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
@@ -79,7 +80,7 @@ public class MetricsCalculator {
 				e.printStackTrace();
 			}
 		}
-		*/
+		
 		
 		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
 		double count = this.reader.getPredictionData().size();		 // all users
@@ -272,6 +273,7 @@ public class MetricsCalculator {
 			
 			if (k == 10) {
 				System.out.println("nDCG@10: " + (nDCGSum / size));
+				nDCG10 = nDCGSum / size;
 			}
 			if (endLine) {
 				bw.write("\n");
@@ -284,6 +286,10 @@ public class MetricsCalculator {
 			e.printStackTrace();
 		}
 	}
+	
+	public static double getNDCG10(){
+	    return nDCG10;
+	} 
 	
 	public static void resetMetrics() {
 		recallSum = 0.0;

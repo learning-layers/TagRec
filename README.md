@@ -12,7 +12,9 @@ Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, l
 
 The software already contains four novel tag-recommender approaches based on cognitive science theory. The first one ([3Layers](http://www.christophtrattner.info/pubs/cikm2013.pdf)) (Seitlinger et al, 2013) uses topic information and is based on the ALCOVE/MINERVA2 theories (Krutschke, 1992; Hintzman, 1984). The second one ([BLL+C](http://delivery.acm.org/10.1145/2580000/2576934/p463-kowald.pdf)) (Kowald et al., 2014b) uses time information is based on the ACT-R theory (Anderson et al., 2004). The third one ([3LT](http://www.christophtrattner.info/pubs/msm8_kowald.pdf)) (Kowald et al., 2015b) is a combination of the former two approaches and integrates the time component on the level of tags and topics. Finally, the fourth one ([BLLac+MPr](http://www.christophtrattner.info/pubs/msm7_kowald.pdf)) extends the BLL+C algorithm with semantic correlations (Kowald et al., 2015a).
 
-Additionally, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://www.christophtrattner.info/pubs/sp2014.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004). Furthermore, it contains another novel item-recommender called [SUSTAIN+CFu](http://arxiv.org/pdf/1501.07716v1.pdf) (Seitlinger et al., 2015) that improves user-based CF via integrating the addentional focus of users via the SUSTAIN model (Love et al., 2004).
+Apart from this, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://www.christophtrattner.info/pubs/sp2014.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004). Furthermore, it contains another novel item-recommender called [SUSTAIN+CFu](http://arxiv.org/pdf/1501.07716v1.pdf) (Seitlinger et al., 2015) that improves user-based CF via integrating the addentional focus of users via the SUSTAIN model (Love et al., 2004).
+
+Finally, TagRec was also utilized for the recommendation of hashtags in Twitter (Kowald et al., 2017). Thus, it contains an initial set of algorithms for this task as well. For this, TagRec also contains a connection to the Apache Solr search engine framework.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
@@ -29,9 +31,11 @@ The source-code can be directly checked-out through this repository. It contains
 * ml_core for MovieLens
 * lastfm_core for LastFM
 * wiki_core for Wikipedia (based on bookmarks from Delicious)
+* twitter_core/researchers for the Twitter CompSci dataset
+* twitter_core/general for the Twitter Random dataset
 
 ## How-to-use
-The _tagrecommender_ .jar uses three parameters:
+The _tagrec_ .jar uses three parameters:
 
 First the algorithm,
 
@@ -41,12 +45,12 @@ Tag-Recommender:
 * bll_c for BLL and BLL+C (based on ACT-R theory) (Kowald et al., 2014b)
 * bll_c_ac for BLL and BLL+MPr together with semantic correlations (Trattner et al., 2014)
 * lda for Latent Dirichlet Allocation (Krestel et al., 2009)
-* cf for (user-based) Collaborative Filtering (JÃ¤schke et al., 2007)
-* cfr for (resource-based and mixed) Collaborative Filtering (JÃ¤schke et al., 2007)
+* cf for (user-based) Collaborative Filtering (Jäschke et al., 2007)
+* cfr for (resource-based and mixed) Collaborative Filtering (Jäschke et al., 2007)
 * fr for Adapted PageRank and FolkRank (Hotho et al., 2006)
 * girptm for GIRP and GIRPTM (Zhang et al., 2012)
-* mp for MostPopular tags (JÃ¤schke et al., 2007)
-* mp_u_r for MostPopular tags by user and/or resource (JÃ¤schke et al., 2007)
+* mp for MostPopular tags (Jäschke et al., 2007)
+* mp_u_r for MostPopular tags by user and/or resource (Jäschke et al., 2007)
 
 Resource-Recommender:
 * item_sustain for the improved CF approach based on the SUSTAIN model
@@ -58,7 +62,17 @@ Resource-Recommender:
 * item_zheng for the tag- and time-based approach by Zheng et al. (2011)
 * item_huang for the tag- and time-based appraoch by Huang et al. (2014)
 
+Hashtag-Recommender (Kowald et al., 2017):
+* hashtag_analysis for analyzing the temporal effects on hashtag reuse
+* hashtag_socialmp for MostPopular hashtags of the followees (i.e., MPs)
+* hashtag socialrecency for recency-ranked hashtags of the followees (i.e., MRs)
+* hashtag_socialbll for BLL-ranked hashtags of the followees (i.e., BLLs)
+* hashtag_hybrid for BLLi,s
+* hashtag_cb_res for BLLi,s,c on the Twitter CompSci dataset and SOLR core
+* hashtag_cb_gen for BLLi,s,c on the Twitter Random dataset and SOLR core
+
 Data-Processing:
+* stats for printing the dataset statistics
 * core for calculating p-cores on a dataset
 * split_l1o for splitting a dataset into training and test-sets using a leave-one-out method
 * split_8020 for splitting a dataset into training and test-sets using 80/20 split
@@ -80,6 +94,8 @@ Data-Processing:
 * ml for MovieLens
 * lastfm for LastFM
 * wiki for Wikipedia (based on bookmarks from Delicious)
+* twitter_res for the Twitter CompSci dataset
+* twitter_gen for the Twitter Random dataset
 
 and third the filename (without file extension)
 
@@ -154,10 +170,10 @@ _Bibtex:_
  address = {New York, NY, USA},
 }`
 
-
-
 ## Publications
-* C. Trattner, D. Kowald, P. Seitlinger, S. Kopeinik, S. and T. Ley: [Modeling Activation Processes in Human Memory to Predict the Use of Tags in Social Bookmarking Systems](http://www.christophtrattner.info/pubs/bll_journal_final.pdf), Journal of Web Science, 2016.
+* D. Kowald, S. Pujari and E. Lex: Temporal Effects on Hashtag Reuse in Twitter: A Cognitive-Inspired Hashtag Recommendation Approach (preprint will be available soon), In Proc. of WWW, 2017
+* D. Kowald and E. Lex: [The Influence of Frequency, Recency and Semantic Context on the Reuse of Tags in Social Tagging Systems](https://arxiv.org/pdf/1604.00837v1.pdf), In Proc. of Hypertext, 2016
+* C. Trattner, D. Kowald, P. Seitlinger, S. Kopeinik and T. Ley: [Modeling Activation Processes in Human Memory to Predict the Use of Tags in Social Bookmarking Systems](http://www.christophtrattner.info/pubs/bll_journal_final.pdf), Journal of Web Science, 2016.
 * D. Kowald and E. Lex: [Evaluating Tag Recommender Algorithms in Real-World Folksonomies: A Comparative Study](http://dl.acm.org/citation.cfm?id=2799664), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
 * S. Larrain, C. Trattner, D. Parra, E. Graells-Garrido and K. Norvag: [Good Times Bad Times: A Study on Recency Effects in Collaborative Filtering for Social Tagging](http://www.christophtrattner.info/pubs/recsys2015b.pdf), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
 * P. Seitlinger, D. Kowald, S. Kopeinik, I. Hasani-Mavriqi, T. Ley, and Elisabeth Lex: [Attention Please! A Hybrid Resource Recommender Mimicking Attention-Interpretation Dynamics](http://arxiv.org/pdf/1501.07716v1.pdf). In Proc. of WWW'2015 Companion. ACM. 2015
@@ -168,22 +184,23 @@ _Bibtex:_
 * P. Seitlinger, D. Kowald, C. Trattner, and T. Ley.: [Recommending Tags with a Model of Human Categorization](http://www.christophtrattner.info/pubs/cikm2013.pdf). In Proceedings of The ACM International Conference on Information and Knowledge Management (CIKM 2013), ACM, New York, NY, USA, 2013.
 
 ## References
-* A. Hotho, R. JÃ¤schke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411â€“426. Springer, 2006.
-* L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354â€“365. Springer, 2012.
-* R. JÃ¤schke, L. Marinho, A. Hotho, L. Schmidt-Thieme, and G. Stumme. Tag recommendations in folksonomies. In Knowledge Discovery in Databases: PKDD 2007, pages 506â€“514. Springer, 2007.
-* R. Krestel, P. Fankhauser, and W. Nejdl. Latent dirichlet allocation for tag recommendation. In Proceedings of the third ACM conference on Recommender systems, pages 61â€“68. ACM, 2009.
-* J. R. Anderson, M. D. Byrne, S. Douglass, C. Lebiere, and Y. Qin. An integrated theory of the mind. Psychological Review, 111(4):1036â€“1050, 2004.
-* J. K. Kruschke et al. Alcove: An exemplar-based connectionist model of category learning. Psychological review, 99(1):22â€“44, 1992.
-* D. L Hintzman. Minerva 2: A simulation model of human memory. Behavior Research Methods, Instruments, & Computers 16 (2), 96â€“101, 1984.
+* A. Hotho, R. Jäschke, C. Schmitz, and G. Stumme. Information retrieval in folksonomies: Search and ranking. In The semantic web: research and applications, pages 411–426. Springer, 2006.
+* L. Zhang, J. Tang, and M. Zhang. Integrating temporal usage pattern into personalized tag prediction. In Web Technologies and Applications, pages 354–365. Springer, 2012.
+* R. Jäschke, L. Marinho, A. Hotho, L. Schmidt-Thieme, and G. Stumme. Tag recommendations in folksonomies. In Knowledge Discovery in Databases: PKDD 2007, pages 506–514. Springer, 2007.
+* R. Krestel, P. Fankhauser, and W. Nejdl. Latent dirichlet allocation for tag recommendation. In Proceedings of the third ACM conference on Recommender systems, pages 61–68. ACM, 2009.
+* J. R. Anderson, M. D. Byrne, S. Douglass, C. Lebiere, and Y. Qin. An integrated theory of the mind. Psychological Review, 111(4):1036–1050, 2004.
+* J. K. Kruschke et al. Alcove: An exemplar-based connectionist model of category learning. Psychological review, 99(1):22–44, 1992.
+* D. L Hintzman. Minerva 2: A simulation model of human memory. Behavior Research Methods, Instruments, & Computers 16 (2), 96–101, 1984.
 * N. Zheng and Q. Li. A recommender system based on tag and time information for social tagging systems. Expert Syst. Appl., 2011.
 * C.-L. Huang, P.-H. Yeh, C.-W. Lin, and D.-C. Wu. Utilizing user tag-based interests in recommender systems for social resource sharing websites. Knowledge-Based Systems, 2014.
 * B. C. Love, D. L. Medin, and T. M. Gureckis. Sustain: A network model of category learning. Psychological review, 111(2):309, 2004.
 
-## Main contributor
-* Dominik Kowald, Know-Center, Graz University of Technology, dkowald@know-center.at (general contact)
+## Main contact and contributor
+* [Dominik Kowald](http://www.dominikkowald.info/), Know-Center, Graz University of Technology, dkowald [AT] know [MINUS] center [DOT] at (general contact)
 
-## Contacts and contributors (in alphabetically order)
-* Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone.kopeinik@tugraz.at (sustain resource recommender algorithm)
-* Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic@know-center.at (huang, zheng and CIRTT resource recommender algorithms)
-* Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth.lex@tugraz.at (general contac)
-* Christoph Trattner, Know-Center, ctrattner@know-center.at (general contact)
+## Contacts and contributors
+* Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone [DOT] [AT] tugraz [DOT] at (sustain resource recommender algorithm)
+* Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic [AT] know [MINUS] center [DOT] at (huang, zheng and CIRTT resource recommender algorithms)
+* Subhash Pujari, Knowledge Technologies Institute, Graz University of Technology, spujari [AT] student [DOT] tugraz [DOT] at (twitter hashtag recommender algorithms)
+* Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth [DOT] lex [AT] tugraz [DOT] at (general contact)
+* Christoph Trattner, Know-Center, Graz University of Technology, ctrattner [AT] know [MINUS] center [DOT] at (general contact)

@@ -37,7 +37,7 @@ public class CooccurenceMatrix {
 	private List<Integer> tagCounts;
 
 	public CooccurenceMatrix(List<Bookmark> bookmarks, List<Integer> tagCounts, boolean normalize) {
-		System.out.println("Building matrix ...");
+		//System.out.println("Building matrix ...");
 		this.coocurenceMatrix = new SparseMatrix();
 		this.tagCounts = tagCounts;
 		this.initMatrix(bookmarks);

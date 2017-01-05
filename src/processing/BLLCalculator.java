@@ -35,6 +35,7 @@ import common.CalculationType;
 import common.CooccurenceMatrix;
 import common.DoubleMapComparator;
 import common.Bookmark;
+import common.MapUtil;
 import common.MemoryThread;
 import common.PerformanceMeasurement;
 import common.Utilities;
@@ -207,6 +208,7 @@ public class BLLCalculator {
 		if (sorting) {
 			Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
 			sortedResultMap.putAll(resultMap);
+			//Map<Integer, Double> sortedResultMap = MapUtil.sortByValue(resultMap);
 			
 			Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>(REC_LIMIT);
 			int i = 0;

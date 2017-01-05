@@ -217,9 +217,9 @@ public class CFResourceCalculator {
 	// Statics -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	private static String timeString;
 	
-	public static BookmarkReader predictResources(String filename, int trainSize, int sampleSize, int neighborSize, boolean userBased, boolean resourceBased, boolean allResources, boolean bll, Features features) {
+	public static BookmarkReader predictResources(String filename, int trainSize, int sampleSize, int neighborSize, boolean userBased, boolean resourceBased, boolean allResources, boolean bll, Features features, boolean writeTime) {
 		MAX_NEIGHBORS = neighborSize;
-		return predictSample(filename, trainSize, sampleSize, userBased, resourceBased, allResources, 5, bll, features);
+		return predictSample(filename, trainSize, sampleSize, userBased, resourceBased, allResources, 5, bll, features, writeTime);
 	}
 	
 	private static List<Map<Integer, Double>> startBM25CreationForResourcesPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, boolean allResources, boolean bll, Features features) {
@@ -248,7 +248,7 @@ public class CFResourceCalculator {
 	}
 	
 	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, boolean allResources,
-			int beta, boolean bll, Features features) {
+			int beta, boolean bll, Features features, boolean writeTime) {
 		
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
@@ -273,19 +273,21 @@ public class CFResourceCalculator {
 		} else if (!resBased) {
 			suffix = "_usercf_";
 		}
-		//suffix += features + "_"; 
 		if (!userBased && !allResources) {
 			suffix += "mixed_";
 		}
 		if (bll) {
 			suffix += "bll_";
 		}
+		suffix += features + "_"; 
 		PredictionFileWriter writer = new PredictionFileWriter(reader, predictionValues);
 		writer.writeResourcePredictionsToFile(filename + suffix + beta, trainSize, MAX_NEIGHBORS);
 
 		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
 		timerThread.cancel();
-		Utilities.writeStringToFile("./data/metrics/" + filename + suffix + beta + "_TIME.txt", timeString);
+		if (writeTime) {
+			Utilities.writeStringToFile("./data/metrics/" + filename + suffix + beta + "_TIME.txt", timeString);
+		}
 		return reader;
 	}
 }

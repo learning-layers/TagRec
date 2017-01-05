@@ -76,7 +76,7 @@ public class MPResourceCalculator {
 		return resources;
 	}
 	
-	public static BookmarkReader predictPopularResources(String filename, int trainSize) {
+	public static BookmarkReader predictPopularResources(String filename, int trainSize, boolean writeTime) {
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
 		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
@@ -93,18 +93,20 @@ public class MPResourceCalculator {
 		timer.reset();
 		timer.start();
 		PredictionFileWriter writer = new PredictionFileWriter(reader, values);
-		writer.writeResourcePredictionsToFile(filename + "_pop", trainSize, 0);
+		writer.writeResourcePredictionsToFile(filename + "_mp", trainSize, 0);
 		timer.stop();
 		long testTime = timer.elapsed(TimeUnit.MILLISECONDS);
 		timeString = PerformanceMeasurement.addTimeMeasurement(timeString, true, trainingTime, testTime, reader.getBookmarks().size() - trainSize);
 		
 		timeString = PerformanceMeasurement.addMemoryMeasurement(timeString, false, memoryThread.getMaxMemory());
 		timerThread.cancel();
-		Utilities.writeStringToFile("./data/metrics/" + filename + "_pop_TIME.txt", timeString);
+		if (writeTime) {
+			Utilities.writeStringToFile("./data/metrics/" + filename + "_mp_TIME.txt", timeString);
+		}
 		return reader;
 	}
 	
-	public static BookmarkReader predictRandomResources(String filename, int trainSize) {
+	public static BookmarkReader predictRandomResources(String filename, int trainSize, boolean writeTime) {
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 		

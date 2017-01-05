@@ -7,11 +7,11 @@ package file.stemming;
 
 import file.stemming.Among;
 
-public class englishStemmer extends SnowballStemmer {
+public class EnglishStemmer extends SnowballStemmer {
 
 private static final long serialVersionUID = 1L;
 
-        private final static englishStemmer methodObject = new englishStemmer ();
+        private final static EnglishStemmer methodObject = new EnglishStemmer ();
 
                 private final static Among a_0[] = {
                     new Among ( "arsen", -1, -1, "", methodObject ),
@@ -166,7 +166,7 @@ private static final long serialVersionUID = 1L;
         private int I_p2;
         private int I_p1;
 
-                private void copy_from(englishStemmer other) {
+                private void copy_from(EnglishStemmer other) {
                     B_Y_found = other.B_Y_found;
                     I_p2 = other.I_p2;
                     I_p1 = other.I_p1;
@@ -1315,11 +1315,11 @@ private static final long serialVersionUID = 1L;
                 }
 
         public boolean equals( Object o ) {
-            return o instanceof englishStemmer;
+            return o instanceof EnglishStemmer;
         }
 
         public int hashCode() {
-            return englishStemmer.class.getName().hashCode();
+            return EnglishStemmer.class.getName().hashCode();
         }
 
 
