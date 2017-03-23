@@ -1,7 +1,7 @@
 TagRec
 ======
 
-##Towards A Standardized Tag Recommender Benchmarking Framework
+## Towards A Standardized Tag Recommender Benchmarking Framework
 
 TagRec won the best poster award @ Hypertext 2014 (HT'14) conference: [http://ht.acm.org/ht2014/index.php?awards.poster](http://ht.acm.org/ht2014/index.php?awards.poster)
 
