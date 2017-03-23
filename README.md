@@ -100,7 +100,7 @@ Data-Processing:
 and third the filename (without file extension)
 
 **Example:**
-`java -jar tagrecommender.jar bll_c bib bib_sample`
+`java -jar tagrec.jar bll_c bib bib_sample`
 
 ## Input format
 The input-files have to be placed in the corresponding subdirectory and are in csv-format (file extension: .txt) with 5 columns (quotation marks are mandatory):
