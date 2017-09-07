@@ -6,7 +6,7 @@ TagRec
 TagRec won the best poster award @ Hypertext 2014 (HT'14) conference: [http://ht.acm.org/ht2014/index.php?awards.poster](http://ht.acm.org/ht2014/index.php?awards.poster)
 
 ## Description
-The aim of this [work](http://www.christophtrattner.info/pubs/ht241-kowald.pdf) (please [cite](https://github.com/learning-layers/TagRec/#citation)) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
+The aim of this work (please [cite](https://github.com/learning-layers/TagRec/#citation)) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
 
 Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting, LDA topic creation and create input files for other recommender frameworks).
 
@@ -140,38 +140,31 @@ for _k_ = 1 to 10 (or 20) - each line is one _k_
 
 ## Citation
 
-C. Trattner, D. Kowald and E. Lacic: [TagRec: Towards a Toolkit for Reproducible Evaluation and Development of Tag-Based Recommender Algorithms](http://www.christophtrattner.info/pubs/sigweb2015.pdf), ACM SIGWEB Newsletter, Spring 2015, ACM, New York, NY, USA, 2015. (invited)
+Kowald, D., Kopeinik, S., & Lex, E. (2017). The TagRec Framework as a Toolkit for the Development of Tag-Based Recommender Systems. In Adjunct Publication of the 25th Conference on User Modeling, Adapation and Personalization (UMAP'2017). ACM.
 
 _Bibtex:_
-`@article{Trattner:2015:TTT:2719943.2719946,
- author = {Trattner, Christoph and Kowald, Dominik and Lacic, Emanuel},
- title = {TagRec: Towards a Toolkit for Reproducible Evaluation and Development of Tag-based Recommender Algorithms},
- journal = {SIGWEB Newsl.},
- issue_date = {Winter 2015},
- year = {2015},
- pages = {3:1--3:10},
- numpages = {10},
+`@inproceedings{kowaldumap2017,
+ author = {Kowald, Dominik and Kopeinik, Simone and Lex, Elisabeth},
+ title = {The TagRec Framework As a Toolkit for the Development of Tag-Based Recommender Systems},
+ booktitle = {Adjunct Publication of the 25th Conference on User Modeling, Adaptation and Personalization},
+ series = {UMAP '17},
+ year = {2017},
+ isbn = {978-1-4503-5067-9},
+ location = {Bratislava, Slovakia},
+ pages = {23--28},
+ numpages = {6},
+ url = {http://doi.acm.org/10.1145/3099023.3099069},
+ doi = {10.1145/3099023.3099069},
+ acmid = {3099069},
  publisher = {ACM},
  address = {New York, NY, USA},
+ keywords = {hashtag recommendation, recommendation evaluation, recommender framework, recommender systems, tag recommendation},
 }`
-
-D. Kowald, E. Lacic, and C. Trattner. [Tagrec:Towards a standardized tag recommender benchmarking framework](http://www.christophtrattner.info/pubs/ht241-kowald.pdf). In Proceedings of the 25th ACM Conference on Hypertext and Social Media, HT'14, New York, NY, USA, 2014. ACM.
-
-_Bibtex:_
-`@inproceedings{Kowald2014TagRec,
- author = {Kowald, Dominik and Lacic, Emanuel and Trattner, Christoph},
- title = {TagRec: Towards A Standardized Tag Recommender Benchmarking Framework},
- booktitle = {Proceedings of the 25th ACM Conference on Hypertext and Social Media},
- series = {HT '14},
- year = {2014},
- isbn = {978-1-4503-2263-8},
- location = {Santiago de Chile, Chile},
- publisher = {ACM},
- address = {New York, NY, USA},
 }`
 
 ## Publications
-* D. Kowald, S. Pujari and E. Lex: Temporal Effects on Hashtag Reuse in Twitter: A Cognitive-Inspired Hashtag Recommendation Approach (preprint will be available soon), In Proc. of WWW, 2017
+* Kowald, D., Kopeinik, S., & Lex, E. (2017). The TagRec Framework as a Toolkit for the Development of Tag-Based Recommender Systems. In Adjunct Publication of the 25th Conference on User Modeling, Adapation and Personalization (UMAP'2017). ACM.
+* Kowald, D., Pujari, S., & Lex, E. (2017). Temporal Effects on Hashtag Reuse in Twitter: A Cognitive-Inspired Hashtag Recommendation Approach. In Proceedings of the 26th International World Wide Web Conference (WWW'2017). ACM.
 * D. Kowald and E. Lex: [The Influence of Frequency, Recency and Semantic Context on the Reuse of Tags in Social Tagging Systems](https://arxiv.org/pdf/1604.00837v1.pdf), In Proc. of Hypertext, 2016
 * C. Trattner, D. Kowald, P. Seitlinger, S. Kopeinik and T. Ley: [Modeling Activation Processes in Human Memory to Predict the Use of Tags in Social Bookmarking Systems](http://www.christophtrattner.info/pubs/bll_journal_final.pdf), Journal of Web Science, 2016.
 * D. Kowald and E. Lex: [Evaluating Tag Recommender Algorithms in Real-World Folksonomies: A Comparative Study](http://dl.acm.org/citation.cfm?id=2799664), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
