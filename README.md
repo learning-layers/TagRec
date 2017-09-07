@@ -158,8 +158,7 @@ _Bibtex:_
  acmid = {3099069},
  publisher = {ACM},
  address = {New York, NY, USA},
- keywords = {hashtag recommendation, recommendation evaluation, recommender framework, recommender systems, tag recommendation},
-}`
+ keywords = {hashtag recommendation, recommendation evaluation, recommender framework, recommender systems, tag recommendation}
 }`
 
 ## Publications
