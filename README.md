@@ -6,7 +6,7 @@ TagRec
 TagRec won the best poster award @ Hypertext 2014 (HT'14) conference: [http://ht.acm.org/ht2014/index.php?awards.poster](http://ht.acm.org/ht2014/index.php?awards.poster)
 
 ## Description
-The aim of this work (please [cite](https://github.com/learning-layers/TagRec/#citation)) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
+The aim of [TagRec](http://www.dominikkowald.info/documents/2017umap_tagrec.pdf) (please [cite](https://github.com/learning-layers/TagRec/#citation)) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
 
 Furthermore, it contains algorithms to process datasets (e.g., p-core pruning, leave-one-out or 80/20 splitting, LDA topic creation and create input files for other recommender frameworks).
 
@@ -14,7 +14,7 @@ The software already contains four novel tag-recommender approaches based on cog
 
 Apart from this, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://www.christophtrattner.info/pubs/sp2014.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004). Furthermore, it contains another novel item-recommender called [SUSTAIN+CFu](http://arxiv.org/pdf/1501.07716v1.pdf) (Seitlinger et al., 2015) that improves user-based CF via integrating the addentional focus of users via the SUSTAIN model (Love et al., 2004).
 
-Finally, TagRec was also utilized for the recommendation of hashtags in Twitter (Kowald et al., 2017). Thus, it contains an initial set of algorithms for this task as well. For this, TagRec also contains a connection to the Apache Solr search engine framework.
+Finally, TagRec was also utilized for the [recommendation of hashtags in Twitter](http://www.dominikkowald.info/documents/2017www_twitter.pdf) (Kowald et al., 2017). Thus, it contains an initial set of algorithms for this task as well. For this, TagRec also contains a connection to the Apache Solr search engine framework.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
@@ -162,8 +162,8 @@ _Bibtex:_
 }`
 
 ## Publications
-* Kowald, D., Kopeinik, S., & Lex, E. (2017). The TagRec Framework as a Toolkit for the Development of Tag-Based Recommender Systems. In Adjunct Publication of the 25th Conference on User Modeling, Adapation and Personalization (UMAP'2017). ACM.
-* Kowald, D., Pujari, S., & Lex, E. (2017). Temporal Effects on Hashtag Reuse in Twitter: A Cognitive-Inspired Hashtag Recommendation Approach. In Proceedings of the 26th International World Wide Web Conference (WWW'2017). ACM.
+* Kowald, D., Kopeinik, S., & Lex, E. (2017). [The TagRec Framework as a Toolkit for the Development of Tag-Based Recommender Systems](http://www.dominikkowald.info/documents/2017umap_tagrec.pdf). In Adjunct Publication of the 25th Conference on User Modeling, Adapation and Personalization (UMAP'2017). ACM.
+* Kowald, D., Pujari, S., & Lex, E. (2017). [Temporal Effects on Hashtag Reuse in Twitter: A Cognitive-Inspired Hashtag Recommendation Approach](http://www.dominikkowald.info/documents/2017www_twitter.pdf). In Proceedings of the 26th International World Wide Web Conference (WWW'2017). ACM.
 * D. Kowald and E. Lex: [The Influence of Frequency, Recency and Semantic Context on the Reuse of Tags in Social Tagging Systems](https://arxiv.org/pdf/1604.00837v1.pdf), In Proc. of Hypertext, 2016
 * C. Trattner, D. Kowald, P. Seitlinger, S. Kopeinik and T. Ley: [Modeling Activation Processes in Human Memory to Predict the Use of Tags in Social Bookmarking Systems](http://www.christophtrattner.info/pubs/bll_journal_final.pdf), Journal of Web Science, 2016.
 * D. Kowald and E. Lex: [Evaluating Tag Recommender Algorithms in Real-World Folksonomies: A Comparative Study](http://dl.acm.org/citation.cfm?id=2799664), In Proceedings of the 9th ACM Conference on Recommender Systems (RecSys 2015), ACM, New York, NY, USA, 2015.
