@@ -195,4 +195,4 @@ _Bibtex:_
 * Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic [AT] know [MINUS] center [DOT] at (huang, zheng and CIRTT resource recommender algorithms)
 * Subhash Pujari, Knowledge Technologies Institute, Graz University of Technology, spujari [AT] student [DOT] tugraz [DOT] at (twitter hashtag recommender algorithms)
 * Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth [DOT] lex [AT] tugraz [DOT] at (general contact)
-* Christoph Trattner, Know-Center, Graz University of Technology, ctrattner [AT] know [MINUS] center [DOT] at (general contact)
+* Christoph Trattner, University of Bergen, Norway, christoph [DOT] trattner [AT] uib [DOT] no (general contact)
