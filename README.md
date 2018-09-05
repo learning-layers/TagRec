@@ -162,6 +162,7 @@ _Bibtex:_
 }`
 
 ## Publications
+* Kowald, D., Seitlinger, P., Ley, T., & Lex, E. (2018). [The Impact of Semantic Context Cues on the User Acceptance of Tag Recommendations: An Online Study](http://www.dominikkowald.info/documents/2018www_study.pdf). In Companion Proceedings of the 27th International World Wide Web Conference (WWW'2018). ACM.
 * Kowald, D., Kopeinik, S., & Lex, E. (2017). [The TagRec Framework as a Toolkit for the Development of Tag-Based Recommender Systems](http://www.dominikkowald.info/documents/2017umap_tagrec.pdf). In Adjunct Publication of the 25th Conference on User Modeling, Adapation and Personalization (UMAP'2017). ACM.
 * Kowald, D., Pujari, S., & Lex, E. (2017). [Temporal Effects on Hashtag Reuse in Twitter: A Cognitive-Inspired Hashtag Recommendation Approach](http://www.dominikkowald.info/documents/2017www_twitter.pdf). In Proceedings of the 26th International World Wide Web Conference (WWW'2017). ACM.
 * D. Kowald and E. Lex: [The Influence of Frequency, Recency and Semantic Context on the Reuse of Tags in Social Tagging Systems](https://arxiv.org/pdf/1604.00837v1.pdf), In Proc. of Hypertext, 2016
