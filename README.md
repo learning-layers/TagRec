@@ -4,6 +4,7 @@ TagRec
 ## Towards A Standardized Tag Recommender Benchmarking Framework
 * TagRec won the best poster award @ Hypertext 2014 (HT'14) conference: [http://ht.acm.org/ht2014/index.php?awards.poster](http://ht.acm.org/ht2014/index.php?awards.poster)
 * TagRec is also a main part of the recommender system in the Layers project [http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/](http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/)
+* TagRec is part of several lists of recommender systems frameworks such as [http://fmoraes.nl/se-recsys-paperswithcode/](http://fmoraes.nl/se-recsys-paperswithcode/) and [https://github.com/grahamjenson/list_of_recommender_systems](https://github.com/grahamjenson/list_of_recommender_systems)
 
 ## Description
 The aim of [TagRec](http://www.dominikkowald.info/documents/2017umap_tagrec.pdf) (please [cite](https://github.com/learning-layers/TagRec/#citation)) is to provide the community with a simple to use, generic tag-recommender framework written in Java to evaluate novel tag-recommender algorithms with a set of well-known std. IR metrics such as nDCG, MAP, MRR, Precision (P@k), Recall (R@k), F1-score (F1@k), Diversity (D), Serendipity (S), User Coverage (UC) and folksonomy datasets such as BibSonomy, CiteULike, LastFM, Flickr, MovieLens or Delicious and to benchmark the developed approaches against state-of-the-art tag-recommender algorithms such as MP, MP_r, MP_u, MP_u,r, CF, APR, FR, GIRP, GIRPTM, etc.
