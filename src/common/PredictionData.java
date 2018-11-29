@@ -187,9 +187,10 @@ public class PredictionData {
 			return diversity;
 		}
 		
-		List<Integer> predictionIDs = new ArrayList<Integer>(); 
+		List<String> predictionIDs = new ArrayList<String>(); 
 		for (String res : this.predictionData) {
-			predictionIDs.add(Integer.valueOf(res));
+			//predictionIDs.add(Integer.valueOf(res));
+			predictionIDs.add(res);
 		}
 		int k = predictionIDs.size();
 		for (int i = 0; i < k; i++) {

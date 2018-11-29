@@ -332,6 +332,9 @@ public class BookmarkReader {
 	}
 	
 	public int getCountLimit() {
+		if (this.countLimit == 0) {
+			return this.getBookmarks().size();
+		}
 		return this.countLimit;
 	}
 	

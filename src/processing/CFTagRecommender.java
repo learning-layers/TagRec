@@ -251,7 +251,7 @@ public class CFTagRecommender {
 	
 	private static String timeString;
 	
-	private static List<Map<Integer, Double>> startBM25CreationForTagPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, int beta) {
+	private static List<Map<Integer, Double>> startBM25CreationForTagPrediction(BookmarkReader reader, int sampleSize, boolean userBased, boolean resBased, int beta, boolean ignoreResource) {
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 		Stopwatch timer = new Stopwatch();
@@ -266,7 +266,8 @@ public class CFTagRecommender {
 		for (int i = trainSize; i < size; i++) {
 			Bookmark data = reader.getBookmarks().get(i);
 			Map<Integer, Double> map = null;
-			map = calculator.getRankedTagList(data.getUserID(), data.getResourceID(), true);
+			int resID = (ignoreResource ? -1 : data.getResourceID());
+			map = calculator.getRankedTagList(data.getUserID(), resID, true);
 			results.add(map);
 			//System.out.println(data.getTags() + "|" + map.keySet());
 		}
@@ -277,12 +278,12 @@ public class CFTagRecommender {
 		return results;
 	}	
 	
-	public static BookmarkReader predictTags(String filename, int trainSize, int sampleSize, int neighbors, boolean userBased, boolean resBased, int beta) {
+	public static BookmarkReader predictTags(String filename, int trainSize, int sampleSize, int neighbors, boolean userBased, boolean resBased, int beta, boolean ignoreResource) {
 		MAX_NEIGHBORS = neighbors;
-		return predictSample(filename, trainSize, sampleSize, userBased, resBased, beta);
+		return predictSample(filename, trainSize, sampleSize, userBased, resBased, beta, ignoreResource);
 	}
 	
-	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int beta) {
+	public static BookmarkReader predictSample(String filename, int trainSize, int sampleSize, boolean userBased, boolean resBased, int beta, boolean ignoreResource) {
 		Timer timerThread = new Timer();
 		MemoryThread memoryThread = new MemoryThread();
 		timerThread.schedule(memoryThread, 0, MemoryThread.TIME_SPAN);
@@ -291,7 +292,7 @@ public class CFTagRecommender {
 		reader.readFile(filename);
 		
 		List<Map<Integer, Double>> cfValues = null;	
-		cfValues = startBM25CreationForTagPrediction(reader, sampleSize, userBased, resBased, beta);
+		cfValues = startBM25CreationForTagPrediction(reader, sampleSize, userBased, resBased, beta, ignoreResource);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();
 		for (int i = 0; i < cfValues.size(); i++) {

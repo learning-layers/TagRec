@@ -87,7 +87,7 @@ public class PredictionFileReader {
 				} else {
 					List<String> realData = Arrays.asList(lineParts[1].split(", "));
 					List<String> predictionData = Arrays.asList(lineParts[2].split(", "));
-					if (predictionData.size() > 0) {
+					if (predictionData.size() > 0 && realData.size() > 0) {
 						PredictionData data = new PredictionData(userID, resID, realData, predictionData, k);
 						this.predictions.add(data);
 						this.predictionCount++;

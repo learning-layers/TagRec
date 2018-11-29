@@ -8,6 +8,7 @@ public class TimeUtil {
     public static final int DAY = 3;
     public static final int FIFTEEN_DAYS = 4;
     public static final int MONTH = 5;
+    public static final int WEEK = 6;
     
     /**
      * get duration count for the dataset.
@@ -42,6 +43,9 @@ public class TimeUtil {
                 break;
             case MONTH:
                 time_count = duration / secondsInMonth;
+                break;
+            case WEEK:
+                time_count = duration / secondsInWeek;
                 break;
         }
         return time_count;

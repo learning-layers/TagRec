@@ -67,7 +67,9 @@ public class HashtagRecommendationEngine {
 		this.sampleDir = sampleDir;
 		this.trainSize = trainSize;
 		initUserTagTime(userTweetFilename, trainSize);
-		initNetwork(networkFilename);
+		if (networkFilename != null) {
+			initNetwork(networkFilename);
+		}
 		initBLLAndFreqMaps(trainSize, dIndividual, lambdaIndividual);
 	}
 	
@@ -180,7 +182,7 @@ public class HashtagRecommendationEngine {
 		if (algorithm.equals("social_top_per_temp")){
 			ContentPersonalTemporalCalculator contentPersTempCalculator = null;
 			Map<Integer, Map<Integer, Double>> contentBasedValues = new HashMap<Integer, Map<Integer, Double>>();
-			String serialFilePath = "./data/results/" + sampleDir + "/" + solrCore + "_cbcfpredictions.ser";
+			String serialFilePath = "./data/results/" + sampleDir + "/" + solrCore + "_cbpredictions.ser";
 			if(new File(serialFilePath).exists()){
 				contentBasedValues = SolrHashtagCalculator.deSerializeHashtagPrediction(serialFilePath);
 				System.out.println(">> serial file path exist >> " + serialFilePath);
@@ -282,6 +284,10 @@ public class HashtagRecommendationEngine {
 			for (Map<Integer, Double> actMap : actValues) {
 				int userID = testLines.get(i++).getUserID();
 				Map<Integer, Double> contentMap = contentBasedValues.get(userID);
+				if (contentMap == null) {
+					resultValues.add(null);
+					continue;
+				}
 				if (actMap != null && actMap.entrySet() != null) {
 					for (Map.Entry<Integer, Double> actEntry : actMap.entrySet()) {
 						if (actEntry != null && actEntry.getKey() != null) {

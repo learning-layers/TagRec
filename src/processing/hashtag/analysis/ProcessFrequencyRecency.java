@@ -43,7 +43,9 @@ public class ProcessFrequencyRecency {
         		saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.HOUR), "individual_recency_hours.txt");
         	} else if (granularity == TimeUtil.DAY) {
         		saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "individual_recency_days.txt");
-        	}
+	    	} else if (granularity == TimeUtil.WEEK) {
+	    		saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.DAY), "individual_recency_weeks.txt");
+	    	}
     	}
         //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.FIFTEEN_DAYS), "./tagrecency" + "_" + "FIFTEEN_DAYS");
         //saveHashMap(getRecencyInDuration(userTagTimestampMap, TimeUtil.MONTH), "./tagrecency" + "_" + "MONTH");

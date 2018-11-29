@@ -67,7 +67,7 @@ public class MetricsCalculator {
 	public MetricsCalculator(PredictionFileReader reader, String outputFile, int k, BookmarkReader bookmarkReader, boolean recommTags) {
 		this.reader = reader;
 		if (recommTags) { // TODO: check
-			this.bookmarkReader = null;//bookmarkReader;
+			this.bookmarkReader = null;
 		}
 		BufferedWriter bw = null;
 		//TODO: Enable if you need data for statistical tests
@@ -82,8 +82,8 @@ public class MetricsCalculator {
 		}
 		
 		
-		//double count = this.reader.getPredictionCount(); // only user where there are recommendations
-		double count = this.reader.getPredictionData().size();		 // all users
+		double count = this.reader.getPredictionCount(); // only user where there are recommendations
+		//double count = this.reader.getPredictionData().size();		 // all users
 		double recall = 0.0, precision = 0.0, mrr = 0.0, fMeasure = 0.0, map = 0.0, nDCG = 0.0, diversity = 0.0, serendipity = 0.0;
 		
 		List<Map<Integer, Double>> entityFeatures = null;
@@ -126,7 +126,7 @@ public class MetricsCalculator {
 			if (this.bookmarkReader != null) {
 				if (recommTags) {
 					cDiversity = data.getTagDiversity(entityFeatures);
-					if (data.getResID() < tagCountMaps.size()) {
+					if (data.getResID() < tagCountMaps.size() && data.getResID() != -1) {
 						Map<Integer, Integer> tagCountMap = tagCountMaps.get(data.getResID());
 						cSerendipity = data.getTagSerendipity(tagCountMap, false);
 					} else {
