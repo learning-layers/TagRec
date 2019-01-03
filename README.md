@@ -3,7 +3,7 @@ TagRec
 
 ## Towards A Standardized Tag Recommender Benchmarking Framework
 * TagRec won the best poster award @ Hypertext 2014 (HT'14) conference: [http://ht.acm.org/ht2014/index.php?awards.poster](http://ht.acm.org/ht2014/index.php?awards.poster)
-* TagRec is also a main part of the recommender system in the Layers project [http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/](http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/)
+* TagRec is also a main part of the recommender systems in the Layers project [http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/](http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/) as well as the AFEL project [http://afel-project.eu/](http://afel-project.eu/)
 * TagRec is part of several lists of recommender systems frameworks such as [http://fmoraes.nl/se-recsys-paperswithcode/](http://fmoraes.nl/se-recsys-paperswithcode/) and [https://github.com/grahamjenson/list_of_recommender_systems](https://github.com/grahamjenson/list_of_recommender_systems)
 
 ## Description
@@ -34,6 +34,7 @@ The source-code can be directly checked-out through this repository. It contains
 * wiki_core for Wikipedia (based on bookmarks from Delicious)
 * twitter_core/researchers for the Twitter CompSci dataset
 * twitter_core/general for the Twitter Random dataset
+* afel for a dataset from the [AFEL project](http://afel-project.eu/)
 
 ## How-to-use
 The _tagrec_ .jar uses three parameters:
@@ -66,7 +67,7 @@ Resource-Recommender:
 Hashtag-Recommender (Kowald et al., 2017):
 * hashtag_analysis for analyzing the temporal effects on hashtag reuse
 * hashtag_socialmp for MostPopular hashtags of the followees (i.e., MPs)
-* hashtag socialrecency for recency-ranked hashtags of the followees (i.e., MRs)
+* hashtag social_recency for recency-ranked hashtags of the followees (i.e., MRs)
 * hashtag_socialbll for BLL-ranked hashtags of the followees (i.e., BLLs)
 * hashtag_hybrid for BLLi,s
 * hashtag_cb_res for BLLi,s,c on the Twitter CompSci dataset and SOLR core
