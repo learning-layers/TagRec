@@ -74,9 +74,9 @@ public class PredictionFileReader {
 				if (parts.length > 1) {
 					resID = Integer.parseInt(parts[1]);
 				}
-				if (!Utilities.isEntityEvaluated(wikiReader, userID, minBookmarks, maxBookmarks, false) || !Utilities.isEntityEvaluated(wikiReader, resID, minResBookmarks, maxResBookmarks, true)) {
-					continue; // skip this user if it shoudln't be evaluated - # bookmarks case
-				}
+				//if (!Utilities.isEntityEvaluated(wikiReader, userID, minBookmarks, maxBookmarks, false) || !Utilities.isEntityEvaluated(wikiReader, resID, minResBookmarks, maxResBookmarks, true)) {
+				//	continue; // skip this user if it shoudln't be evaluated - # bookmarks case
+				//}
 				if (categorizer != null) {
 					if (!categorizer.evaluate(userID)) {
 						continue; // skip this user if it shoudln't be evaluated - categorizer case

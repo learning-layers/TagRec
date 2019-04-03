@@ -39,12 +39,12 @@ public class RecencyCalculator {
 		
 		int count = 0;
 		int index = bookmarks.size() - 1;
-		while (count < 10 && index >= 0) {
+		while (count < Utilities.REC_LIMIT && index >= 0) {
 			Bookmark b = bookmarks.get(index--);
 			for (int t : b.getTags()) {
 				if (!returnMap.containsKey(t)) {
-					returnMap.put(t, 10.0 - count++);
-					if (count >= 10) {
+					returnMap.put(t, (double)Utilities.REC_LIMIT - count++);
+					if (count >= Utilities.REC_LIMIT) {
 						break;
 					}
 				}
@@ -58,12 +58,19 @@ public class RecencyCalculator {
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);	
 		List<int[]> predictionValues = new ArrayList<int[]>();
+		Map<Integer, int[]> predictionValueMap = new LinkedHashMap<Integer, int[]>();
 		RecencyCalculator calculator = new RecencyCalculator(reader, trainSize);
 		
 		for (int i = trainSize; i < trainSize + sampleSize; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID());
-			predictionValues.add(Ints.toArray(map.keySet()));
+			if (predictionValueMap.containsKey(data.getUserID())) {
+				predictionValues.add(predictionValueMap.get(data.getUserID()));
+			} else {
+				Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID());
+				int[] predictionKeys = Ints.toArray(map.keySet());
+				predictionValueMap.put(data.getUserID(), predictionKeys);
+				predictionValues.add(predictionKeys);
+			}
 		}
 
 		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));

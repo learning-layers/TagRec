@@ -66,13 +66,13 @@ public class MetricsCalculator {
 	
 	public MetricsCalculator(PredictionFileReader reader, String outputFile, int k, BookmarkReader bookmarkReader, boolean recommTags) {
 		this.reader = reader;
-		if (recommTags) { // TODO: check
-			this.bookmarkReader = null;
-		}
+		this.bookmarkReader = bookmarkReader;
+		//if (recommTags) { // TODO: check
+		//	this.bookmarkReader = null;
+		//}
 		BufferedWriter bw = null;
-		//TODO: Enable if you need data for statistical tests
-		
-		if ((recommTags && (k == 5 || k == 10)) || (!recommTags && k == 20)) {
+		//TODO: Enable if you need data for statistical tests		
+		if ((recommTags && (k == 5 || k == 10 || k == 20)) || (!recommTags && k == 20)) {
 			try {
 				FileWriter writer = new FileWriter(new File(outputFile + "_" + k + ".txt"), true);
 				bw = new BufferedWriter(writer);
@@ -80,20 +80,23 @@ public class MetricsCalculator {
 				e.printStackTrace();
 			}
 		}
-		
-		
+				
 		double count = this.reader.getPredictionCount(); // only user where there are recommendations
 		//double count = this.reader.getPredictionData().size();		 // all users
 		double recall = 0.0, precision = 0.0, mrr = 0.0, fMeasure = 0.0, map = 0.0, nDCG = 0.0, diversity = 0.0, serendipity = 0.0;
 		
 		List<Map<Integer, Double>> entityFeatures = null;
 		List<Map<Integer, Integer>> tagCountMaps = null;
+		Map<Integer, Integer> popMap = null;
 		List<Bookmark> trainList = null;
 		if (this.bookmarkReader != null) {
 			trainList = this.bookmarkReader.getBookmarks().subList(0, this.bookmarkReader.getCountLimit());
 			if (recommTags) {
-				tagCountMaps = Utilities.getResMaps(trainList);
-				entityFeatures = Utilities.getResourceMapsForTags(trainList);
+				tagCountMaps = Utilities.getUserMaps(trainList);
+				popMap = Utilities.getPopMap(this.bookmarkReader);
+				// TODO: old version from RecSys
+				//tagCountMaps = Utilities.getResMaps(trainList);
+				//entityFeatures = Utilities.getResourceMapsForTags(trainList);
 			} else {
 				entityFeatures = Utilities.getUniqueTopicMaps(trainList, true); // TODO: check regarding unique!
 			}
@@ -125,6 +128,10 @@ public class MetricsCalculator {
 			double cDiversity = 0.0, cSerendipity = 0.0;
 			if (this.bookmarkReader != null) {
 				if (recommTags) {
+					cDiversity = data.getTagNovelty(popMap, bookmarkReader);
+					int userID = this.bookmarkReader.getUserMap().get(Integer.toString(data.getUserID()));
+					cSerendipity = data.getTagNovelty(tagCountMaps.get(userID), bookmarkReader);
+					/* old version from recsys paper
 					cDiversity = data.getTagDiversity(entityFeatures);
 					if (data.getResID() < tagCountMaps.size() && data.getResID() != -1) {
 						Map<Integer, Integer> tagCountMap = tagCountMaps.get(data.getResID());
@@ -132,6 +139,7 @@ public class MetricsCalculator {
 					} else {
 						cSerendipity = 1.0;
 					}
+					*/
 				} else {
 					List<Integer> knownEntities = Bookmark.getResourcesFromUser(trainList, data.getUserID());
 					cDiversity = data.getDiversity(entityFeatures, true);

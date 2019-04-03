@@ -21,9 +21,12 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import file.BookmarkReader;
 
 public class PredictionData {
 	
@@ -242,6 +245,32 @@ public class PredictionData {
 			serendipity = (1.0 - Utilities.getCosineSim(getPredictionDataAsMap(), tagFrequencyMap));
 		}
 		return serendipity;
+	}
+	
+	public double getTagNovelty(Map<Integer, Integer> popMap, BookmarkReader reader) {
+		double novelty = 0.0;
+		if (this.predictionData.size() == 0 || popMap == null) {
+			System.out.println("Error while calculating novelty");
+			return 1.0;
+		}
+		// normalization constant
+		double popMax = Collections.max(popMap.values()) + 1.0;
+		popMax = Math.log(popMax) / Math.log(2);
+		
+		for (String tag : this.predictionData) {
+			Integer tagID = reader.getTagMap().get(tag);
+			if (tagID == null) {
+				System.out.println("Novelty: Tag not found");
+			}
+			double pop = 1.0;
+			if (popMap.containsKey(tagID)) {
+				pop += popMap.get(tagID);
+			}
+			//pop = pop / popMax * (-1);
+			pop = Math.log(pop) / Math.log(2);
+			novelty += (pop / popMax);	
+		}
+		return 1.0 - novelty / this.predictionData.size();
 	}
 	
 	/**

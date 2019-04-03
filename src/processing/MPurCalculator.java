@@ -40,7 +40,7 @@ import common.Utilities;
 
 public class MPurCalculator {
 
-	private final static int REC_LIMIT = 10;
+	private final static int REC_LIMIT = Utilities.REC_LIMIT;
 	
 	private BookmarkReader reader;
 	private double beta;
@@ -87,7 +87,8 @@ public class MPurCalculator {
 		if (this.userBased && this.userMaps != null && userID < this.userMaps.size()) {
 			Map<Integer, Integer> userMap = this.userMaps.get(userID);
 			for (Map.Entry<Integer, Integer> entry : userMap.entrySet()) {
-				double userVal = this.beta * (Math.exp(entry.getValue().doubleValue()) / this.userDenoms.get(userID));
+				//double userVal = this.beta * (Math.exp(entry.getValue().doubleValue()) / this.userDenoms.get(userID));
+				double userVal = entry.getValue().doubleValue();
 				resultMap.put(entry.getKey(), userVal);
 			}
 		}

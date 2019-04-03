@@ -107,9 +107,9 @@ public class MPCalculator {
 
 		List<int[]> values = null;
 		if (mp) {
-			values = getPopularTags(reader, sampleSize, 10);
+			values = getPopularTags(reader, sampleSize, Utilities.REC_LIMIT);
 		} else {
-			values = getPerfectTags(reader, sampleSize, 10);
+			values = getPerfectTags(reader, sampleSize, Utilities.REC_LIMIT);
 		}
 		
 		reader.setTestLines(reader.getBookmarks().subList(trainSize, reader.getBookmarks().size()));

@@ -34,7 +34,7 @@ import common.Bookmark;
 
 public class PredictionFileWriter {
 
-	private static final int OUTPUT_LIMIT = 10;
+	private static final int OUTPUT_LIMIT = 30;
 	
 	private BookmarkReader reader;
 	private List<int[]> results;
@@ -63,11 +63,12 @@ public class PredictionFileWriter {
 				}
 				List<Integer> userTags = userData.getTags();
 				
-				resultString += (userData.getUserID() + (userData.getResourceID() == -1 ? "" : "-" + userData.getResourceID()) + "|");
+				resultString += (this.reader.getUsers().get(userData.getUserID()) + "|");
+				//resultString += (userData.getUserID() + (userData.getResourceID() == -1 ? "" : "-" + userData.getResourceID()) + "|");
 				for (int c : userTags) {
 					//if (j++ < OUTPUT_LIMIT) {
-						//resultString += (categories.get(c) + ", ");
-						resultString += (c + ", ");
+						//resultString += (c + ", ");
+						resultString += (this.reader.getTags().get(c) + ", ");
 					//} else {
 					//	break;
 					//}
@@ -80,7 +81,8 @@ public class PredictionFileWriter {
 				j = 0;
 				for (int c : userResults) {
 					if (j++ < OUTPUT_LIMIT) {
-						resultString += (c + ", ");
+						//resultString += (c + ", ");
+						resultString += (this.reader.getTags().get(c) + ", ");
 					} else {
 						break;
 					}

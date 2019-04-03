@@ -33,4 +33,16 @@ public class MapUtil
 			e.setValue(Math.exp(e.getValue()) / denom);
 		}
     }
+    
+    public static void normalizeMap(Map<Integer, Double> map, double beta) {
+    	double denom = 0.0;
+		for (Map.Entry<Integer, Double> e : map.entrySet()) {
+			denom += Math.exp(e.getValue());
+			denom += e.getValue();
+		}
+		for (Map.Entry<Integer, Double> e : map.entrySet()) {
+			e.setValue(Math.exp(e.getValue()) / denom * beta);
+			e.setValue(e.getValue() / denom * beta);
+		}
+    }
 }

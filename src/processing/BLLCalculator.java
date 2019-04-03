@@ -44,7 +44,7 @@ import file.BookmarkReader;
 
 public class BLLCalculator {
 
-	private final static int REC_LIMIT = 10;
+	private final static int REC_LIMIT = Utilities.REC_LIMIT;
 	
 	private BookmarkReader reader;
 	private double dVal;

@@ -117,14 +117,14 @@ public class BookmarkReader {
 					processUserData(userID, userData, tags, categories, resID);		
 				//}
 				// reset userdata
-				userID = lineParts[0].replace("\"", "");
-				resID = lineParts[1].replace("\"", "");
-				timestamp = lineParts[2].replace("\"", "");
+				userID = lineParts[0].replace("\"", "").trim();
+				resID = lineParts[1].replace("\"", "").trim();
+				timestamp = lineParts[2].replace("\"", "").trim();
 				userData = new Bookmark(-1, -1, timestamp);
 				categories.clear();
 				tags.clear();
 				for (String tag : lineParts[3].replace("\"", "").split(",")) {
-					String stemmedTag = tag.toLowerCase();
+					String stemmedTag = tag.trim().toLowerCase();
 					if (!stemmedTag.isEmpty() && !tags.contains(stemmedTag)) {
 						if (this.stemmer != null) {
 							this.stemmer.setCurrent(stemmedTag);
@@ -140,21 +140,23 @@ public class BookmarkReader {
 							//if (cat.contains("_")) {
 							//	categories.add(cat.substring(0, cat.indexOf("_")).toLowerCase());
 							//} else {
-								categories.add(cat.toLowerCase());
+								categories.add(cat.trim().toLowerCase());
 							//}
 						}
 					}
 				}
 				
-				//if (lineParts.length > 5) { // is there a rating?
-				//	try {
-				//		userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
-				//	} catch (Exception e) { /* do nothing */ }
-				//}
+				if (lineParts.length > 5) { // is there a rating?
+					try {
+						userData.setRating(Double.parseDouble(lineParts[5].replace("\"", "")));
+					} catch (Exception e) {
+						//System.out.println("Rating parse error");
+					}
+				}
 				
 				// TODO ----------------------
 				// extend common/Bookmark class with fields for title (= lineParts[6]) and description (= lineParts[7])
-				//if (lineParts.length > 6) { // is there a rating?
+				//if (lineParts.length > 6) { // is there a title or description?
 				//	try {
 				//		userData.setTitle(lineParts[6].replace("\"", ""));
 				//	} catch (Exception e) { /* do nothing */ }

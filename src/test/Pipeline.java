@@ -78,6 +78,7 @@ import processing.hashtag.social.SocialStrengthCalculator;
 import processing.hashtag.solr.CFSolrHashtagCalculator;
 import processing.hashtag.solr.SolrHashtagCalculator;
 import processing.hashtag.solr.Tweet;
+import processing.musicrec.MusicCFRecommender;
 
 public class Pipeline {
 
@@ -94,8 +95,9 @@ public class Pipeline {
     // placeholder for the topic posfix
     private static String TOPIC_NAME = null;
     // placeholder for the used dataset
-    private final static String DATASET = "bib";//"lfm1b";
-    private final static String SUBDIR = "";///high";// "general" / "researchers" for Twitter
+    private final static String DATASET = "lfm1b";
+    private final static String SUBDIR = "/low";// "general" / "researchers" for Twitter
+    private static double dParam = 0.5;
 
     public static void main(String[] args) {
         System.out.println(
@@ -117,6 +119,7 @@ public class Pipeline {
         String path = dir + DATASET + "_sample";
         String networkFileName = "./data/csv/" + dir + "network.txt";
         String solrServerNameWithPort = "http://kti-social:8938";
+        Utilities.REC_LIMIT = 20;
         
         //JKULFMProcessor.preprocessFile("./data/schedl/high_main_users1000.txt", "./data/schedl/high_main_user_events_1000.txt");
         // Simone school dataset
@@ -133,10 +136,10 @@ public class Pipeline {
         //getStatistics(path, false);
         
         // --> split dataset
-        //BookmarkSplitter.splitSample(path, path, 1, 20, true, false, true, null, null);
+        //BookmarkSplitter.splitSample(path, path, 1, 1, true, false, true, null, null);
         
         // --> analyze sample
-        //analysisSocial(dir, path, null, "personal", TimeUtil.WEEK);
+        //analysisSocial(dir, path, null, "personal", TimeUtil.HOUR);
         
         // --> MP
         //startBaselineCalculator(dir, path, 1, true);
@@ -148,10 +151,34 @@ public class Pipeline {
         //startRecCalculator(dir, path);
         
         // --> BLLi
-        //startActCalculator(dir, path, 1, 1.513, null, -5, false, CalculationType.NONE, false); // low
-        //startActCalculator(dir, path, 1, 1.618, null, -5, false, CalculationType.NONE, false); // medium
-        //startActCalculator(dir, path, 1, 1.646, null, -5, false, CalculationType.NONE, false); // high
-       
+        if (SUBDIR.contains("low")) {
+        	dParam = 1.555;
+        } else if (SUBDIR.contains("medium")) {
+        	dParam = 1.599;
+        } else {
+        	dParam = 1.665;
+        }
+        //startActCalculator(dir, path, 1, dParam, null, -5, false, CalculationType.NONE, false); // artists
+        //startActCalculator(dir, path, 1, 1.480, null, -5, false, CalculationType.NONE, false); // low genre
+        //startActCalculator(dir, path, 1, 1.574, null, -5, false, CalculationType.NONE, false); // medium genre
+        //startActCalculator(dir, path, 1, 1.587, null, -5, false, CalculationType.NONE, false); // high genre
+        
+        //int neighbors = 20;
+        // --> CF_general
+        //startCfMusicCalculator(dir, path, 1, neighbors, null, null, "general");
+        // --> CF_pop
+        //startCfMusicCalculator(dir, path, 1, neighbors, null, null, "pop");
+        // --> CF_time
+        //startCfMusicCalculator(dir, path, 1, neighbors, null, null, "time");
+        
+        // static BLL+CF
+        //startCfMusicCalculator(dir, path, 1, 30, dParam, 0.5, "time");
+        
+        // dynamic BLL+CF
+        //startCfMusicCalculator(dir, path, 1, 30, dParam, -1.0, "time");
+               
+        //startGirpCalculator(dir, path, false);
+        
         // --> MPs
         //startSocialRecommendation(dir, path, networkFileName, "social_freq", 1.7, null, 1.25, null, null, null);
 
@@ -385,17 +412,14 @@ public class Pipeline {
         for (int i = 1; i <= sampleCount; i++) {
             reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false, dVal, 5, type, lambda);
             if (type == CalculationType.USER_TO_RESOURCE_ONLY) {
-                writeMetrics(sampleDir, sampleName, "ac_5_5", sampleCount, 10, null, allMetrics ? reader : null, null);
+                writeMetrics(sampleDir, sampleName, "ac_5_5", sampleCount, Utilities.REC_LIMIT, null, reader, null);
             } else {
-                writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, 10, null,
-                        allMetrics ? reader : null, null);
+                writeMetrics(sampleDir, sampleName, "bll" + ac + "_" + 5 + "_" + dVal, sampleCount, Utilities.REC_LIMIT, null, reader, null);
             }
             if (all) {
                 for (int betaVal : betaValues) {
-                    reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal,
-                            type, lambda);
-                    writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, 10,
-                            null, allMetrics ? reader : null, null);
+                    reader = BLLCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, dVal, betaVal, type, lambda);
+                    writeMetrics(sampleDir, sampleName, "bll_c" + ac + "_" + betaVal + "_" + dVal, sampleCount, Utilities.REC_LIMIT, null, reader, null);
                 }
             }
         }
@@ -492,8 +516,7 @@ public class Pipeline {
         }
     }
 
-    private static void startCfCbHashtagCalculator(String sampleDir, String sampleName, double beta, String solrUrl,
-            String solrCore) {
+    private static void startCfCbHashtagCalculator(String sampleDir, String sampleName, double beta, String solrUrl, String solrCore) {
         getTrainTestSize(sampleName);
         CFSolrHashtagCalculator.predictSample(sampleDir, sampleName, TRAIN_SIZE, beta, solrUrl, solrCore);
         writeMetrics(sampleDir, sampleName, "cf_cb_" + beta, 1, 10, null, null, null);
@@ -531,7 +554,7 @@ public class Pipeline {
     	getTrainTestSize(path);
     	BookmarkReader reader = null;
     	reader = RecencyCalculator.predictSample(path, TRAIN_SIZE, TEST_SIZE);
-    	writeMetrics(dir, path, "rec", 1, 10, null, reader, null);
+    	writeMetrics(dir, path, "rec", 1, Utilities.REC_LIMIT, null, reader, null);
 	}
 
     private static void startModelCalculator(String sampleDir, String sampleName, int sampleCount, int betaUpperBound,
@@ -545,19 +568,35 @@ public class Pipeline {
             if (all)
                 reader = MPurCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, false, true, 5);
         }
-        writeMetrics(sampleDir, sampleName, "mp_u_" + 5, sampleCount, 10, null, reader, null);
+        writeMetrics(sampleDir, sampleName, "mp_u_" + 5, sampleCount, Utilities.REC_LIMIT, null, reader, null);
         if (all)
-            writeMetrics(sampleDir, sampleName, "mp_r_" + 5, sampleCount, 10, null, reader, null);
+            writeMetrics(sampleDir, sampleName, "mp_r_" + 5, sampleCount, Utilities.REC_LIMIT, null, reader, null);
         if (all) {
             for (int beta : betaValues) {
                 for (int i = 1; i <= sampleCount; i++) {
                     reader = MPurCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true, beta);
                 }
-                writeMetrics(sampleDir, sampleName, "mp_ur_" + beta, sampleCount, 10, null, reader, null);
+                writeMetrics(sampleDir, sampleName, "mp_ur_" + beta, sampleCount, Utilities.REC_LIMIT, null, reader, null);
             }
         }
     }
 
+    private static void startCfMusicCalculator(String sampleDir, String sampleName, int sampleCount, int neighbors, Double bllVal, Double beta, String type) {
+        getTrainTestSize(sampleName);
+        BookmarkReader reader = null;
+        for (int i = 1; i <= sampleCount; i++) {
+            reader = MusicCFRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors, bllVal, beta, type);
+        }
+        String postfix = "cf_" + type + "_";
+		if (beta != null) {
+			postfix = "bll_cf_";
+		}
+        if (beta != null && beta > 0) {
+        	postfix += "static_";
+        }
+        writeMetrics(sampleDir, sampleName, postfix + neighbors, sampleCount, Utilities.REC_LIMIT, null, reader, null);
+    }
+    
     private static void startCfTagCalculator(String sampleDir, String sampleName, int sampleCount, int neighbors,
             int betaUpperBound, boolean all, boolean ignoreResource) {
         getTrainTestSize(sampleName);
@@ -599,7 +638,7 @@ public class Pipeline {
         for (int i = 1; i <= size; i++) {
             reader = MPCalculator.predictPopularTags(sampleName, TRAIN_SIZE, TEST_SIZE, mp);
         }
-        writeMetrics(sampleDir, sampleName, "mp", size, 10, null, reader, null);
+        writeMetrics(sampleDir, sampleName, "mp", size, Utilities.REC_LIMIT, null, reader, null);
     }
 
     private static void startLdaCalculator(String sampleDir, String sampleName, int topics, int sampleCount,
@@ -749,7 +788,7 @@ public class Pipeline {
         System.out.println("Last timestamp: " + reader.getLastTimestamp().toString());
 
         // write user distribution
-        UserTagDistribution.calculate(reader, dataset);
+        //UserTagDistribution.calculate(reader, dataset);
         if (writeAll) {
             try {
                 getTrainTestSize(dataset);

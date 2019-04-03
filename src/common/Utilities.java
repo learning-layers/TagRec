@@ -45,6 +45,8 @@ import file.BookmarkReader;
 
 public class Utilities {
 
+	public static int REC_LIMIT = 20;
+	
     private final static String REV_START = "<rev xml:space=\"preserve\">";
     private final static String REV_END = "</rev>";
 
@@ -70,6 +72,14 @@ public class Utilities {
         return false;
     }
 
+    public static Map<Integer, Integer> getPopMap(BookmarkReader reader) {
+		Map<Integer, Integer> countMap = new LinkedHashMap<Integer, Integer>();
+		for (int i = 0; i < reader.getTagCounts().size(); i++) {
+			countMap.put(i, reader.getTagCounts().get(i));
+		}
+		return countMap;
+    }
+    
     public static List<Map<Integer, Integer>> getUserMaps(List<Bookmark> userLines) {
         List<Map<Integer, Integer>> userMaps = new ArrayList<Map<Integer, Integer>>();
         for (Bookmark data : userLines) {
@@ -78,6 +88,19 @@ public class Utilities {
                 userMaps.add(Utilities.mergeListWithMap(data.getTags(), new LinkedHashMap<Integer, Integer>()));
             } else {
                 Utilities.mergeListWithMap(data.getTags(), userMaps.get(userID));
+            }
+        }
+        return userMaps;
+    }
+    
+    public static List<Map<Integer, Double>> getFloatUserMaps(List<Bookmark> userLines) {
+        List<Map<Integer, Double>> userMaps = new ArrayList<Map<Integer, Double>>();
+        for (Bookmark data : userLines) {
+            int userID = data.getUserID();
+            if (userID >= userMaps.size()) {
+                userMaps.add(Utilities.mergeFloatListWithMap(data.getTags(), new LinkedHashMap<Integer, Double>()));
+            } else {
+                Utilities.mergeFloatListWithMap(data.getTags(), userMaps.get(userID));
             }
         }
         return userMaps;
@@ -230,6 +253,14 @@ public class Utilities {
     public static Map<Integer, Integer> mergeListWithMap(List<Integer> from, Map<Integer, Integer> to) {
         for (Integer value : from) {
             Integer count = to.get(value);
+            to.put(value, (count != null ? count + 1 : 1));
+        }
+        return to;
+    }
+    
+    public static Map<Integer, Double> mergeFloatListWithMap(List<Integer> from, Map<Integer, Double> to) {
+        for (Integer value : from) {
+            Double count = to.get(value);
             to.put(value, (count != null ? count + 1 : 1));
         }
         return to;
@@ -484,6 +515,9 @@ public class Utilities {
     public static double getCosineSim(Map<Integer, Integer> targetMap, Map<Integer, Integer> nMap) {
         Set<Integer> both = new HashSet<Integer>(targetMap.keySet());
         both.retainAll(nMap.keySet());
+        if (both.size() == 0) {
+        	return 0.0;
+        }
         double scalar = 0.0, norm1 = 0.0, norm2 = 0.0;
         for (int k : both)
             scalar += (targetMap.get(k) * nMap.get(k));
@@ -491,8 +525,9 @@ public class Utilities {
             norm1 += (targetMap.get(k) * targetMap.get(k));
         for (int k : nMap.keySet())
             norm2 += (nMap.get(k) * nMap.get(k));
-        if (Math.sqrt(norm1 * norm2) == 0.0)
+        if (Math.sqrt(norm1 * norm2) == 0.0) {       	
             return 0.0;
+        }
         return scalar / Math.sqrt(norm1 * norm2);
     }
 
