@@ -54,7 +54,7 @@ public class ThreeLTCalculator {
 		this.bookmarkBLL = bookmarkBLL;		
 		this.cType = cType;
 		
-		this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true, null);
+		this.resMaps = BLLCalculator.getArtifactMaps(reader, this.trainList, null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0, true, null, true);
 		this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 		this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);
 		if (this.cType == CalculationType.USER_TO_RESOURCE) {

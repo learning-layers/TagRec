@@ -27,7 +27,7 @@ import file.PredictionFileWriter;
 import processing.BLLCalculator;
 import file.BookmarkReader;
 
-public class MusicCFRecommender {
+public class BLL_CFRecommender {
 	
 	public static int MAX_NEIGHBORS = 20;
 	
@@ -39,7 +39,7 @@ public class MusicCFRecommender {
 	private List<Map<Integer, Double>> bllMap;
 	private Double beta;
 	
-	public MusicCFRecommender(BookmarkReader reader, int trainSize, Double bllVal, Double beta, String type) {
+	public BLL_CFRecommender(BookmarkReader reader, int trainSize, Double bllVal, Double beta, String type) {
 		this.reader = reader;
 		this.beta = beta;
 		this.trainList = this.reader.getBookmarks().subList(0, trainSize);
@@ -48,11 +48,10 @@ public class MusicCFRecommender {
 		
 		if (bllVal != null) {
 			this.bllMap = BLLCalculator.getArtifactMaps(this.reader, this.trainList, this.testList, false, 
-					new ArrayList<Long>(), new ArrayList<Double>(), bllVal.doubleValue(), true, null, true);
+					new ArrayList<Long>(), new ArrayList<Double>(), bllVal.doubleValue(), true, null, false);
 		}
 		if (type.equals("general")) {
 			this.userMaps = Utilities.getFloatUserMaps(this.trainList);
-			System.out.println("Avg. number of genres per user: " + this.getAvgUserSize());
 		} else if (type.equals("pop")) {
 			this.userMaps = getTopUserArtists(30);
 		} else { // time
@@ -99,59 +98,6 @@ public class MusicCFRecommender {
 		return returnList;
 	}
 	
-	private double getAvgPairwiseSim() {
-		double sim = 0.0;
-		if (this.simMap.size() == 0) {
-			return sim;
-		}
-		for (double s : this.simMap.values()) {
-			sim += s;
-		}
-		return sim / this.simMap.size();
-	}
-	
-	private double getAvgUserSize() {
-		double size = 0.0;
-		if (this.userMaps.size() == 0) {
-			return size;
-		}
-		for (Map<Integer, Double> map : this.userMaps) {
-			size += map.size();
-		}
-		return size / this.userMaps.size();
-	}
-	
-	private void printPairwiseSim(String filename) {
-		System.out.println("Entries to write: " + this.simMap.size());
-		String fileToWrite = "./data/metrics/" + filename + "_cosine_sim.txt";
-		//String fileToWrite = "./data/metrics/" + filename + "_jaccard_sim.txt";       
-		try {
-            FileWriter writer = new FileWriter(new File(fileToWrite));
-            BufferedWriter bw = new BufferedWriter(writer);
-			for (Map.Entry<String, Double> entry : this.simMap.entrySet()) {
-				bw.write(entry.getKey() + ";");
-				bw.write(entry.getValue() + "\n");
-			}
-			bw.flush();
-			bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }     
-	}
-	
-	private double getBetaForUser(Bookmark data) {
-		if (this.beta < 0) {
-			if (data.getRating() > 0) {
-				return data.getRating();
-			} else {
-				System.out.println("Wrong rating");
-				return 0.5;
-			}
-		} else {
-			return this.beta.doubleValue();
-		}
-	}
-	
 	public Map<Integer, Double> getRankedTagList(Bookmark data, boolean sorting) {
 		int userID = data.getUserID();
 		Map<Integer, Double> resultMap = new LinkedHashMap<Integer, Double>();
@@ -178,8 +124,9 @@ public class MusicCFRecommender {
 				break;
 			}
 		}
+		/*
 		if (this.beta != null && userID < this.bllMap.size()) { // hybrid!
-			double beta = getBetaForUser(data);
+			double beta = this.beta.doubleValue();
 			MapUtil.normalizeMap(resultMap, beta);
 			Map<Integer, Double> userBllMap = this.bllMap.get(userID);
 			for (Map.Entry<Integer, Double> artist : userBllMap.entrySet()) {
@@ -189,10 +136,9 @@ public class MusicCFRecommender {
 				resultMap.put(artist.getKey(), hybridval);
 			}
 		}
+		*/
 		if (sorting) {
-			Map<Integer, Double> sortedResultMap = MapUtil.sortByValue(resultMap);
-			//Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(resultMap));
-			//sortedResultMap.putAll(resultMap);			
+			Map<Integer, Double> sortedResultMap = MapUtil.sortByValue(resultMap);			
 			Map<Integer, Double> returnMap = new LinkedHashMap<Integer, Double>();
 			for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
 				if (returnMap.size() < Utilities.REC_LIMIT) {
@@ -233,8 +179,6 @@ public class MusicCFRecommender {
 			}
 			
 			Map<Integer, Double> sortedNeighbors = MapUtil.sortByValue(neighbors);
-			//Map<Integer, Double> sortedNeighbors = new TreeMap<Integer, Double>(new DoubleMapComparator(neighbors));
-			//sortedNeighbors.putAll(neighbors);
 			return sortedNeighbors;
 		}
 		System.out.println("Wrong user id");
@@ -247,7 +191,7 @@ public class MusicCFRecommender {
 		int size = reader.getBookmarks().size();
 		int trainSize = size - sampleSize;
 
-		MusicCFRecommender calculator = new MusicCFRecommender(reader, trainSize, bllVal, beta, type);		
+		BLL_CFRecommender calculator = new BLL_CFRecommender(reader, trainSize, bllVal, beta, type);		
 		List<Map<Integer, Double>> results = new ArrayList<Map<Integer, Double>>();
 		for (int i = trainSize; i < size; i++) {
 			Bookmark data = reader.getBookmarks().get(i);
@@ -255,8 +199,6 @@ public class MusicCFRecommender {
 			map = calculator.getRankedTagList(data, true);
 			results.add(map);
 		}
-		System.out.println("Average pairwise sim: " + calculator.getAvgPairwiseSim());
-		calculator.printPairwiseSim(filename);
 		
 		return results;
 	}	
@@ -270,31 +212,6 @@ public class MusicCFRecommender {
 		BookmarkReader reader = new BookmarkReader(trainSize, false);
 		reader.readFile(filename);
 		
-		/*
-		Utilities.REC_LIMIT = 100;		
-		FileWriter pywriter;
-		try {
-			pywriter = new FileWriter(new File("./data/metrics/" + filename + "_cfvals.txt"));
-			BufferedWriter pybw = new BufferedWriter(pywriter);
-			for (Map<Integer, Double> map : cfValues) {
-				//MapUtil.normalizeMap(map);
-				boolean firstEntry = true;
-				for (Map.Entry<Integer, Double> entry : map.entrySet()) {
-					if (!firstEntry) {
-						pybw.write(";");
-					} else {
-						firstEntry = false;
-					}
-					pybw.write(reader.getResources().get(entry.getKey()) + ":" + entry.getValue());
-				}
-				pybw.write("\n");
-			}
-			pybw.flush();
-			pybw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		*/
 		List<Map<Integer, Double>> cfValues = startCollaborativeFiltering(reader, sampleSize, filename, bllVal, beta, type);
 		
 		List<int[]> predictionValues = new ArrayList<int[]>();

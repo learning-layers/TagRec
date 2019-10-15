@@ -35,6 +35,7 @@ import common.Bookmark;
 import common.MemoryThread;
 import common.PerformanceMeasurement;
 import common.Utilities;
+import engine.EngineUtils;
 import file.PredictionFileWriter;
 import file.BookmarkReader;
 
@@ -96,6 +97,31 @@ public class MPCalculator {
 		return tags;
 	}
 	
+	private static List<int[]> getPopularTagsFiltered(BookmarkReader reader, int trainSize, int sampleSize, int limit) {
+		System.out.println("MP: Filter own entities");
+		
+		List<int[]> tags = new ArrayList<int[]>();
+		int[] tagIDs = getPopularTagList(reader, reader.getTags().size());
+		List<Map<Integer, Integer>> userMaps = Utilities.getUserMaps(reader.getBookmarks().subList(0, trainSize));
+		
+		for (int j = trainSize; j < trainSize + sampleSize; j++) {
+			Map<Integer, Integer> filterTags = userMaps.get(reader.getBookmarks().get(j).getUserID());
+			List<Integer> returnTags = new ArrayList<Integer>();
+			for (int popTag: tagIDs) {
+				if (returnTags.size() < limit) {
+					if (!filterTags.containsKey(popTag)) {
+						returnTags.add(popTag);
+					}
+				} else {
+					break;
+				}
+			}			
+			tags.add(Ints.toArray(returnTags));
+		}
+		
+		return tags;
+	}
+	
 	// public statics --------------------------------------------------------------------------------------------
 	public static BookmarkReader predictPopularTags(String filename, int trainSize, int sampleSize, boolean mp) {
 		Timer timerThread = new Timer();
@@ -107,7 +133,11 @@ public class MPCalculator {
 
 		List<int[]> values = null;
 		if (mp) {
-			values = getPopularTags(reader, sampleSize, Utilities.REC_LIMIT);
+			if (!Utilities.FILTER_OWN) {
+				values = getPopularTags(reader, sampleSize, Utilities.REC_LIMIT);
+			} else {
+				values = getPopularTagsFiltered(reader, trainSize, sampleSize, Utilities.REC_LIMIT);
+			}
 		} else {
 			values = getPerfectTags(reader, sampleSize, Utilities.REC_LIMIT);
 		}

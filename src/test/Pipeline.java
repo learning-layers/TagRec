@@ -78,6 +78,7 @@ import processing.hashtag.social.SocialStrengthCalculator;
 import processing.hashtag.solr.CFSolrHashtagCalculator;
 import processing.hashtag.solr.SolrHashtagCalculator;
 import processing.hashtag.solr.Tweet;
+import processing.musicrec.ArtistCFRecommender;
 import processing.musicrec.MusicCFRecommender;
 
 public class Pipeline {
@@ -95,14 +96,16 @@ public class Pipeline {
     // placeholder for the topic posfix
     private static String TOPIC_NAME = null;
     // placeholder for the used dataset
-    private final static String DATASET = "lfm1b";
-    private final static String SUBDIR = "/low";// "general" / "researchers" for Twitter
+    private final static String DATASET = "lfm1b"; // example dir for Last.fm
+    private final static String SUBDIR = "";
+    // "/general" / "/researchers" for Twitter
+    // "/low" / "/medium" / "/high" / "/cold" for Last.fm
     private static double dParam = 0.5;
 
     public static void main(String[] args) {
         System.out.println(
                 "TagRecommender:\n" + "" + "A framework to implement and evaluate algorithms for the recommendation\n"
-                        + "of tags. " + "Copyright (C) 2013 - 2019 Dominik Kowald\n\n"
+                        + "of tags. " + "Copyright (C) 2013 - 2020 Dominik Kowald\n\n"
                         + "This program is free software: you can redistribute it and/or modify\n"
                         + "it under the terms of the GNU Affero General Public License as published by\n"
                         + "the Free Software Foundation, either version 3 of the License, or\n"
@@ -119,9 +122,10 @@ public class Pipeline {
         String path = dir + DATASET + "_sample";
         String networkFileName = "./data/csv/" + dir + "network.txt";
         String solrServerNameWithPort = "http://kti-social:8938";
-        Utilities.REC_LIMIT = 20;
+        Utilities.REC_LIMIT = 10;
+        Utilities.FILTER_OWN = false;
         
-        //JKULFMProcessor.preprocessFile("./data/schedl/high_main_users1000.txt", "./data/schedl/high_main_user_events_1000.txt");
+        //JKULFMProcessor.preprocessFile("./data/schedl/cold_start_users.txt", "./data/schedl/cold_start_events.txt");
         // Simone school dataset
         //BookmarkReader reader = null;//new BookmarkReader(0, false);
         //reader.readFile("school_core/school_core");
@@ -152,18 +156,21 @@ public class Pipeline {
         
         // --> BLLi
         if (SUBDIR.contains("low")) {
-        	dParam = 1.555;
+        	dParam = 1.642;
         } else if (SUBDIR.contains("medium")) {
-        	dParam = 1.599;
+        	dParam = 1.640;
         } else {
-        	dParam = 1.665;
+        	dParam = 1.666;
         }
-        //startActCalculator(dir, path, 1, dParam, null, -5, false, CalculationType.NONE, false); // artists
+        //startActCalculator(dir, path, 1, 0.5, null, -5, false, CalculationType.NONE, false); // default
+        //startActCalculator(dir, path, 1, 1.65, null, -5, false, CalculationType.NONE, false); // artists        
         //startActCalculator(dir, path, 1, 1.480, null, -5, false, CalculationType.NONE, false); // low genre
         //startActCalculator(dir, path, 1, 1.574, null, -5, false, CalculationType.NONE, false); // medium genre
         //startActCalculator(dir, path, 1, 1.587, null, -5, false, CalculationType.NONE, false); // high genre
         
-        //int neighbors = 20;
+        int neighbors = 20;
+        // --> CF_item
+        //startCfArtistCalculator(dir, path, 1, neighbors);
         // --> CF_general
         //startCfMusicCalculator(dir, path, 1, neighbors, null, null, "general");
         // --> CF_pop
@@ -172,8 +179,7 @@ public class Pipeline {
         //startCfMusicCalculator(dir, path, 1, neighbors, null, null, "time");
         
         // static BLL+CF
-        //startCfMusicCalculator(dir, path, 1, 30, dParam, 0.5, "time");
-        
+        //startCfMusicCalculator(dir, path, 1, 30, dParam, 0.5, "time");       
         // dynamic BLL+CF
         //startCfMusicCalculator(dir, path, 1, 30, dParam, -1.0, "time");
                
@@ -543,10 +549,10 @@ public class Pipeline {
         getTrainTestSize(sampleName);
         BookmarkReader reader = null;
         reader = GIRPTMCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, false);
-        writeMetrics(sampleDir, sampleName, "girp", 1, 10, null, reader, null);
+        writeMetrics(sampleDir, sampleName, "girp", 1, Utilities.REC_LIMIT, null, reader, null);
         if (all) {
             reader = GIRPTMCalculator.predictSample(sampleName, TRAIN_SIZE, TEST_SIZE, true, true);
-            writeMetrics(sampleDir, sampleName, "girptm", 1, 10, null, reader, null);
+            writeMetrics(sampleDir, sampleName, "girptm", 1, Utilities.REC_LIMIT, null, reader, null);
         }
     }
     
@@ -594,6 +600,16 @@ public class Pipeline {
         if (beta != null && beta > 0) {
         	postfix += "static_";
         }
+        writeMetrics(sampleDir, sampleName, postfix + neighbors, sampleCount, Utilities.REC_LIMIT, null, reader, null);
+    }
+    
+    private static void startCfArtistCalculator(String sampleDir, String sampleName, int sampleCount, int neighbors) {
+        getTrainTestSize(sampleName);
+        BookmarkReader reader = null;
+        for (int i = 1; i <= sampleCount; i++) {
+            reader = ArtistCFRecommender.predictTags(sampleName, TRAIN_SIZE, TEST_SIZE, neighbors);
+        }
+        String postfix = "cfartist_";
         writeMetrics(sampleDir, sampleName, postfix + neighbors, sampleCount, Utilities.REC_LIMIT, null, reader, null);
     }
     

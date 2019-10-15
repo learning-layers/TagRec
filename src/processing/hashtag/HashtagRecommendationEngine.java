@@ -141,7 +141,7 @@ public class HashtagRecommendationEngine {
 		List<Bookmark> trainList = this.reader.getBookmarks().subList(0, this.trainSize);
 		List<Bookmark> testList = this.reader.getBookmarks().subList(this.trainSize, this.reader.getBookmarks().size());
 		this.resultMapPersonalBLLAllUsers = BLLCalculator.getArtifactMaps(reader, trainList, testList, false,
-				new ArrayList<Long>(), new ArrayList<Double>(), dIndividual, true, lambdaIndividual);
+				new ArrayList<Long>(), new ArrayList<Double>(), dIndividual, true, lambdaIndividual, true);
 		this.resultMapPersonalFreqAllUsers = Utilities
 				.getNormalizedMaps(this.reader.getBookmarks().subList(0, trainSize), false);
 	}

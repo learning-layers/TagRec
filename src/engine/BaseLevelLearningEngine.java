@@ -61,7 +61,8 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		Map<String, Map<Integer, Double>> resMaps = new HashMap<>();
 		Map<String, Map<Integer, Double>> resCounts = new HashMap<>();
 
-		List<Map<Integer, Double>> userRecencies = BLLCalculator.getArtifactMaps(reader, reader.getBookmarks(), null, false, new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true, null);
+		List<Map<Integer, Double>> userRecencies = BLLCalculator.getArtifactMaps(reader, reader.getBookmarks(), null, false, 
+				new ArrayList<Long>(), new ArrayList<Double>(), 0.5, true, null, true);
 		List<Map<Integer, Double>> userFrequencies = Utilities.getRelativeTagMaps(reader.getBookmarks(), false);
 		int i = 0;
 		for (Map<Integer, Double> map : userRecencies) {
@@ -71,7 +72,8 @@ public class BaseLevelLearningEngine implements EngineInterface {
 		for (Map<Integer, Double> map : userFrequencies) {
 			userCounts.put(reader.getUsers().get(i++), map);
 		}
-		List<Map<Integer, Double>> resRecencies = BLLCalculator.getArtifactMaps(reader, reader.getBookmarks(), null, true, new ArrayList<Long>(), new ArrayList<Double>(), 0.0, true, null);
+		List<Map<Integer, Double>> resRecencies = BLLCalculator.getArtifactMaps(reader, reader.getBookmarks(), null, true, new ArrayList<Long>(), 
+				new ArrayList<Double>(), 0.0, true, null, true);
 		List<Map<Integer, Double>> resFrequencies = Utilities.getRelativeTagMaps(reader.getBookmarks(), true);
 		i = 0;
 		for (Map<Integer, Double> map : resRecencies) {

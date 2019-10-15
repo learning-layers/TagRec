@@ -79,7 +79,7 @@ public class BLLCalculator {
 		this.userDenoms = new ArrayList<Double>();
 		this.userTimestamps = new ArrayList<Long>();
 		//if (this.userBased) {
-			this.userMaps = getArtifactMaps(reader, this.trainList, testList, false, this.userTimestamps, this.userDenoms, this.dVal, true, lambda);
+			this.userMaps = getArtifactMaps(reader, this.trainList, testList, false, this.userTimestamps, this.userDenoms, this.dVal, true, lambda, true);
 			this.userCounts = Utilities.getRelativeTagMaps(this.trainList, false);
 			this.resCounts = Utilities.getRelativeTagMaps(this.trainList, true);
 			if (cType != CalculationType.NONE) {
@@ -89,7 +89,7 @@ public class BLLCalculator {
 		this.resDenoms = new ArrayList<Double>();
 		this.resTimestamps = new ArrayList<Long>();
 		//if (this.resBased) {		
-			this.resMaps = getArtifactMaps(reader, this.trainList, testList, true, this.resTimestamps, this.resDenoms, this.dVal, true, null);
+			this.resMaps = getArtifactMaps(reader, this.trainList, testList, true, this.resTimestamps, this.resDenoms, this.dVal, true, null, true);
 		//}
 	}	
 
@@ -226,7 +226,7 @@ public class BLLCalculator {
 
 	// Basis activations values for each user
 	public static List<Map<Integer, Double>> getArtifactMaps(BookmarkReader reader, List<Bookmark> userLines, List<Bookmark> testLines, boolean resource,
-			List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize, Double lambda) {
+			List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize, Double lambda, boolean calcOnTags) {
 		
 		List<Map<Integer, Double>> maps = new ArrayList<Map<Integer, Double>>();
 		for (Bookmark data : userLines) {
@@ -247,14 +247,14 @@ public class BLLCalculator {
 				}
 				timestampList.add(baselineTimestamp);
 				if (baselineTimestamp != -1) {
-					maps.add(addActValue(data, new LinkedHashMap<Integer, Double>(), baselineTimestamp, resource, dVal, lambda));
+					maps.add(addActValue(data, new LinkedHashMap<Integer, Double>(), baselineTimestamp, resource, dVal, lambda, calcOnTags));
 				} else {
 					maps.add(null);
 				}
 			} else {
 				baselineTimestamp = timestampList.get(refID);
 				if (baselineTimestamp != -1) {
-					addActValue(data, maps.get(refID), baselineTimestamp, resource, dVal, lambda);
+					addActValue(data, maps.get(refID), baselineTimestamp, resource, dVal, lambda, calcOnTags);
 				}
 			}
 		}
@@ -288,7 +288,7 @@ public class BLLCalculator {
 	public static Map<Integer, Double> getSortedArtifactMapForUser(int userID, BookmarkReader reader, List<Bookmark> userLines, List<Bookmark> testLines, boolean resource,
 			List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize) {
 		
-		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize, null);
+		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize, null, true);
 		if (artifactMaps != null && userID < artifactMaps.size()) {
 			Map<Integer, Double> sortedResultMap = new TreeMap<Integer, Double>(new DoubleMapComparator(artifactMaps.get(userID)));
 			sortedResultMap.putAll(artifactMaps.get(userID));		
@@ -301,7 +301,7 @@ public class BLLCalculator {
 		List<Long> timestampList, List<Double> denomList, double dVal, boolean normalize) {
 		
 		Map<Integer, Double> collectiveArtifactMap = new LinkedHashMap<Integer, Double>();
-		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize, null);
+		List<Map<Integer, Double>> artifactMaps = getArtifactMaps(reader, userLines, testLines, resource, timestampList, denomList, dVal, normalize, null, true);
 		for (Map<Integer, Double> map : artifactMaps) {
 			for (Map.Entry<Integer, Double> entry : map.entrySet()) {
 				Double val = collectiveArtifactMap.get(entry.getKey());
@@ -314,7 +314,8 @@ public class BLLCalculator {
 		return sortedResultMap;
 	}
 	
-	private static Map<Integer, Double> addActValue(Bookmark data, Map<Integer, Double> actValues, long baselineTimestamp, boolean resource, double dVal, Double lambda) {
+	private static Map<Integer, Double> addActValue(Bookmark data, Map<Integer, Double> actValues, long baselineTimestamp, 
+			boolean resource, double dVal, Double lambda, boolean calcOnTags) {
 		if (!data.getTimestamp().isEmpty()) {
 			Double newAct = 0.0;
 			if (resource) {
@@ -331,7 +332,8 @@ public class BLLCalculator {
 					}
 				//}
 			}
-			for (Integer value : data.getTags()) {
+			List<Integer> entities = calcOnTags ? data.getTags() : data.getCategories();
+			for (Integer value : entities) {
 				Double oldAct = actValues.get(value);
 				if (!newAct.isInfinite() && !newAct.isNaN()) {
 					actValues.put(value, (oldAct != null ? oldAct + newAct : newAct));

@@ -68,7 +68,7 @@ public class GIRPTMCalculator {
 		sortedResultMap.putAll(resultMap);
 		int count = 0;
 		for (Map.Entry<Integer, Double> entry : sortedResultMap.entrySet()) {
-			if (count++ < 10) {
+			if (count++ < Utilities.REC_LIMIT) {
 				returnMap.put(entry.getKey(), entry.getValue());
 			} else {
 				break;

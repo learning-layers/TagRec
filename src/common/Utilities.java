@@ -46,6 +46,7 @@ import file.BookmarkReader;
 public class Utilities {
 
 	public static int REC_LIMIT = 20;
+	public static boolean FILTER_OWN = false;
 	
     private final static String REV_START = "<rev xml:space=\"preserve\">";
     private final static String REV_END = "</rev>";
@@ -331,6 +332,27 @@ public class Utilities {
                 resList = userLists.get(userID);
             }
             resList.add(data.getResourceID());
+        }
+        return userLists;
+    }
+    
+    public static List<Map<Integer, Integer>> getUserResourceMaps(List<Bookmark> userLines) {
+        List<Map<Integer, Integer>> userLists = new ArrayList<Map<Integer, Integer>>();
+        for (Bookmark data : userLines) {
+            int userID = data.getUserID();
+            Map<Integer, Integer> resList = null;
+            if (userID >= userLists.size()) {
+                resList = new LinkedHashMap<Integer, Integer>();
+                userLists.add(resList);
+            } else {
+                resList = userLists.get(userID);
+            }
+            Integer resVal = resList.get(data.getResourceID());
+            if (resVal == null) {
+            	resList.put(data.getResourceID(), 1);
+            } else {
+            	resList.put(data.getResourceID(), resVal + 1);
+            }
         }
         return userLists;
     }
