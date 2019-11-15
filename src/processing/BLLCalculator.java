@@ -112,7 +112,8 @@ public class BLLCalculator {
 				}
 			}
 			
-			if ((cType.equals(CalculationType.USER_TO_RESOURCE_ONLY) || cType.equals(CalculationType.USER_TO_RESOURCE) || cType.equals(CalculationType.BOTH)) && resID < this.resMaps.size()){	
+			if ((cType.equals(CalculationType.USER_TO_RESOURCE_ONLY) || cType.equals(CalculationType.USER_TO_RESOURCE) || cType.equals(CalculationType.BOTH) 
+					|| cType.equals(CalculationType.MUSIC)) && resID < this.resMaps.size() && resID > -1){	
 				resMap = this.resMaps.get(resID);
 				resCount = this.resCounts.get(resID);
 				Map<Integer, Double> associativeValues = this.rMatrix.calculateAssociativeComponentsWithTagAssosiation(userCount, resCount, false, true, false);	
@@ -365,9 +366,24 @@ public class BLLCalculator {
 		
 		timer.reset();
 		timer.start();
+		// List<List<Bookmark>> userBookmarks = Utilities.getBookmarks(reader.getBookmarks().subList(0, trainSize), false); // only when using items from train-set
 		for (int i = trainSize; i < size; i++) { // the test-set
 			Bookmark data = reader.getBookmarks().get(i);
-			Map<Integer, Double> map = calculator.getRankedTagList(data.getUserID(), data.getResourceID(), sorting, cType);
+			int userID = data.getUserID();
+			int resID = data.getResourceID();
+			
+			if (cType == CalculationType.MUSIC) {
+				if (i > 0) {
+					data = reader.getBookmarks().get(i - 1); // last item from test set
+					//data = Utilities.getLastBookmarkOfUser(userBookmarks, userID); // last item of train-set
+					if (data.getUserID() == userID) {
+						resID = data.getResourceID();
+					} else {
+						resID = -1;
+					}
+				}
+			}
+			Map<Integer, Double> map = calculator.getRankedTagList(userID, resID, sorting, cType);
 			results.add(map);
 		}
 		timer.stop();
@@ -398,7 +414,7 @@ public class BLLCalculator {
 		} else if (!resBased) {
 			suffix = "_bll";
 		}
-		if (cType == CalculationType.USER_TO_RESOURCE) {
+		if (cType == CalculationType.USER_TO_RESOURCE || cType == CalculationType.MUSIC) {
 			suffix += "_ac";
 		} else if (cType == CalculationType.USER_TO_RESOURCE_ONLY) {
 			suffix = "_ac";

@@ -51,6 +51,11 @@ public class Utilities {
     private final static String REV_START = "<rev xml:space=\"preserve\">";
     private final static String REV_END = "</rev>";
 
+    public static Bookmark getLastBookmarkOfUser(List<List<Bookmark>> userBookmarks, int userID) {
+    	List<Bookmark> bookmarks = userBookmarks.get(userID);
+    	return bookmarks.get(bookmarks.size() - 1);
+    }
+    
     public static boolean isEntityEvaluated(BookmarkReader reader, int id, Integer minBookmarks, Integer maxBookmarks,
             boolean resource) {
         if (reader == null || id == -1) {

@@ -97,7 +97,7 @@ public class Pipeline {
     private static String TOPIC_NAME = null;
     // placeholder for the used dataset
     private final static String DATASET = "lfm1b"; // example dir for Last.fm
-    private final static String SUBDIR = "";
+    private final static String SUBDIR = "/low";///umap";
     // "/general" / "/researchers" for Twitter
     // "/low" / "/medium" / "/high" / "/cold" for Last.fm
     private static double dParam = 0.5;
@@ -156,12 +156,14 @@ public class Pipeline {
         
         // --> BLLi
         if (SUBDIR.contains("low")) {
-        	dParam = 1.642;
+        	dParam = 1.480;
         } else if (SUBDIR.contains("medium")) {
-        	dParam = 1.640;
+        	dParam = 1.574;
         } else {
-        	dParam = 1.666;
+        	dParam = 1.587;
         }
+        //startActCalculator(dir, path, 1, dParam, null, -5, false, CalculationType.NONE, false);
+        //startActCalculator(dir, path, 1, dParam, null, -5, false, CalculationType.MUSIC, false);
         //startActCalculator(dir, path, 1, 0.5, null, -5, false, CalculationType.NONE, false); // default
         //startActCalculator(dir, path, 1, 1.65, null, -5, false, CalculationType.NONE, false); // artists        
         //startActCalculator(dir, path, 1, 1.480, null, -5, false, CalculationType.NONE, false); // low genre
@@ -412,7 +414,7 @@ public class Pipeline {
             Double lambda, int betaUpperBound, boolean all, CalculationType type, boolean allMetrics) {
         getTrainTestSize(sampleName);
         List<Integer> betaValues = getBetaValues(betaUpperBound);
-        String ac = type == CalculationType.USER_TO_RESOURCE ? "_ac" : "";
+        String ac = (type == CalculationType.USER_TO_RESOURCE || type == CalculationType.MUSIC ? "_ac" : "");
         BookmarkReader reader = null;
 
         for (int i = 1; i <= sampleCount; i++) {
