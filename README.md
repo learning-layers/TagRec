@@ -15,7 +15,7 @@ The software already contains four novel tag-recommender approaches based on cog
 
 Apart from this, TagRec also contains algorithms for the personalized recommendation of resources / items in social tagging systems. In this respect TagRec includes a novel algorithm called [CIRTT](http://www.christophtrattner.info/pubs/sp2014.pdf) (Lacic et al., 2014) that integrates tag and time information using the BLL-equation coming from the ACT-R theory (Anderson et al, 2004). Furthermore, it contains another novel item-recommender called [SUSTAIN+CFu](http://arxiv.org/pdf/1501.07716v1.pdf) (Seitlinger et al., 2015) that improves user-based CF via integrating the addentional focus of users via the SUSTAIN model (Love et al., 2004).
 
-Finally, TagRec was also utilized for the [recommendation of hashtags in Twitter](http://www.dominikkowald.info/documents/2017www_twitter.pdf) (Kowald et al., 2017). Thus, it contains an initial set of algorithms for this task as well. For this, TagRec also contains a connection to the Apache Solr search engine framework.
+TagRec was also utilized for the [recommendation of hashtags in Twitter](http://www.dominikkowald.info/documents/2017www_twitter.pdf) (Kowald et al., 2017). Thus, it contains an initial set of algorithms for this task as well. For this, TagRec also contains a connection to the Apache Solr search engine framework. Finally, we also utilized TagRec for [predicting and recommendation music preferences](http://www.dominikkowald.info/documents/2019ismir_bll.pdf). Here, all tag recommendation algorithms can also be used for predicting music artists and genres. Our TISMIR journal article on this topic will be published soon.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
@@ -164,6 +164,8 @@ _Bibtex:_
 }`
 
 ## Publications
+* Kowald, D., Lex, E., & Schedl, M. (2019). Modeling Popularity and Temporal Drift of Music Genre Preferences. Transactions on the International Society for Music Information Retrieval (TISMIR). (to be published)
+* Kowald, D., Lex, E., & Schedl, M. (2019). [Modeling Artist Preferences for Personalized Music Recommendations](http://www.dominikkowald.info/documents/2019ismir_bll.pdf). In Late-Breaking-Results Track of the 20th annual conference of the International Society for Music Information Retrieval (ISMIR'2019). 
 * Kowald, D., Seitlinger, P., Ley, T., & Lex, E. (2018). [The Impact of Semantic Context Cues on the User Acceptance of Tag Recommendations: An Online Study](http://www.dominikkowald.info/documents/2018www_study.pdf). In Companion Proceedings of the 27th International World Wide Web Conference (WWW'2018). ACM.
 * Kowald, D., Kopeinik, S., & Lex, E. (2017). [The TagRec Framework as a Toolkit for the Development of Tag-Based Recommender Systems](http://www.dominikkowald.info/documents/2017umap_tagrec.pdf). In Adjunct Publication of the 25th Conference on User Modeling, Adapation and Personalization (UMAP'2017). ACM.
 * Kowald, D., Pujari, S., & Lex, E. (2017). [Temporal Effects on Hashtag Reuse in Twitter: A Cognitive-Inspired Hashtag Recommendation Approach](http://www.dominikkowald.info/documents/2017www_twitter.pdf). In Proceedings of the 26th International World Wide Web Conference (WWW'2017). ACM.
@@ -191,11 +193,12 @@ _Bibtex:_
 * B. C. Love, D. L. Medin, and T. M. Gureckis. Sustain: A network model of category learning. Psychological review, 111(2):309, 2004.
 
 ## Main contact and contributor
-* [Dominik Kowald](http://www.dominikkowald.info/), Know-Center, Graz University of Technology, dkowald [AT] know [MINUS] center [DOT] at (general contact)
+* [Dominik Kowald](http://www.dominikkowald.info/), Know-Center, dkowald [AT] know [MINUS] center [DOT] at (general contact)
 
 ## Contacts and contributors
-* Simone Kopeinik, Knowledge Technologies Institute, Graz University of Technology, simone [DOT] [AT] tugraz [DOT] at (sustain resource recommender algorithm)
-* Emanuel Lacic, Knowledge Technologies Institute, Graz University of Technology, elacic [AT] know [MINUS] center [DOT] at (huang, zheng and CIRTT resource recommender algorithms)
-* Subhash Pujari, Knowledge Technologies Institute, Graz University of Technology, spujari [AT] student [DOT] tugraz [DOT] at (twitter hashtag recommender algorithms)
-* Elisabeth Lex, Knowledge Technologies Institute, Graz University of Technology, elisabeth [DOT] lex [AT] tugraz [DOT] at (general contact)
+* Simone Kopeinik, Know-Center, simone [DOT] [AT] tugraz [DOT] at (sustain resource recommender algorithm)
+* Emanuel Lacic, Know-Center, elacic [AT] know [MINUS] center [DOT] at (huang, zheng and CIRTT resource recommender algorithms)
+* Subhash Pujari, ISDS, Graz University of Technology, spujari [AT] student [DOT] tugraz [DOT] at (twitter hashtag recommender algorithms)
+* Elisabeth Lex, ISDS, Graz University of Technology, elisabeth [DOT] lex [AT] tugraz [DOT] at (general contact)
+* Markus Schedl, Johannes-Kepler University Linz, markus [DOT] schedl [AT] jku [DOT] at (music preference prediction algorithms)
 * Christoph Trattner, University of Bergen, Norway, christoph [DOT] trattner [AT] uib [DOT] no (general contact)
