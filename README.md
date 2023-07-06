@@ -4,7 +4,7 @@ TagRec
 ## Towards A Standardized Tag Recommender Benchmarking Framework
 * TagRec is developed by the Social Computing research area of [Know-Center](https://www.know-center.tugraz.at/en/) and [Graz University of Technology](https://www.tugraz.at/fakultaeten/csbme/home/)
 * TagRec won the best poster award @ Hypertext 2014 (HT'14) conference: [http://ht.acm.org/ht2014/index.php?awards.poster](http://ht.acm.org/ht2014/index.php?awards.poster)
-* TagRec is also a main part of the recommender systems in the Layers project [http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/](http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/) as well as the AFEL project [http://afel-project.eu/](http://afel-project.eu/)
+* TagRec is also a main part of the recommender systems in the Layers project [http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/](http://results.learning-layers.eu/infrastructure/sss/services/tag-rec/)
 * TagRec is part of several lists of recommender systems frameworks or courses such as [http://fmoraes.nl/se-recsys-paperswithcode/](http://fmoraes.nl/se-recsys-paperswithcode/), [https://github.com/grahamjenson/list_of_recommender_systems](https://github.com/grahamjenson/list_of_recommender_systems), and [https://cseweb.ucsd.edu/classes/fa17/cse291-b/](https://cseweb.ucsd.edu/classes/fa17/cse291-b/)
 
 ## Description
